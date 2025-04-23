@@ -10,6 +10,7 @@ export default function Home() {
   const [code, setCode] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userID, setUserID] = useState(null);
+  const [user, setUser] = useState(null); // ✅ Store full user info
 
   // 🔁 Grab the code from the URL on page load
   useEffect(() => {
@@ -43,9 +44,10 @@ export default function Home() {
           },
         });
 
-        const user = await userRes.json();
-        console.log("👤 User:", user);
-        setUserID(user.id);
+        const userData = await userRes.json();
+        console.log("👤 User:", userData);
+        setUser(userData); // ✅ Save to state
+        setUserID(userData.id);
         setIsLoggedIn(true);
       }
     };
@@ -60,8 +62,10 @@ export default function Home() {
 
   return (
     <div>
-      {isLoggedIn ? (
-        <h1 className="text-center text-3xl mt-20">Welcome back, {user.display_name}!</h1>
+      {isLoggedIn && user ? (
+        <h1 className="text-center text-3xl mt-20">
+          Welcome back, {user.display_name}!
+        </h1>
       ) : (
         <div className="flex items-center justify-center h-screen pb-10">
           <div className="text-center">
