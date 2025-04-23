@@ -61,7 +61,7 @@ export default function Home() {
   return (
     <div>
       {isLoggedIn ? (
-        <h1 className="text-center text-3xl mt-20">Welcome back, {user.display_name}!</h1>
+        <h1 className="text-center text-3xl mt-20">Welcome back, {User.display_name}!</h1>
       ) : (
         <div className="flex items-center justify-center h-screen pb-10">
           <div className="text-center">
