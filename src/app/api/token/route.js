@@ -1,4 +1,5 @@
 export async function POST(req) {
+    console.log("🔥 /api/token was hit");
     const { code } = await req.json();
 
     const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
