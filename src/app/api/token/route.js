@@ -3,10 +3,11 @@ export async function POST(req) {
 
     const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
     const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
-    const REDIRECT_URI = "http://127.0.0.1:3000";
 
     console.log("🧪 CLIENT_ID:", CLIENT_ID);
-    console.log("🧪 CLIENT_SECRET:", CLIENT_SECRET);
+    console.log("🧪 CODE:", code);
+
+    const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app"; // use your deployed URL
 
     const tokenResponse = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
@@ -24,5 +25,7 @@ export async function POST(req) {
     });
 
     const data = await tokenResponse.json();
+    console.log("🎯 TOKEN RESPONSE:", data);
+
     return Response.json(data);
 }
