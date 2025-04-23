@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
-const REDIRECT_URI = "https://code-the-dream-pre-req-7atz-4x4459976-carlgbtgmailcoms-projects.vercel.app/";
+const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app";
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
 const SCOPES = "user-read-private user-read-email";
 const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
