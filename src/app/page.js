@@ -30,7 +30,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, redirect_uri: REDIRECT_URI }),
       });
 
       const tokenData = await tokenRes.json();
