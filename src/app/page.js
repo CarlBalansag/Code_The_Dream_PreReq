@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 
-const REDIRECT_URI = "http://127.0.0.1:3000";
+const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app/";
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
 const SCOPES = "user-read-private user-read-email";
-const CLIENT_ID = "2751136537024052b892a475c49906e1";
+const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
 
 export default function Home() {
   const [code, setCode] = useState(null);
