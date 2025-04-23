@@ -8,7 +8,7 @@ export async function POST(req) {
     console.log("🧪 CLIENT_ID:", CLIENT_ID);
     console.log("🧪 CODE:", code);
 
-    const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app"; // use your deployed URL
+    const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app/"; // use your deployed URL
 
     const tokenResponse = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
