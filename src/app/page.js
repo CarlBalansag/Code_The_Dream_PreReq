@@ -63,9 +63,26 @@ export default function Home() {
   return (
     <div>
       {isLoggedIn && user ? (
-        <h1 className="text-center text-3xl mt-20">
-          Welcome back, {user.display_name}!
-        </h1>
+          <div className="min-h-screen flex flex-col">
+          <div className="w-full h-16 px-6 flex items-center justify-end  shadow-md">
+          <img
+            src={
+              user?.images?.length > 0
+                ? user.images[0].url 
+                : "/blank_pfp.png"  
+            }
+            alt="Profile"
+            className="w-10 h-10 rounded-full object-cover"
+          />
+          </div>
+    
+          {/* 🔽 Main content area */}
+          <div className="flex-1 p-6">
+          <h1 className="text-center text-3xl mt-20">
+            Welcome back, {user.display_name}!
+          </h1>
+          </div>
+          </div>
       ) : (
         <div className="flex items-center justify-center h-screen pb-10">
           <div className="text-center">
