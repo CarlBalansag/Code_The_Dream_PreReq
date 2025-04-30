@@ -45,7 +45,6 @@ const getSong = async () => {
 
     // 🔥 Only fade if the song is different
     if (!song || (song?.item?.id !== currentSong.item.id)) {
-        console.log(song)
         setFade(true);
         setSong(currentSong);
         setTimeout(() => setFade(false), 300);
