@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import CurrentlyPlaying from "./component/current_playing";
 const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app";
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
-const SCOPES = "user-read-private user-read-email";
+const SCOPES = "user-read-private user-read-email user-read-currently-playing user-read-playback-state";
 const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
 
 export default function Home() {
