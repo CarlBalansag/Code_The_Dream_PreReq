@@ -83,9 +83,9 @@ return (
             {premium 
             ? (
                 <div className="mt-5 mb-5 flex gap-9" id="control">
-                    <Previous_Button size={18} thickness={5} refreshSong={getSong} />
+                    {/* <Previous_Button size={18} thickness={5} refreshSong={getSong} />
                     <PlayPauseToggle size={30} accessToken={accessToken} refreshSong={getSong} />
-                    <Next_Button size={18} thickness={5} refreshSong={getSong} />
+                    <Next_Button size={18} thickness={5} refreshSong={getSong} /> */}
                 </div>
             ) : (
                 <div className="relative mt-5 mb-5" id="control-wrapper">
@@ -93,9 +93,9 @@ return (
                         <p className="text-red-700 text-xl font-semibold">Premium Only</p>
                     </div>
                     <div className="flex gap-12 opacity-50 pointer-events-none blur-sm" id="control">
-                        <Previous_Button size={6} thickness={5} refreshSong={getSong} />
+                        {/* <Previous_Button size={6} thickness={5} refreshSong={getSong} />
                         <PlayPauseToggle size={30} accessToken={accessToken} refreshSong={getSong} />
-                        <Next_Button size={15} thickness={5} refreshSong={getSong} />
+                        <Next_Button size={15} thickness={5} refreshSong={getSong} /> */}
                     </div>
                 </div>
             )}
