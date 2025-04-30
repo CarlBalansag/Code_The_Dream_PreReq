@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import CurrentlyPlaying from "./component/current_playing";
+
+
 const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app";
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
 const SCOPES = "user-read-private user-read-email user-read-currently-playing user-read-playback-state";
