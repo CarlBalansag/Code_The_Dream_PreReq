@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import CurrentlyPlaying from "./component/current_playing";
+import DropdownMenu from "@/component/DropdownMenu";
 
 
 const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app";
@@ -66,15 +67,7 @@ export default function Home() {
       {isLoggedIn && user ? (
           <div className="min-h-screen flex flex-col">
           <div className="w-full h-16 px-6 flex items-center justify-end  shadow-md">
-          <img
-            src={
-              user?.images?.length > 0
-                ? user.images[0].url 
-                : "/blank_pfp.png"  
-            }
-            alt="Profile"
-            className="w-10 h-10 rounded-full object-cover"
-          />
+          <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product}/>
           </div>
     
           {/* 🔽 Main content area */}

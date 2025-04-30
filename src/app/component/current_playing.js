@@ -64,6 +64,7 @@ useEffect(() => {
     }, 15000); // 15 seconds
 
     return () => clearInterval(interval);                                                               
+// eslint-disable-next-line react-hooks/exhaustive-deps
 }, [accessToken]);
 
 return (
