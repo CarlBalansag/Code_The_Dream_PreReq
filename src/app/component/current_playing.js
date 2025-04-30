@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from 'next/image';
-import PlayPauseToggle from "./play_pause_button";
-import Next_Button from "./next_button";
-import Previous_Button from "./previous_button";
+// import PlayPauseToggle from "./play_pause_button";
+// import Next_Button from "./next_button";
+// import Previous_Button from "./previous_button";
 
 export default function CurrentlyPlaying({ accessToken, premium }) {
 const [song, setSong] = useState(null);                                                                 
