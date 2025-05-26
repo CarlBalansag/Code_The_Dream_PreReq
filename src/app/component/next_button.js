@@ -18,7 +18,7 @@ export default function Next_Button({ size = 50, thickness = 8, accessToken, ref
             if (refreshSong) {
                 setTimeout(() => {
                     refreshSong();
-                }, 600);
+                }, 1500);
             };
             }
         } catch (error) {
