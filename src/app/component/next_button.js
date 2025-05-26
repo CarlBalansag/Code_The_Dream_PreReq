@@ -2,9 +2,29 @@
 
 export default function Next_Button({ size = 50, thickness = 8 }) {
 
-    const handleClick = () => {
-        console.log("next button clicked")
-    }
+    const handleClick = async () => {
+        try {
+            const res = await fetch("https://api.spotify.com/v1/me/player/next", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+            });
+
+            if (!res.ok) {
+            console.error("Failed to skip to next track:", res.status);
+            } else {
+            console.log("Skipped to next track!");
+            if (refreshSong) {
+                setTimeout(() => {
+                    refreshSong();
+                }, 600);
+            };
+            }
+        } catch (error) {
+            console.error("Error skipping to next track:", error);
+        }
+    };
 
 return (
     <div

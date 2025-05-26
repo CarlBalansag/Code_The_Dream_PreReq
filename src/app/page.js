@@ -5,7 +5,7 @@ import DropdownMenu from "./component/DropdownMenu";
 
 const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app";
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
-const SCOPES = "user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state";
+const SCOPES = "user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read user-read-recently-played";
 const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
 
 export default function Home() {
@@ -25,33 +25,50 @@ export default function Home() {
   useEffect(() => {
     if (!code) return;                                                                                        //Check if spotify gave u "code" after sign up
 
-    const fetchTokenAndUser = async () => {                                                                   //Send request to (/api/token) exchanging code for token
-      const tokenRes = await fetch("/api/token", {                                                      
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",                                                                 //sends in client_id, client_secret_code, redirect_uri
-        },
-        body: JSON.stringify({ code, redirect_uri: REDIRECT_URI }),                       
-      });
-
-      const tokenData = await tokenRes.json();                                                                //Returns access_token, refresh_token, expires_in, scope
-      console.log("🔑 Token Response:", tokenData);
-
-      if (tokenData.access_token) {
-        setAccessToken(tokenData.access_token);                                                               //Saves access_token
-        const userRes = await fetch("https://api.spotify.com/v1/me", {                                        //Fetches users profile using the token
+    const fetchTokenAndUser = async () => {
+      try {
+        const tokenRes = await fetch("/api/token", {
+          method: "POST",
           headers: {
-            Authorization: `Bearer ${tokenData.access_token}`,
+            "Content-Type": "application/json",
           },
+          body: JSON.stringify({ code, redirect_uri: REDIRECT_URI }),
         });
-      
-        const userData = await userRes.json();                                                                //Returns User info
-        console.log("👤 User:", userData);                                                                    
-        setUser(userData);                                                    
-        setUserID(userData.id);
-        setIsLoggedIn(true);
-        setPremium(userData.product === "premium" ? true : false);
-      }      
+
+        if (!tokenRes.ok) {
+          const errorText = await tokenRes.text();
+          console.error("❌ Token request failed:", errorText);
+          return;
+        }
+
+        const tokenData = await tokenRes.json();
+        console.log("🔑 Token Response:", tokenData);
+
+        if (tokenData.access_token) {
+          const userRes = await fetch("https://api.spotify.com/v1/me", {
+            headers: {
+              Authorization: `Bearer ${tokenData.access_token}`,
+            },
+          });
+
+          if (!userRes.ok) {
+            const errorText = await userRes.text();
+            console.error("❌ User profile fetch failed:", errorText);
+            return;
+          }
+
+          const userData = await userRes.json();
+          console.log("👤 User:", userData);
+
+          setUser(userData);
+          setUserID(userData.id);
+          setAccessToken(tokenData.access_token);
+          setIsLoggedIn(true);
+          setPremium(userData.product === "premium");
+        }
+      } catch (err) {
+        console.error("❌ Error fetching token or user:", err);
+      }
     };
     fetchTokenAndUser();
   }, [code]); 
