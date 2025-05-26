@@ -1,6 +1,6 @@
 "use client";
 
-export default function Next_Button({ size = 50, thickness = 8 }) {
+export default function Next_Button({ size = 50, thickness = 8, accessToken }) {
 
     const handleClick = async () => {
         try {
