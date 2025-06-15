@@ -1,6 +1,6 @@
 "use client";
 
-export default function Next_Button({ size = 50, thickness = 8, accessToken, refreshSong}) {
+export default function Next_Button({ size = 50, thickness = 8, accessToken, refreshSong }) {
 
     const handleClick = async () => {
         try {
@@ -18,7 +18,7 @@ export default function Next_Button({ size = 50, thickness = 8, accessToken, ref
             if (refreshSong) {
                 setTimeout(() => {
                     refreshSong();
-                }, 0);
+                }, 600);
             };
             }
         } catch (error) {

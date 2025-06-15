@@ -1,7 +1,7 @@
 "use client";
 import Image from 'next/image';
+import { spotifyLogOut } from "@/component/spotifyLogOut";
 import { useState, useRef, useEffect } from "react";
-import { spotifyLogOut } from './spotifyLogout';
 
 export default function DropdownMenu({ProfilePicture, UserName, UserProduct}) {
 const [open, setOpen] = useState(false);

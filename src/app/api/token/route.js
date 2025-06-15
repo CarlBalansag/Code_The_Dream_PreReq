@@ -5,7 +5,7 @@ export async function POST(req) {
     try {
     payload = await req.json();
     } catch (error) {
-    console.error("❌ Failed to parse JSON body:", error);
+    console.error("Failed to parse JSON body:", error);
     return new Response(JSON.stringify({ error: "Bad JSON" }), { status: 400 });
     }
 
@@ -14,9 +14,9 @@ export async function POST(req) {
     const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
     const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 
-    console.log("🧪 CLIENT_ID:", CLIENT_ID);
-    console.log("🧪 CODE:", code);
-    console.log("🧪 REDIRECT_URI:", redirect_uri);
+    console.log("CLIENT_ID:", CLIENT_ID);
+    console.log("CODE:", code);
+    console.log("REDIRECT_URI:", redirect_uri);
 
     const tokenResponse = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
