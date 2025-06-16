@@ -76,7 +76,7 @@ return (
                 <p className="text-sm text-gray-400">{track.album}</p>
             </div>
             <div className="ml-auto">
-                <CirclePlayButton />
+                {/* <CirclePlayButton /> */}
             </div>
             </div>
         </li>
