@@ -37,7 +37,7 @@ export default function Home() {
 
         if (!tokenRes.ok) {
           const errorText = await tokenRes.text();
-          console.error("❌ Token request failed:", errorText);
+          console.error("Token request failed:", errorText);
           return;
         }
 
