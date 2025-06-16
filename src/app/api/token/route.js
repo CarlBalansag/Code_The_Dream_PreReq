@@ -5,14 +5,16 @@ export async function POST(req) {
     try {
     payload = await req.json();
     } catch (error) {
-    console.error("❌ Failed to parse JSON body:", error);
+    console.error("Failed to parse JSON body:", error);
     return new Response(JSON.stringify({ error: "Bad JSON" }), { status: 400 });
     }
 
     const { code, redirect_uri } = payload;
 
-    const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
-    const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
+    const CLIENT_ID = "2751136537024052b892a475c49906e1";
+    const CLIENT_SECRET = "08a90bbbd1a04c2486bb40daf52d0212";
+    const REDIRECT_URI = "http://127.0.0.1:3000";
+    
 
     console.log("🧪 CLIENT_ID:", CLIENT_ID);
     console.log("🧪 CODE:", code);

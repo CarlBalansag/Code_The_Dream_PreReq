@@ -5,6 +5,13 @@ const nextConfig = {
     SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID,
     SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET,
     },
+    images: {
+    domains: [
+        'i.scdn.co',
+        'scontent-dub4-1.xx.fbcdn.net',
+        'scontent-lhr6-1.xx.fbcdn.net',
+    ],
+    },
 };
 
 export default nextConfig;
