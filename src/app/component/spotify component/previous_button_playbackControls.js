@@ -1,29 +1,31 @@
 "use client";
 
+// Component for skipping to the previous track on Spotify
 export default function Previous_Button({ size = 50, thickness = 8, flip = true, accessToken, refreshSong}) {
 
-    const handleClick = async () => {
-        try {
+// Function to handle the click event
+const handleClick = async () => {
+    try {
+    // Send POST request to Spotify API to go to the previous track
+    const res = await fetch("https://api.spotify.com/v1/me/player/previous", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}`},
+    });
 
-            const res = await fetch("https://api.spotify.com/v1/me/player/previous", {
-                method: "POST",
-                headers: { Authorization: `Bearer ${accessToken}`},
-            });
-
-            if (!res.ok) {
-                console.error("Failed to go to previous track:", res.status);
-            } else {
-                console.log("Previous track");
-                if (refreshSong) {
-                    setTimeout(() => {
-                        refreshSong();
-                    }, 600);
-                };
-            }
-        } catch (error) {
-            console.error("Error skipping to nexxt track:", error)
-        }
+    if (!res.ok) { // If request failed, log the error status
+        console.error("Failed to go to previous track:", res.status);
+    } else {
+        console.log("Previous track");
+        if (refreshSong) { //Refresh current song info after delay
+            setTimeout(() => { //Delay gives Spotify time to update the track
+                refreshSong();
+            }, 600);
+        };
     }
+    } catch (error) {
+        console.error("Error skipping to nexxt track:", error)
+    }
+}
 
 return (
     <div

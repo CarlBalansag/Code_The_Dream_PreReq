@@ -1,30 +1,33 @@
 "use client";
 
+// Button component to skip to the next track on Spotify
 export default function Next_Button({ size = 50, thickness = 8, accessToken, refreshSong }) {
+  const handleClick = async () => {   // Function that sends a request to Spotify to skip to the next track
+    try {
+      const res = await fetch("https://api.spotify.com/v1/me/player/next", {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${accessToken}`, // Authorization with user's access token
+        },
+      });
 
-    const handleClick = async () => {
-        try {
-            const res = await fetch("https://api.spotify.com/v1/me/player/next", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
-            });
+      // Check if request was successful
+      if (!res.ok) {
+        console.error("Failed to skip to next track:", res.status);
+      } else {
+        console.log("Skipped to next track!");
 
-            if (!res.ok) {
-            console.error("Failed to skip to next track:", res.status);
-            } else {
-            console.log("Skipped to next track!");
-            if (refreshSong) {
-                setTimeout(() => {
-                    refreshSong();
-                }, 600);
-            };
-            }
-        } catch (error) {
-            console.error("Error skipping to next track:", error);
-        }
-    };
+      //refresh song info after skipping
+      if (refreshSong) {
+          setTimeout(() => {
+              refreshSong(); //Call parent callback to update UI
+          }, 600); // Wait a moment for Spotify to update
+      };
+      }
+    } catch (error) {
+        console.error("Error skipping to next track:", error);
+    }
+  };
 
 return (
     <div
