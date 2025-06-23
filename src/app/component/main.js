@@ -80,41 +80,44 @@ return (
         <div className="text-center w-full h-full">
             {/* Mobile View */}
             <div className="block lg:hidden">
-                <div className="text-sm text-red-400 ml-5">{swipeHints[activeIndex]}</div>
+            <div className="text-sm text-red-400 ml-5 mb-2">
+                {swipeHints[activeIndex]}
+            </div>
+            <div className="h-[80vh] overflow-hidden">
                 <Swiper
-                    effect="cube"
-                    grabCursor={true}
-                    cubeEffect={{
+                effect="cube"
+                grabCursor={true}
+                cubeEffect={{
                     slideShadows: true,
                     shadowOffset: 20,
                     shadowScale: 0.94,
-                    }}
-                    pagination={true}
-                    onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
-                    modules={[EffectCube, Pagination]}
-                    className="mySwiper"
+                }}
+                pagination={true}
+                onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+                modules={[EffectCube, Pagination]}
+                className="h-full"
+                style={{ overflow: "hidden" }}
                 >
-                    <SwiperSlide>
-                    <div className="flex justify-center items-center h-full p-4">
-                        <UserTopArtists accessToken={accessToken} />
+                <SwiperSlide>
+                    <div className="h-full overflow-y-auto p-4">
+                    <UserTopArtists accessToken={accessToken} />
                     </div>
-                    </SwiperSlide>
-
-                    <SwiperSlide>
-                    <div className="flex justify-center items-center h-full p-4">
-                        <UserTopTracks accessToken={accessToken} />
+                </SwiperSlide>
+                <SwiperSlide>
+                    <div className="h-full overflow-y-auto p-4">
+                    <UserTopTracks accessToken={accessToken} />
                     </div>
-                    </SwiperSlide>
-
-                    <SwiperSlide>
-                    <div className="flex justify-center items-center h-full p-4">
-                        <RecentlyPlayedList
+                </SwiperSlide>
+                <SwiperSlide>
+                    <div className="h-full overflow-y-auto p-4">
+                    <RecentlyPlayedList
                         accessToken={accessToken}
                         name={name}
-                        />
+                    />
                     </div>
-                    </SwiperSlide>
+                </SwiperSlide>
                 </Swiper>
+            </div>
             </div>
 
             {/* Desktop View */}
@@ -132,48 +135,51 @@ return (
         </div>
         )
     ) : (
-        <div className="text-center align-fo">
+        <div className="text-center">
         <p className="text-red-500 text-xl font-semibold mb-4">
             Not a Premium Member
         </p>
 
         {/* Mobile View */}
         <div className="block lg:hidden">
-            <div className="text-sm text-red-400 ml-5">{swipeHints[activeIndex]}</div>
+            <div className="text-sm text-red-400 ml-5 mb-2">
+            {swipeHints[activeIndex]}
+            </div>
+            <div className="h-[80vh] overflow-hidden">
             <Swiper
-            effect="cube"
-            grabCursor={true}
-            cubeEffect={{
+                effect="cube"
+                grabCursor={true}
+                cubeEffect={{
                 slideShadows: true,
                 shadowOffset: 20,
                 shadowScale: 0.94,
-            }}
-            pagination={true}
-            onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
-            modules={[EffectCube, Pagination]}
-            className="mySwiper"
+                }}
+                pagination={true}
+                onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+                modules={[EffectCube, Pagination]}
+                className="h-full"
+                style={{ overflow: "hidden" }}
             >
-            <SwiperSlide>
-                <div className="flex justify-center items-center h-full p-4">
-                <UserTopArtists accessToken={accessToken} />
+                <SwiperSlide>
+                <div className="h-full overflow-y-auto p-4">
+                    <UserTopArtists accessToken={accessToken} />
                 </div>
-            </SwiperSlide>
-
-            <SwiperSlide>
-                <div className="flex justify-center items-center h-full p-4">
-                <UserTopTracks accessToken={accessToken} />
+                </SwiperSlide>
+                <SwiperSlide>
+                <div className="h-full overflow-y-auto p-4">
+                    <UserTopTracks accessToken={accessToken} />
                 </div>
-            </SwiperSlide>
-
-            <SwiperSlide>
-                <div className="flex justify-center items-center h-full p-4">
-                <RecentlyPlayedList
+                </SwiperSlide>
+                <SwiperSlide>
+                <div className="h-full overflow-y-auto p-4">
+                    <RecentlyPlayedList
                     accessToken={accessToken}
                     name={name}
-                />
+                    />
                 </div>
-            </SwiperSlide>
+                </SwiperSlide>
             </Swiper>
+            </div>
         </div>
 
         {/* Desktop View */}
