@@ -1,8 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import DropdownMenu from "./component/DropdownMenu";
 import CurrentlyPlaying from "./component/main";
-
+import DropdownMenu from "./component/spotify component/DropdownMenu";
 
 const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app"; //link that tells spotify where to send user back after log in 
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; //link for spotify login page
