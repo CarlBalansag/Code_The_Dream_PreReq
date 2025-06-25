@@ -9,10 +9,7 @@ import UserTopArtists from "./spotify component/user_top_artists";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
 import {
-Navigation,
 Pagination,
 Mousewheel,
 Keyboard,
@@ -23,6 +20,7 @@ const [song, setSong] = useState(null);
 const [isPlaying, setIsPlaying] = useState(false);
 const [songID, setSongID] = useState(null);
 const [activeIndex, setActiveIndex] = useState(0);
+const [swiperRef, setSwiperRef] = useState(null);
 
 const swipeHints = [
     "Swipe right for Top Tracks",
@@ -56,6 +54,64 @@ useEffect(() => {
     return () => clearInterval(interval);
 }, [accessToken]);
 
+const MobileNavigation = () => (
+    <>
+    {/* Left Arrow */}
+    <button
+        onClick={() => swiperRef?.slidePrev()}
+        className="absolute top-1/2 left-0 transform -translate-y-1/2 z-50 text-[3.5rem] font-bold text-[#1DB954] lg:hidden"
+    >
+        ‹
+    </button>
+
+    {/* Right Arrow */}
+    <button
+        onClick={() => swiperRef?.slideNext()}
+        className="absolute top-1/2 right-0 transform -translate-y-1/2 z-50 text-[3.5rem] font-bold text-[#1DB954] lg:hidden"
+    >
+        ›
+    </button>
+    </>
+);
+
+const MobileSwiper = () => (
+    <div className="block lg:hidden flex justify-center px-4 relative overflow-visible w-full pb-14">
+    <div className="w-full max-w-[600px] relative overflow-visible pr-10">
+        <MobileNavigation />
+        <div className="text-sm text-red-400 mb-2 text-center">
+        {swipeHints[activeIndex]}
+        </div>
+        <Swiper
+        cssMode={true}
+        navigation={false}
+        pagination={false}
+        mousewheel={true}
+        keyboard={true}
+        onSwiper={setSwiperRef}
+        onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+        modules={[Pagination, Mousewheel, Keyboard]}
+        className="mySwiper"
+        >
+        <SwiperSlide>
+            <div className="overflow-hidden p-4">
+            <UserTopArtists accessToken={accessToken} />
+            </div>
+        </SwiperSlide>
+        <SwiperSlide>
+            <div className="overflow-hidden p-4">
+            <UserTopTracks accessToken={accessToken} />
+            </div>
+        </SwiperSlide>
+        <SwiperSlide>
+            <div className="overflow-hidden p-4">
+            <RecentlyPlayedList accessToken={accessToken} name={name} />
+            </div>
+        </SwiperSlide>
+        </Swiper>
+    </div>
+    </div>
+);
+
 return (
     <div className="absolute inset-0 overflow-hidden">
     {premium ? (
@@ -84,42 +140,7 @@ return (
         </div>
         ) : (
         <div className="text-center w-full h-full">
-            {/* Mobile View */}
-            <div className="block lg:hidden flex justify-center px-4 relative overflow-visible w-full ">
-            <div className="w-full max-w-[600px] relative overflow-visible">
-                <div className="text-sm text-red-400 mb-2 text-center">
-                {swipeHints[activeIndex]}
-                </div>
-                <Swiper
-                cssMode={true}
-                navigation={true}
-                pagination={true}
-                mousewheel={true}
-                keyboard={true}
-                modules={[Navigation, Pagination, Mousewheel, Keyboard]}
-                className="mySwiper swiper-custom"
-                onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
-                >
-                <SwiperSlide>
-                    <div className="overflow-hidden p-4">
-                    <UserTopArtists accessToken={accessToken} />
-                    </div>
-                </SwiperSlide>
-                <SwiperSlide>
-                    <div className="overflow-hidden p-4">
-                    <UserTopTracks accessToken={accessToken} />
-                    </div>
-                </SwiperSlide>
-                <SwiperSlide>
-                    <div className="overflow-hidden p-4">
-                    <RecentlyPlayedList accessToken={accessToken} name={name} />
-                    </div>
-                </SwiperSlide>
-                </Swiper>
-            </div>
-            </div>
-
-            {/* Desktop View */}
+            {MobileSwiper()}
             <div className="hidden lg:flex flex-row w-full">
             <div className="text-white pl-7 text-center basis-1/3">
                 <UserTopArtists accessToken={accessToken} />
@@ -138,43 +159,7 @@ return (
         <p className="text-red-500 text-xl font-semibold mb-4">
             Not a Premium Member
         </p>
-
-        {/* Mobile View */}
-        <div className="block lg:hidden flex justify-center px-4 overflow-hidden w-full">
-            <div className="w-full max-w-md">
-            <div className="text-sm text-red-400 mb-2 text-center">
-                {swipeHints[activeIndex]}
-            </div>
-            <Swiper
-                cssMode={true}
-                navigation={true}
-                pagination={true}
-                mousewheel={true}
-                keyboard={true}
-                modules={[Navigation, Pagination, Mousewheel, Keyboard]}
-                className="mySwiper swiper-custom"
-                onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
-            >
-                <SwiperSlide>
-                <div className="overflow-hidden p-4">
-                    <UserTopArtists accessToken={accessToken} />
-                </div>
-                </SwiperSlide>
-                <SwiperSlide>
-                <div className="overflow-hidden p-4">
-                    <UserTopTracks accessToken={accessToken} />
-                </div>
-                </SwiperSlide>
-                <SwiperSlide>
-                <div className="overflow-hidden p-4">
-                    <RecentlyPlayedList accessToken={accessToken} name={name} />
-                </div>
-                </SwiperSlide>
-            </Swiper>
-            </div>
-        </div>
-
-        {/* Desktop View */}
+        {MobileSwiper()}
         <div className="hidden lg:flex flex-row w-full">
             <div className="text-white pl-7 text-center basis-1/3">
             <UserTopArtists accessToken={accessToken} />
