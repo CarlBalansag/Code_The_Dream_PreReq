@@ -9,16 +9,12 @@ import UserTopArtists from "./spotify component/user_top_artists";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
-import {
-Pagination,
-Mousewheel,
-Keyboard,
-} from "swiper/modules";
+import { Pagination, Mousewheel, Keyboard,} from "swiper/modules";
 
 export default function CurrentlyPlaying({ accessToken, premium, name }) {
-const [song, setSong] = useState(null);
-const [isPlaying, setIsPlaying] = useState(false);
-const [songID, setSongID] = useState(null);
+const [song, setSong] = useState(null);                     //data of currently playing song
+const [isPlaying, setIsPlaying] = useState(false);          //Checks if a song is currently playing
+const [songID, setSongID] = useState(null);                 //gets the songs ID
 const [activeIndex, setActiveIndex] = useState(0);
 const [swiperRef, setSwiperRef] = useState(null);
 
@@ -29,17 +25,19 @@ const swipeHints = [
 ];
 
 const getSong = async () => {
+    //exits function if there is no accessToken
     if (!accessToken) return;
 
+    //gets the current playing song from the function fetchCurrentlyPlaying
     const currentSong = await fetchCurrentlyPlaying(accessToken);
 
-    if (currentSong && currentSong.item) {
-    setIsPlaying(currentSong.is_playing);
-    const newSongId = currentSong.item.id;
+    if (currentSong && currentSong.item) {      //if there is a song that is currently playing and there is song data
+    setIsPlaying(currentSong.is_playing);       //update playback status
+    const newSongId = currentSong.item.id;      // Get the ID of the currently playing song
 
-    if (songID !== newSongId) {
-        setSongID(newSongId);
-        setSong(currentSong);
+    if (songID !== newSongId) {                 //if the useState songID is different from the current song playing 
+        setSongID(newSongId);                   // Update the store SongID
+        setSong(currentSong);                   // Save the full song object to state
     }
     } else {
     setSong(null);
@@ -47,11 +45,11 @@ const getSong = async () => {
     }
 };
 
-useEffect(() => {
+useEffect(() => {                                               //If there is no access token don't continue
     if (!accessToken) return;
-    getSong();
-    const interval = setInterval(() => getSong(), 3000);
-    return () => clearInterval(interval);
+    getSong();                                                  //Gets the currently playing song 
+    const interval = setInterval(() => getSong(), 3000);        // Set up an interval to fetch the song every 3 seconds
+    return () => clearInterval(interval);                       //Clean up the interval when component unmounts or accessToken changes 
 }, [accessToken]);
 
 const MobileNavigation = () => (
@@ -162,13 +160,13 @@ return (
         {MobileSwiper()}
         <div className="hidden lg:flex flex-row w-full">
             <div className="text-white pl-7 text-center basis-1/3">
-            <UserTopArtists accessToken={accessToken} />
+                <UserTopArtists accessToken={accessToken} />
             </div>
             <div className="pl-7 basis-1/3">
-            <UserTopTracks accessToken={accessToken} />
+                <UserTopTracks accessToken={accessToken} />
             </div>
             <div className="pl-7 basis-1/3">
-            <RecentlyPlayedList accessToken={accessToken} name={name} />
+                <RecentlyPlayedList accessToken={accessToken} name={name} />
             </div>
         </div>
         </div>

@@ -83,27 +83,27 @@ export default function Home() {
   return (
     <div>
       {isLoggedIn && user ? (
-          <div className="min-h-screen flex flex-col">
-            <div className="w-full h-16 px-6 flex items-center justify-end  shadow-md">
-              <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product}/>
-            </div>
-      
-            {/*Main content area */}
-            <div className="flex-1 p-6">
-              <CurrentlyPlaying accessToken={accessToken} premium={premium} />
-            </div>
+        <div className="min-h-screen flex flex-col">
+          <div className="w-full h-16 px-6 flex items-center justify-end shadow-md z-2">
+            <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} />
           </div>
+          <div className="flex-1 p-6 z-1 w-full h-full relative mt-10 ">
+            <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} />
+          </div>
+        </div>
       ) : (
         <div className="flex items-center justify-center h-screen pb-10">
           <div className="text-center">
             <h1 className="text-4xl pb-5">Log in to Spotify</h1>
-            <button onClick={loginToSpotify}className="w-5/6 bg-[#1db954] text-black text-lg h-12 rounded-3xl">
+            <button
+              onClick={loginToSpotify}
+              className="w-5/6 bg-[#1db954] text-black text-lg h-12 rounded-3xl"
+            >
               Continue to Spotify
             </button>
           </div>
         </div>
-      )
-    }
+      )}
     </div>
   );
 }
