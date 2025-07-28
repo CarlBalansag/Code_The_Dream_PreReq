@@ -1,8 +1,7 @@
 "use client";
-import DropdownMenu from "@/component/DropdownMenu";
-import CurrentlyPlaying from "@/component/main";
+import CurrentlyPlaying from "./component/main";
 import { useState, useEffect } from "react";
-
+import DropdownMenu from "./component/DropdownMenu";
 const CLIENT_ID = "2751136537024052b892a475c49906e1";
 const REDIRECT_URI = "http://127.0.0.1:3000";
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
@@ -83,15 +82,10 @@ export default function Home() {
     <div>
       {isLoggedIn && user ? (
         <div className="min-h-screen flex flex-col">
-          <div className="w-full h-16 px-6 flex items-center justify-end shadow-md">
-            <DropdownMenu
-              ProfilePicture={user?.images?.[0]?.url}
-              UserName={user.display_name}
-              UserProduct={user.product}
-            />
+          <div className="w-full h-16 px-6 flex items-center justify-end shadow-md z-2">
+            <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} />
           </div>
-
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-6 z-1 w-full h-full relative mt-10 ">
             <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} />
           </div>
         </div>
