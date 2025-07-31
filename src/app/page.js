@@ -85,7 +85,7 @@ export default function Home() {
           <div className="w-full h-16 px-6 flex items-center justify-end shadow-md z-2">
             <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} />
           </div>
-          <div className="flex-1 p-6 z-1 w-full h-full relative mt-10 ">
+          <div className="flex-1 p-6 z-1 w-full h-full relative ">
             <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} />
           </div>
         </div>

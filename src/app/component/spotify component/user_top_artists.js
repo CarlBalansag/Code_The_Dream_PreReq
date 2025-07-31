@@ -37,8 +37,8 @@ useEffect(() => {
 }, [accessToken, timeRange]);
 
 return (
-    <div className="custom-scrollbar p-4 ml-6 rounded-md overflow-y-auto w-full max-w-lg" style={{ maxHeight: "800px" }}>
-    <div className="sticky top-[-19px] z-10 bg-[#121212] pb-4 text-center">
+    <div className="custom-scrollbar p-4 ml-6 rounded-md overflow-y-auto w-full max-w-lg " style={{ maxHeight: "800px" }}>
+    <div className="sticky top-[-19px] z-10 bg-[#121212] pb-4 text-center ">
         <p className="text-[#1DB954] text-xl font-semibold mb-2">Top Artists</p>
         <div className="flex justify-center gap-2 mb-2">
         {["short_term", "medium_term", "long_term"].map((range) => (

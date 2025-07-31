@@ -79,8 +79,8 @@ const MobileSwiper = () => (
     <div className="block lg:hidden flex justify-center px-4 relative overflow-visible w-full pb-14">
     <div className="w-full max-w-[600px] relative overflow-visible pr-10">
         <MobileNavigation />
-        <div className="text-sm text-red-400 mb-2 text-center">
-        {swipeHints[activeIndex]}
+        <div className="text-sm text-red-400 mb-2 text-center ml-11">
+            {swipeHints[activeIndex]}
         </div>
         <Swiper
             cssMode={true}
@@ -115,9 +115,10 @@ const MobileSwiper = () => (
 
 return (
     <div className="absolute inset-0 overflow-hidden">
+    <div className=" w-[90%] mx-auto h-full ml-5">
     {premium ? (
         song && song.item ? (
-        <div className="flex flex-col gap-8 md:flex-row">
+        <div className="flex flex-col gap-8 md:flex-row ">
             <div className="basis-1/3">
             <LiveSong
                 song={song}
@@ -140,9 +141,9 @@ return (
             </div>
         </div>
         ) : (
-        <div className="text-center w-full h-full">
+        <div className="text-center w-full h-full ">
             {MobileSwiper()}
-            <div className="hidden lg:flex flex-row w-full">
+            <div className="hidden lg:flex flex-row w-full h-full">
             <div className="text-white pl-7 text-center basis-1/3">
                 <UserTopArtists accessToken={accessToken} />
             </div>
@@ -175,6 +176,7 @@ return (
         </div>
         </div>
     )}
+    </div>
     </div>
 );
 }
