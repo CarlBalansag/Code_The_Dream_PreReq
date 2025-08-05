@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
+import CirclePlayButton from "../../circle_play_button";
 
 export default function UserTopTracks({ accessToken }) {
 const [topTracks, setTopTracks] = useState([]);
 const [timeRange, setTimeRange] = useState("short_term");
+const [currentTrackId, setCurrentTrackId] = useState(null);
 
 useEffect(() => {
     const fetchTopTracks = async () => {
@@ -24,6 +26,7 @@ useEffect(() => {
         const formatted = data.items.map((track) => ({
         id: track.id,
         name: track.name,
+        uri: track.uri,
         image: track.album?.images[0]?.url || "",
         artists: track.artists.map((a) => a.name).join(", "),
         }));
@@ -66,11 +69,20 @@ return (
         <ul className="space-y-4">
         {topTracks.map((item, index) => (
             <li key={item.id} className="bg-[#212121] rounded-lg p-3 flex items-center space-x-4">
-            <img src={item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover" />
-            <div className="flex-grow">
-                <p className="text-white font-semibold text-md">{index + 1}. {item.name}</p>
-                <p className="text-gray-400 text-sm">By {item.artists}</p>
-            </div>
+                <div className="flex items-center w-full h-full justify-between">
+                    <div className="w-20 ">
+                        <img src={item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover" />
+                    </div>
+                    <div className="w-[65%]">
+                        <p className="text-white font-semibold text-md">
+                            {index + 1}. {item.name}
+                        </p>
+                        <p className="text-gray-400 text-sm">By {item.artists}</p>
+                    </div>
+                    <div className="mr-5">
+                        <CirclePlayButton size={30} trackUri={item.uri} accessToken={accessToken} setCurrentTrackId={setCurrentTrackId} currentTrackId={currentTrackId} trackId={item.id}/>
+                    </div>
+                </div>
             </li>
         ))}
         </ul>

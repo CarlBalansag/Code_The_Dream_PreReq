@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import CirclePlayButton from "../circle_play_button";
+import CirclePlayButton from "../../circle_play_button";
 
 export default function PremiumTopTracks({ artistId, accessToken }) {
 const [tracks, setTracks] = useState([]);

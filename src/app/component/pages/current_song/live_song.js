@@ -1,8 +1,9 @@
     "use client";
     import Image from "next/image";
-    import PlayPauseToggle from "../play_pause_button";
-    import Next_Button from "../next_button";
-    import Previous_Button from "../previous_button";
+    
+    import PlayPauseToggle from "../components/control_bar/play_pause_button";
+    import Next_Button from "../components/control_bar/next_button";
+    import Previous_Button from "../components/control_bar/previous_button";
 
     // Moved here from main.js
     export async function fetchCurrentlyPlaying(accessToken) {

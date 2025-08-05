@@ -1,7 +1,9 @@
 "use client";
-import CurrentlyPlaying from "./component/main";
+import CurrentlyPlaying from "./main";
+import SpotifyDeviceStatus from "./component/pages/components/navbar/connected_device";
+import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
 import { useState, useEffect } from "react";
-import DropdownMenu from "./component/DropdownMenu";
+
 const CLIENT_ID = "2751136537024052b892a475c49906e1";
 const REDIRECT_URI = "http://127.0.0.1:3000";
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
@@ -36,7 +38,7 @@ export default function Home() {
 
         if (!tokenRes.ok) {
           const errorText = await tokenRes.text();
-          console.error("❌ Token request failed:", errorText);
+          console.error("Token request failed:", errorText);
           return;
         }
 
@@ -52,7 +54,7 @@ export default function Home() {
 
           if (!userRes.ok) {
             const errorText = await userRes.text();
-            console.error("❌ User profile fetch failed:", errorText);
+            console.error("User profile fetch failed:", errorText);
             return;
           }
 
@@ -66,7 +68,7 @@ export default function Home() {
           setPremium(userData.product === "premium");
         }
       } catch (err) {
-        console.error("❌ Error fetching token or user:", err);
+        console.error("Error fetching token or user:", err);
       }
     };
 
@@ -82,8 +84,19 @@ export default function Home() {
     <div>
       {isLoggedIn && user ? (
         <div className="min-h-screen flex flex-col">
-          <div className="w-full h-16 px-6 flex items-center justify-end shadow-md z-2">
-            <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} />
+          <div id="navbar" className="w-full h-16 px-6 flex items-center justify-between shadow-md z-2">
+              {/* Left-side content (new component) */}
+              <div className="mb-6">
+                <SpotifyDeviceStatus accessToken={accessToken} />
+              </div>
+
+              {/* Right-side content (Dropdown menu) */}
+              <DropdownMenu
+                ProfilePicture={user?.images?.[0]?.url}
+                UserName={user.display_name}
+                UserProduct={user.product}
+                accessToken={accessToken}
+              />
           </div>
           <div className="flex-1 p-6 z-1 w-full h-full relative ">
             <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} />
