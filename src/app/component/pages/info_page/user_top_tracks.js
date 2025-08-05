@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import CirclePlayButton from "../../circle_play_button";
 
-export default function UserTopTracks({ accessToken }) {
+export default function UserTopTracks({ accessToken, setShowInfoPage }) {
 const [topTracks, setTopTracks] = useState([]);
 const [timeRange, setTimeRange] = useState("short_term");
 const [currentTrackId, setCurrentTrackId] = useState(null);
@@ -80,7 +80,7 @@ return (
                         <p className="text-gray-400 text-sm">By {item.artists}</p>
                     </div>
                     <div className="mr-5">
-                        <CirclePlayButton size={30} trackUri={item.uri} accessToken={accessToken} setCurrentTrackId={setCurrentTrackId} currentTrackId={currentTrackId} trackId={item.id}/>
+                        <CirclePlayButton size={30} trackUri={item.uri} accessToken={accessToken} setCurrentTrackId={setCurrentTrackId} currentTrackId={currentTrackId} trackId={item.id} setShowInfoPage={setShowInfoPage}/>
                     </div>
                 </div>
             </li>

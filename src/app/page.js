@@ -16,12 +16,21 @@ export default function Home() {
   const [userID, setUserID] = useState(null);
   const [user, setUser] = useState(null);
   const [premium, setPremium] = useState(null);
+  const [deviceConnected, setDeviceConnected] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get("code");
     setCode(authCode);
   }, []);
+
+  useEffect(() => {
+    if (deviceConnected) {
+      const timer = setTimeout(() => setDeviceConnected(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [deviceConnected]);
+
 
   useEffect(() => {
     if (!code) return;
@@ -84,22 +93,14 @@ export default function Home() {
     <div>
       {isLoggedIn && user ? (
         <div className="min-h-screen flex flex-col">
-          <div id="navbar" className="w-full h-16 px-6 flex items-center justify-between shadow-md z-2">
-              {/* Left-side content (new component) */}
+          <div id="navbar" className="w-full h-16 px-6 flex items-center justify-between shadow-md z-2 mb-10">
               <div className="mb-6">
-                <SpotifyDeviceStatus accessToken={accessToken} />
+                <SpotifyDeviceStatus accessToken={accessToken} onDeviceConnect={() => setDeviceConnected(true)}/>
               </div>
-
-              {/* Right-side content (Dropdown menu) */}
-              <DropdownMenu
-                ProfilePicture={user?.images?.[0]?.url}
-                UserName={user.display_name}
-                UserProduct={user.product}
-                accessToken={accessToken}
-              />
+              <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} accessToken={accessToken}/>
           </div>
           <div className="flex-1 p-6 z-1 w-full h-full relative ">
-            <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} />
+            <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} deviceConnected={deviceConnected}/>
           </div>
         </div>
       ) : (

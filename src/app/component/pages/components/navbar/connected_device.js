@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 
-export default function SpotifyDeviceStatus({ accessToken }) {
+export default function SpotifyDeviceStatus({ accessToken, onDeviceConnect }) {
   const [connectedDevice, setConnectedDevice] = useState(null);
   const [availableDevices, setAvailableDevices] = useState([]);
   const [open, setOpen] = useState(false);
@@ -49,6 +49,7 @@ export default function SpotifyDeviceStatus({ accessToken }) {
         }),
       });
       await checkDeviceStatus();
+      onDeviceConnect();
       setOpen(false);
     } catch (error) {
       console.error("Failed to connect to device:", error);

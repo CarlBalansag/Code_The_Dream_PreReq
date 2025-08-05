@@ -7,15 +7,10 @@ export default function CirclePlayButton({
   accessToken,
   setCurrentTrackId,
   currentTrackId,
+  setShowInfoPage, // ✅ New prop
 }) {
   const handleClick = async () => {
     try {
-      console.log("🔘 Play button clicked");
-      console.log("🎵 Track URI:", trackUri);
-      console.log("📌 Track ID:", trackId);
-      console.log("🪪 Access Token:", accessToken ? "Available ✅" : "Missing ❌");
-
-      // Step 1: Get available Spotify devices
       const deviceRes = await fetch("https://api.spotify.com/v1/me/player/devices", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -23,19 +18,13 @@ export default function CirclePlayButton({
       });
 
       const deviceData = await deviceRes.json();
-      console.log("📱 Devices response:", deviceData);
-
       const activeDevice = deviceData.devices.find((d) => d.is_active);
 
       if (!activeDevice) {
-        console.warn("⚠️ No active Spotify device found.");
         alert("No active Spotify device found. Open Spotify on a device and try again.");
         return;
       }
 
-      console.log("✅ Active Device:", activeDevice.name, `(${activeDevice.id})`);
-
-      // Step 2: Send request to play the selected track
       const playRes = await fetch(
         `https://api.spotify.com/v1/me/player/play?device_id=${activeDevice.id}`,
         {
@@ -48,11 +37,9 @@ export default function CirclePlayButton({
         }
       );
 
-      console.log("🎬 Playback response status:", playRes.status);
-
       if (playRes.status === 204) {
-        console.log("✅ Track is playing.");
-        setCurrentTrackId(trackId); // Update current playing track
+        setCurrentTrackId(trackId);
+        if (setShowInfoPage) setShowInfoPage(false); // ✅ Flip back to premium layout
       } else {
         const errorText = await playRes.text();
         console.error("❌ Failed to play track. Response:", errorText);
@@ -66,8 +53,7 @@ export default function CirclePlayButton({
 
   return (
     <>
-      <style>
-        {`
+      <style>{`
         .circle-button-container {
           --color: #ffffff;
           display: flex;
@@ -114,8 +100,7 @@ export default function CirclePlayButton({
             transform: scale(1.1);
           }
         }
-      `}
-      </style>
+      `}</style>
 
       <label
         onClick={handleClick}
@@ -125,20 +110,10 @@ export default function CirclePlayButton({
         style={{ fontSize: `${size}px` }}
       >
         <input type="checkbox" defaultChecked />
-        <svg
-          viewBox="0 0 384 512"
-          height="1em"
-          xmlns="http://www.w3.org/2000/svg"
-          className="play"
-        >
+        <svg viewBox="0 0 384 512" height="1em" className="play">
           <path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z" />
         </svg>
-        <svg
-          viewBox="0 0 320 512"
-          height="1em"
-          xmlns="http://www.w3.org/2000/svg"
-          className="pause"
-        >
+        <svg viewBox="0 0 320 512" height="1em" className="pause">
           <path d="M48 64C21.5 64 0 85.5 0 112V400c0 26.5 21.5 48 48 48H80c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H48zm192 0c-26.5 0-48 21.5-48 48V400c0 26.5 21.5 48 48 48h32c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H240z" />
         </svg>
       </label>
