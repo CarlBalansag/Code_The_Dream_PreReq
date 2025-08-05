@@ -176,13 +176,13 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
             <div className="text-center w-full h-full">
               {MobileSwiper()}
               <div className="hidden lg:flex flex-row w-full h-full">
-                <div className="text-white pl-7 text-center basis-1/3">
+                <div className="text-white pl-7 text-center basis-5/12">
                   <UserTopArtists accessToken={accessToken} />
                 </div>
-                <div className="pl-7 basis-1/3">
+                <div className="pl-7 basis-6/12">
                   <UserTopTracks accessToken={accessToken} getSong={getSong} setShowInfoPage={setShowInfoPage} />
                 </div>
-                <div className="pl-7 basis-1/3">
+                <div className="pl-7 basis-6/12">
                   <RecentlyPlayedList accessToken={accessToken} name={name} />
                 </div>
               </div>

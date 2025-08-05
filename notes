@@ -10,10 +10,7 @@ finish play random song button
 
 when next or previous is pressed and no next song play liked song like randomized
 
-current issues when connecting to device autmatically takes to live song, fix can be setting song = null
 
 better warning for no device connected
-
-back to info not working, maybe gotta disconnect device
 
 make artist size smaller and use extra size on top tracks 

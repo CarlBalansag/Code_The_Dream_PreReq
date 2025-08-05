@@ -45,7 +45,7 @@ return (
     style={{ maxHeight: "800px" }}
     >
     <div className="sticky top-[-19px] z-10 bg-[#121212] pb-4">
-        <p className="text-[#1DB954] text-xl font-semibold mb-2 text-center">
+        <p className="text-[#1DB954] text-xl font-semibold mb-11 text-center">
         Recently Played For {name}
         </p>
     </div>
