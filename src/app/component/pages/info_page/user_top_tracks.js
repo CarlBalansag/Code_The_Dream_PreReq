@@ -69,11 +69,11 @@ return (
         <ul className="space-y-4">
         {topTracks.map((item, index) => (
             <li key={item.id} className="bg-[#212121] rounded-lg p-3 flex items-center space-x-4">
-                <div className="flex items-center w-full h-full justify-between">
+                <div className="flex flex-wrap items-center w-full h-full justify-between">
                     <div className="w-20 ">
                         <img src={item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover" />
                     </div>
-                    <div className="w-[65%]">
+                    <div className="w-[55%]">
                         <p className="text-white font-semibold text-md">
                             {index + 1}. {item.name}
                         </p>

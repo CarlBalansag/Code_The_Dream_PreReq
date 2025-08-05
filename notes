@@ -1,14 +1,19 @@
-
+premium mode: Song Playing: play and pause on top tracks for artist 
+"https://uiverse.io/catraco/wet-rabbit-81"
 
 premium mode: Song Playing: view album
 https://uiverse.io/Li-Deheng/shy-moth-10
+
+a X button when Song is playing to get back into view all mode same UI as random song 
 
 finish play random song button
 
 when next or previous is pressed and no next song play liked song like randomized
 
+current issues when connecting to device autmatically takes to live song, fix can be setting song = null
+
 better warning for no device connected
 
-live song mobile view 
+back to info not working, maybe gotta disconnect device
 
-fix mobile view for False song ternary of Top Tracks
+make artist size smaller and use extra size on top tracks 

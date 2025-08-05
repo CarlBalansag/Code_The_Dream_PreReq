@@ -22,7 +22,13 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
   const [quit, setQuit] = useState(false);
   const [showInfoPage, setShowInfoPage] = useState(false);
 
-  const swipeHints = [
+  const swipeHintsInfoPage = [
+    "Swipe right for Top Tracks",
+    "Swipe right for Recently Played Music",
+    "Swipe left to go back to Top Tracks",
+  ];
+
+    const swipeHintsLiveSong = [
     "Swipe right for Top Tracks",
     "Swipe right for Albums",
     "Swipe left to go back to Song",
@@ -70,7 +76,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
       <div className="w-full max-w-[600px] relative overflow-visible pr-10">
         <MobileNavigation />
         <div className="text-sm text-red-400 mb-2 text-center ml-11">
-          {swipeHints[activeIndex]}
+          {swipeHintsInfoPage[activeIndex]}
         </div>
         <Swiper
           cssMode={true}
@@ -108,7 +114,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
       <div className="w-full max-w-[600px] relative overflow-visible pr-10">
         <MobileNavigation />
         <div className="text-sm text-red-400 mb-2 text-center ml-11">
-          {swipeHints[activeIndex]}
+          {swipeHintsLiveSong[activeIndex]}
         </div>
         <Swiper
           cssMode={true}
@@ -124,7 +130,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
           <SwiperSlide>
             <div className="overflow-hidden p-4">
               <LiveSong song={song} isPlaying={isPlaying} accessToken={accessToken} getSong={getSong} />
-              <div className="ml-5 sm:ml-12 lg:ml-18 mt-5">
+              <div className="ml-30 sm:ml-12 lg:ml-18 mt-5">
                 <QuitButton setSong={setSong} setQuit={setQuit} accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
               </div>
             </div>
@@ -134,7 +140,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
               <PremiumTopTracks artistId={song.item.artists[0].id} accessToken={accessToken} />
             </div>
           </SwiperSlide>
-          <SwiperSlide>
+          <SwiperSlide> 
             <div className="overflow-hidden p-4">
               <PremiumAlbum artistId={song.item.artists[0].id} accessToken={accessToken} />
             </div>
