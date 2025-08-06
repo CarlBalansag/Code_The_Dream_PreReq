@@ -182,7 +182,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
                 <div className="pl-7 basis-6/12">
                   <UserTopTracks accessToken={accessToken} getSong={getSong} setShowInfoPage={setShowInfoPage} />
                 </div>
-                <div className="pl-7 basis-6/12">
+                <div className=" basis-6/12">
                   <RecentlyPlayedList accessToken={accessToken} name={name} />
                 </div>
               </div>
@@ -200,7 +200,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
               <div className="pl-7 basis-1/3">
                 <UserTopTracks accessToken={accessToken} />
               </div>
-              <div className="pl-7 basis-1/3">
+              <div className="basis-1/3">
                 <RecentlyPlayedList accessToken={accessToken} name={name} />
               </div>
             </div>
