@@ -28,7 +28,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
     "Swipe left to go back to Top Tracks",
   ];
 
-    const swipeHintsLiveSong = [
+  const swipeHintsLiveSong = [
     "Swipe right for Top Tracks",
     "Swipe right for Albums",
     "Swipe left to go back to Song",
@@ -58,13 +58,15 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
     <>
       <button
         onClick={() => swiperRef?.slidePrev()}
-        className="absolute top-1/2 left-0 transform -translate-y-1/2 z-50 text-[3.5rem] font-bold text-[#1DB954] lg:hidden"
+        className="absolute top-1/2 left-0 -translate-y-1/2 z-50 text-[3.5rem] font-bold text-[#1DB954] lg:hidden"
+        aria-label="Previous"
       >
         ‹
       </button>
       <button
         onClick={() => swiperRef?.slideNext()}
-        className="absolute top-1/2 right-0 transform -translate-y-1/2 z-50 text-[3.5rem] font-bold text-[#1DB954] lg:hidden"
+        className="absolute top-1/2 right-0 -translate-y-1/2 z-50 text-[3.5rem] font-bold text-[#1DB954] lg:hidden"
+        aria-label="Next"
       >
         ›
       </button>
@@ -72,35 +74,32 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
   );
 
   const MobileSwiper = () => (
-    <div className="block lg:hidden flex justify-center px-4 relative overflow-visible w-full pb-14">
-      <div className="w-full max-w-[600px] relative overflow-visible pr-10">
+    <div className="block lg:hidden w-full px-4 pb-16 relative">
+      <div className="w-full max-w-[640px] mx-auto relative">
         <MobileNavigation />
-        <div className="text-sm text-red-400 mb-2 text-center ml-11">
+        <div className="text-sm text-red-400 mb-2 text-center">
           {swipeHintsInfoPage[activeIndex]}
         </div>
+        {/* IMPORTANT: give Swiper explicit height on mobile */}
         <Swiper
-          cssMode={true}
-          navigation={false}
-          pagination={false}
-          mousewheel={true}
-          keyboard={true}
+          slidesPerView={1}
           onSwiper={setSwiperRef}
           onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
           modules={[Pagination, Mousewheel, Keyboard]}
-          className="mySwiper"
+          className="mySwiper h-[70vh]"
         >
           <SwiperSlide>
-            <div className="overflow-hidden p-4">
+            <div className="p-2 h-full overflow-y-auto">
               <UserTopArtists accessToken={accessToken} />
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="overflow-hidden p-4">
-              <UserTopTracks accessToken={accessToken} getSong={getSong} setShowInfoPage={setShowInfoPage} />
+            <div className="p-2 h-full overflow-y-auto">
+              <UserTopTracks accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="overflow-hidden p-4">
+            <div className="p-2 h-full overflow-y-auto">
               <RecentlyPlayedList accessToken={accessToken} name={name} />
             </div>
           </SwiperSlide>
@@ -110,38 +109,35 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
   );
 
   const MobileNowPlayingSwiper = () => (
-    <div className="block lg:hidden flex justify-center px-4 relative overflow-visible w-full pb-14">
-      <div className="w-full max-w-[600px] relative overflow-visible pr-10">
+    <div className="block lg:hidden w-full px-4 pb-16 relative">
+      <div className="w-full max-w-[640px] mx-auto relative">
         <MobileNavigation />
-        <div className="text-sm text-red-400 mb-2 text-center ml-11">
+        <div className="text-sm text-red-400 mb-2 text-center">
           {swipeHintsLiveSong[activeIndex]}
         </div>
+        {/* IMPORTANT: explicit height so slides render */}
         <Swiper
-          cssMode={true}
-          navigation={false}
-          pagination={false}
-          mousewheel={true}
-          keyboard={true}
+          slidesPerView={1}
           onSwiper={setSwiperRef}
           onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
           modules={[Pagination, Mousewheel, Keyboard]}
-          className="mySwiper"
+          className="mySwiper h-[70vh]"
         >
           <SwiperSlide>
-            <div className="overflow-hidden p-4">
+            <div className="p-2 h-full overflow-y-auto">
               <LiveSong song={song} isPlaying={isPlaying} accessToken={accessToken} getSong={getSong} />
-              <div className="ml-30 sm:ml-12 lg:ml-18 mt-5">
+              <div className="mt-5 flex justify-center">
                 <QuitButton setSong={setSong} setQuit={setQuit} accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
               </div>
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="overflow-hidden p-4">
+            <div className="p-2 h-full overflow-y-auto">
               <PremiumTopTracks artistId={song.item.artists[0].id} accessToken={accessToken} />
             </div>
           </SwiperSlide>
-          <SwiperSlide> 
-            <div className="overflow-hidden p-4">
+          <SwiperSlide>
+            <div className="p-2 h-full overflow-y-auto">
               <PremiumAlbum artistId={song.item.artists[0].id} accessToken={accessToken} />
             </div>
           </SwiperSlide>
@@ -152,60 +148,84 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div className="w-[90%] mx-auto xl:ml-5 h-full">
-        {premium ? (
-          !deviceConnected && !showInfoPage && song && song.item ? (
-            <>
-              {MobileNowPlayingSwiper()}
-              <div className="hidden lg:flex flex-col gap-8 md:flex-row">
-                <div className="basis-1/3 text-center">
-                  <LiveSong song={song} isPlaying={isPlaying} accessToken={accessToken} getSong={getSong} />
-                  <div className="ml-5 sm:ml-12 lg:ml-18 mt-5">
-                    <QuitButton setSong={setSong} setQuit={setQuit} accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
+      {/* layout shell */}
+      <div className="h-full w-full mx-auto px-[5%] xl:px-6 flex flex-col">
+        {/* CONTENT AREA */}
+        <div className="flex-1 min-h-0">
+          {premium ? (
+            !deviceConnected && !showInfoPage && song && song.item ? (
+              <>
+                {MobileNowPlayingSwiper()}
+                {/* Desktop / Large screens */}
+                <div className="hidden lg:grid grid-cols-12 gap-6 h-full min-h-0">
+                  <div className="col-span-12 xl:col-span-4 h-full min-h-0">
+                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
+                      <div className="p-4">
+                        <LiveSong song={song} isPlaying={isPlaying} accessToken={accessToken} getSong={getSong} />
+                        <div className="mt-5">
+                          <QuitButton setSong={setSong} setQuit={setQuit} accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-span-12 sm:col-span-6 xl:col-span-4 h-full min-h-0">
+                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
+                      <div className="h-full min-h-0 overflow-y-auto p-4">
+                        <PremiumTopTracks artistId={song.item.artists[0].id} accessToken={accessToken} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-span-12 sm:col-span-6 xl:col-span-4 h-full min-h-0">
+                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
+                      <div className="h-full min-h-0 overflow-y-auto p-4">
+                        <PremiumAlbum artistId={song.item.artists[0].id} accessToken={accessToken} />
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="basis-1/3">
-                  <PremiumTopTracks artistId={song.item.artists[0].id} accessToken={accessToken} />
+              </>
+            ) : (
+              <div className="w-full h-full">
+                {MobileSwiper()}
+                {/* Desktop / Large screens */}
+                <div className="hidden lg:grid grid-cols-12 gap-6 h-[calc(100%-4rem)] min-h-0">
+                  <div className="col-span-12 md:col-span-4 h-full min-h-0">
+                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
+                      <UserTopArtists accessToken={accessToken} />
+                    </div>
+                  </div>
+                  <div className="col-span-12 md:col-span-4 h-full min-h-0">
+                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
+                      <UserTopTracks accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
+                    </div>
+                  </div>
+                  <div className="col-span-12 md:col-span-4 h-full min-h-0">
+                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
+                      <RecentlyPlayedList accessToken={accessToken} name={name} />
+                    </div>
+                  </div>
                 </div>
-                <div className="basis-1/3">
-                  <PremiumAlbum artistId={song.item.artists[0].id} accessToken={accessToken} />
-                </div>
+                <FloatingActionButton />
               </div>
-            </>
+            )
           ) : (
-            <div className="text-center w-full h-full">
+            <div className="w-full h-full">
+              <p className="text-red-500 text-xl font-semibold mb-4">Not a Premium Member</p>
               {MobileSwiper()}
-              <div className="hidden lg:flex flex-row w-full h-full">
-                <div className="text-white pl-7 text-center basis-5/12">
+              <div className="hidden lg:grid grid-cols-12 gap-6 h-[calc(100%-4rem)] min-h-0">
+                <div className="col-span-12 md:col-span-4 h-full min-h-0">
                   <UserTopArtists accessToken={accessToken} />
                 </div>
-                <div className="pl-7 basis-6/12">
-                  <UserTopTracks accessToken={accessToken} getSong={getSong} setShowInfoPage={setShowInfoPage} />
+                <div className="col-span-12 md:col-span-4 h-full min-h-0">
+                  <UserTopTracks accessToken={accessToken} />
                 </div>
-                <div className=" basis-6/12">
+                <div className="col-span-12 md:col-span-4 h-full min-h-0">
                   <RecentlyPlayedList accessToken={accessToken} name={name} />
                 </div>
               </div>
-              <FloatingActionButton />
             </div>
-          )
-        ) : (
-          <div className="text-center w-full h-full">
-            <p className="text-red-500 text-xl font-semibold mb-4">Not a Premium Member</p>
-            {MobileSwiper()}
-            <div className="hidden lg:flex flex-row w-full">
-              <div className="text-white pl-7 text-center basis-1/3">
-                <UserTopArtists accessToken={accessToken} />
-              </div>
-              <div className="pl-7 basis-1/3">
-                <UserTopTracks accessToken={accessToken} />
-              </div>
-              <div className="basis-1/3">
-                <RecentlyPlayedList accessToken={accessToken} name={name} />
-              </div>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
