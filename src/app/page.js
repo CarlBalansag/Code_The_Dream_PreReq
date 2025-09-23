@@ -1,32 +1,41 @@
 "use client";
+import CurrentlyPlaying from "./main";
+import SpotifyDeviceStatus from "./component/pages/components/navbar/connected_device";
+import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
 import { useState, useEffect } from "react";
-import CurrentlyPlaying from "./component/main";
-import DropdownMenu from "./component/spotify component/DropdownMenu";
 
-const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app"; //link that tells spotify where to send user back after log in 
-const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; //link for spotify login page
-//SCOPES what permissions website is requesting from user
-const SCOPES = "user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read user-read-recently-played";
-const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID; //Spotify unique I
+const CLIENT_ID = "2751136537024052b892a475c49906e1";
+const REDIRECT_URI = "http://127.0.0.1:3000";
+const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
+const SCOPES = "user-read-recently-played user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read user-read-recently-played user-top-read";
 
 export default function Home() {
-  const [accessToken, setAccessToken] = useState(null);   //Stores clients ID
-  const [code, setCode] = useState(null);                 //Stores auth code from URL
-  const [isLoggedIn, setIsLoggedIn] = useState(false);    //Check if user is logged in 
-  const [userID, setUserID] = useState(null);             //Stores Spotify User ID
-  const [user, setUser] = useState(null);                 //Store the full User profile
-  const [premium, setPremium] = useState(null);           //Checks if User is a premium member
+  const [accessToken, setAccessToken] = useState(null);
+  const [code, setCode] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userID, setUserID] = useState(null);
+  const [user, setUser] = useState(null);
+  const [premium, setPremium] = useState(null);
+  const [deviceConnected, setDeviceConnected] = useState(false);
 
-  useEffect(() => {     //On first load extracts the users authorization code after user logs in
+  useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get("code");
     setCode(authCode);
   }, []);
 
-  useEffect(() => {     //fetch access token from backend and retrieve user profile
+  useEffect(() => {
+    if (deviceConnected) {
+      const timer = setTimeout(() => setDeviceConnected(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [deviceConnected]);
+
+
+  useEffect(() => {
     if (!code) return;
 
-    const fetchTokenAndUser = async () => {     //fetch for access_token
+    const fetchTokenAndUser = async () => {
       try {
         const tokenRes = await fetch("/api/token", {
           method: "POST",
@@ -36,30 +45,31 @@ export default function Home() {
           body: JSON.stringify({ code, redirect_uri: REDIRECT_URI }),
         });
 
-        if (!tokenRes.ok) { //If fetch fails
+        if (!tokenRes.ok) {
           const errorText = await tokenRes.text();
           console.error("Token request failed:", errorText);
           return;
         }
 
         const tokenData = await tokenRes.json();
+        console.log("🔑 Token Response:", tokenData);
 
-        if (tokenData.access_token) {   //If successful, use access token to fetch user profile
+        if (tokenData.access_token) {
           const userRes = await fetch("https://api.spotify.com/v1/me", {
             headers: {
               Authorization: `Bearer ${tokenData.access_token}`,
             },
           });
 
-          if (!userRes.ok) { // Handle failed user profile fetch
+          if (!userRes.ok) {
             const errorText = await userRes.text();
             console.error("User profile fetch failed:", errorText);
             return;
           }
 
           const userData = await userRes.json();
+          console.log("👤 User:", userData);
 
-          // Store user data and login state
           setUser(userData);
           setUserID(userData.id);
           setAccessToken(tokenData.access_token);
@@ -70,25 +80,27 @@ export default function Home() {
         console.error("Error fetching token or user:", err);
       }
     };
-    fetchTokenAndUser();
-  }, [code]);  // Runs only when `code` useState changes
 
-  //Triggers Spotify login redirect
+    fetchTokenAndUser();
+  }, [code]);
+
   const loginToSpotify = () => {
-    const url = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}`;                                //Redirects to spotify log in page 
-    window.location.href = url; //Redirects user to Spotify login page
+    const url = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}`;
+    window.location.href = url;
   };
 
-  //Return the page user sees first, Log in page
   return (
     <div>
       {isLoggedIn && user ? (
         <div className="min-h-screen flex flex-col">
-          <div className="w-full h-16 px-6 flex items-center justify-end shadow-md z-2">
-            <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} />
+          <div id="navbar" className="w-full h-16 px-6 flex items-center justify-between shadow-md z-2 mb-10">
+              <div className="mb-6">
+                <SpotifyDeviceStatus accessToken={accessToken} onDeviceConnect={() => setDeviceConnected(true)}/>
+              </div>
+              <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} accessToken={accessToken}/>
           </div>
-          <div className="flex-1 p-6 z-1 w-full h-full relative mt-10 ">
-            <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} />
+          <div className="flex-1 p-6 z-1 w-full h-full relative ">
+            <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} deviceConnected={deviceConnected}/>
           </div>
         </div>
       ) : (

@@ -1,4 +1,4 @@
-//Logout from spotify account
+// src/component/spotifyLogOut.js
 export function spotifyLogOut() {                                                                                   //When function is ran logs user out of the spotify
     localStorage.removeItem("spotify_access_token");
 

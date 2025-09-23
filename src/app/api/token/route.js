@@ -1,23 +1,25 @@
-//Uses post request to exchange authorization code for an access token
 export async function POST(req) {
+    console.log("🔥 /api/token was hit");
 
     let payload;
     try {
-        // parse the JSON body from the Post request
-        payload = await req.json();
+    payload = await req.json();
     } catch (error) {
-        console.error("Failed to parse JSON body:", error);
+    console.error("Failed to parse JSON body:", error);
     return new Response(JSON.stringify({ error: "Bad JSON" }), { status: 400 });
     }
 
-    //destruct authorization code and redirect URI from the request
     const { code, redirect_uri } = payload;
 
-    //Spotify client credentials
-    const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
-    const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
+    const CLIENT_ID = "2751136537024052b892a475c49906e1";
+    const CLIENT_SECRET = "08a90bbbd1a04c2486bb40daf52d0212";
+    const REDIRECT_URI = "http://127.0.0.1:3000";
+    
 
-    //Request to Spotify Account Services, exchange authorization code for access token
+    console.log("🧪 CLIENT_ID:", CLIENT_ID);
+    console.log("🧪 CODE:", code);
+    console.log("🧪 REDIRECT_URI:", redirect_uri);
+
     const tokenResponse = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
     headers: {
@@ -29,11 +31,12 @@ export async function POST(req) {
     body: new URLSearchParams({
         grant_type: "authorization_code",
         code,
-        redirect_uri,
+        redirect_uri, // must match frontend and Spotify Dashboard exactly
     }),
     });
 
-    //parse json response, access token, refresh token.
     const data = await tokenResponse.json();
+    console.log("🎯 TOKEN RESPONSE:", data);
+
     return Response.json(data);
 }
