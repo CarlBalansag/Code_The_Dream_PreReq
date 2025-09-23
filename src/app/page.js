@@ -4,9 +4,9 @@ import SpotifyDeviceStatus from "./component/pages/components/navbar/connected_d
 import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
 import { useState, useEffect } from "react";
 
-const CLIENT_ID = "2751136537024052b892a475c49906e1";
-const REDIRECT_URI = "http://127.0.0.1:3000";
-const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
+const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID; //Spotify unique I
+const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app"; //link that tells spotify where to send user back after log in 
+const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; //link for spotify login page
 const SCOPES = "user-read-recently-played user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read user-read-recently-played user-top-read";
 
 export default function Home() {
