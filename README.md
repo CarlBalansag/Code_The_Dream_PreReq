@@ -4,3 +4,5 @@ The Project is still under development mode, spotify limits 20 users to access t
 
 1) Log in to spotify with the email that was provided to be able to gain access when in development mode. 
 
+2) Work in progress
+
