@@ -121,23 +121,23 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
           onSwiper={setSwiperRef}
           onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
           modules={[Pagination, Mousewheel, Keyboard]}
-          className="mySwiper h-[70vh]"
+          className="mySwiper h-[80vh]"
         >
           <SwiperSlide>
-            <div className="p-2 h-full overflow-y-auto">
+            <div className="p-2 h-full overflow-hidden">
               <LiveSong song={song} isPlaying={isPlaying} accessToken={accessToken} getSong={getSong} />
-              <div className="mt-5 flex justify-center">
+              <div className="mt-2 flex justify-center">
                 <QuitButton setSong={setSong} setQuit={setQuit} accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
               </div>
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="p-2 h-full overflow-y-auto">
+            <div className="p-2 h-full overflow-hidden">
               <PremiumTopTracks artistId={song.item.artists[0].id} accessToken={accessToken} />
             </div>
           </SwiperSlide>
           <SwiperSlide>
-            <div className="p-2 h-full overflow-y-auto">
+            <div className="p-2 h-full overflow-hidden">
               <PremiumAlbum artistId={song.item.artists[0].id} accessToken={accessToken} />
             </div>
           </SwiperSlide>
@@ -156,28 +156,35 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
             !deviceConnected && !showInfoPage && song && song.item ? (
               <>
                 {MobileNowPlayingSwiper()}
-                {/* Desktop / Large screens */}
-                <div className="hidden lg:grid grid-cols-12 gap-6 h-full min-h-0">
-                  <div className="col-span-12 xl:col-span-4 h-full min-h-0">
+                {/* Desktop / Large screens - FIXED LAYOUT */}
+                <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-12 gap-6 h-full min-h-0">
+                  {/* First column - Live Song */}
+                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
                     <div className="h-full min-h-0 overflow-hidden rounded-xl">
                       <div className="p-4">
                         <LiveSong song={song} isPlaying={isPlaying} accessToken={accessToken} getSong={getSong} />
-                        <div className="mt-5">
+                        <div className="mt-5 pl-18 text-center">
                           <QuitButton setSong={setSong} setQuit={setQuit} accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="col-span-12 sm:col-span-6 xl:col-span-4 h-full min-h-0">
-                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
-                      <div className="h-full min-h-0 overflow-y-auto p-4">
+                  
+                  {/* Second column - Premium Top Tracks */}
+                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
+                    <div className="h-full min-h-0 rounded-xl">
+                      {/* REMOVED overflow-y-auto from wrapper to prevent double scrollbars */}
+                      <div className="p-4 h-full">
                         <PremiumTopTracks artistId={song.item.artists[0].id} accessToken={accessToken} />
                       </div>
                     </div>
                   </div>
-                  <div className="col-span-12 sm:col-span-6 xl:col-span-4 h-full min-h-0">
-                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
-                      <div className="h-full min-h-0 overflow-y-auto p-4">
+                  
+                  {/* Third column - Premium Album */}
+                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
+                    <div className="h-full min-h-0 rounded-xl">
+                      {/* REMOVED overflow-y-auto from wrapper to prevent double scrollbars */}
+                      <div className="p-4 h-full">
                         <PremiumAlbum artistId={song.item.artists[0].id} accessToken={accessToken} />
                       </div>
                     </div>
@@ -187,19 +194,19 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
             ) : (
               <div className="w-full h-full">
                 {MobileSwiper()}
-                {/* Desktop / Large screens */}
-                <div className="hidden lg:grid grid-cols-12 gap-6 h-[calc(100%-4rem)] min-h-0">
-                  <div className="col-span-12 md:col-span-4 h-full min-h-0">
+                {/* Desktop / Large screens - Info Page Layout */}
+                <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-12 gap-6 h-[calc(100%-4rem)] min-h-0">
+                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
                     <div className="h-full min-h-0 overflow-hidden rounded-xl">
                       <UserTopArtists accessToken={accessToken} />
                     </div>
                   </div>
-                  <div className="col-span-12 md:col-span-4 h-full min-h-0">
+                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
                     <div className="h-full min-h-0 overflow-hidden rounded-xl">
                       <UserTopTracks accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
                     </div>
                   </div>
-                  <div className="col-span-12 md:col-span-4 h-full min-h-0">
+                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
                     <div className="h-full min-h-0 overflow-hidden rounded-xl">
                       <RecentlyPlayedList accessToken={accessToken} name={name} />
                     </div>
@@ -212,14 +219,14 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
             <div className="w-full h-full">
               <p className="text-red-500 text-xl font-semibold mb-4">Not a Premium Member</p>
               {MobileSwiper()}
-              <div className="hidden lg:grid grid-cols-12 gap-6 h-[calc(100%-4rem)] min-h-0">
-                <div className="col-span-12 md:col-span-4 h-full min-h-0">
+              <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-12 gap-6 h-[calc(100%-4rem)] min-h-0">
+                <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
                   <UserTopArtists accessToken={accessToken} />
                 </div>
-                <div className="col-span-12 md:col-span-4 h-full min-h-0">
+                <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
                   <UserTopTracks accessToken={accessToken} />
                 </div>
-                <div className="col-span-12 md:col-span-4 h-full min-h-0">
+                <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
                   <RecentlyPlayedList accessToken={accessToken} name={name} />
                 </div>
               </div>

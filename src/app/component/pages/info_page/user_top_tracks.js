@@ -79,9 +79,9 @@ return (
                     </p>
                     <p className="text-gray-400 text-sm truncate">By {item.artists}</p>
                 </div>
-                <div className="flex-none">
+                <div className="flex-none pr-10">
                     <CirclePlayButton
-                    size={30}
+                    size={35}
                     trackUri={item.uri}
                     accessToken={accessToken}
                     setCurrentTrackId={setCurrentTrackId}
