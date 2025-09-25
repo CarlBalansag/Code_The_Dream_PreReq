@@ -24,7 +24,7 @@ export default function LoginPage() {
       <div className="text-center">
         <h1 className="text-4xl pb-5">Log in to Spotify</h1>
         <button
-          onClick={loginToSpotify}
+          onClick={loginWithSpotify}
           className="w-5/6 bg-[#1db954] text-black text-lg h-12 rounded-3xl"
         >
           Continue to Spotify
@@ -33,3 +33,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
