@@ -1,13 +1,13 @@
 "use client";
-import CurrentlyPlaying from "../main";
+import { useState, useEffect } from "react";
+import CurrentlyPlaying from "../main"; // adjust this path if needed
 import SpotifyDeviceStatus from "../component/pages/components/navbar/connected_device";
 import DropdownMenu from "../component/pages/components/navbar/DropdownMenu";
-import { useState, useEffect } from "react";
 
-const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID; //Spotify unique I
-const REDIRECT_URI = "https://spotify.carltechs.com/home"; //link that tells spotify where to send user back after log in 
-const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; //link for spotify login page
-const SCOPES = "user-read-recently-played user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read user-read-recently-played user-top-read";
+const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
+const REDIRECT_URI = "https://spotify.carltechs.com/home";
+const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
+const SCOPES = "user-read-recently-played user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read";
 
 export default function Home() {
   const [accessToken, setAccessToken] = useState(null);
@@ -21,7 +21,7 @@ export default function Home() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get("code");
-    setCode(authCode);
+    if (authCode) setCode(authCode);
   }, []);
 
   useEffect(() => {
@@ -31,7 +31,6 @@ export default function Home() {
     }
   }, [deviceConnected]);
 
-
   useEffect(() => {
     if (!code) return;
 
@@ -39,9 +38,7 @@ export default function Home() {
       try {
         const tokenRes = await fetch("/api/token", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ code, redirect_uri: REDIRECT_URI }),
         });
 
@@ -94,13 +91,13 @@ export default function Home() {
       {isLoggedIn && user ? (
         <div className="min-h-screen flex flex-col">
           <div id="navbar" className="w-full h-16 px-6 flex items-center justify-between shadow-md z-2 mb-10">
-              <div className="mb-6">
-                <SpotifyDeviceStatus accessToken={accessToken} onDeviceConnect={() => setDeviceConnected(true)}/>
-              </div>
-              <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} accessToken={accessToken}/>
+            <div className="mb-6">
+              <SpotifyDeviceStatus accessToken={accessToken} onDeviceConnect={() => setDeviceConnected(true)} />
+            </div>
+            <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} accessToken={accessToken} />
           </div>
           <div className="flex-1 p-6 z-1 w-full h-full relative ">
-            <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} deviceConnected={deviceConnected}/>
+            <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} deviceConnected={deviceConnected} />
           </div>
         </div>
       ) : (
