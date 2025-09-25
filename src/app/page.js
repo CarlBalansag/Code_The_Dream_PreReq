@@ -5,7 +5,7 @@ import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
 import { useState, useEffect } from "react";
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID; //Spotify unique I
-const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app"; //link that tells spotify where to send user back after log in 
+const REDIRECT_URI = "https://spotify.carltechs.com/home"; //link that tells spotify where to send user back after log in 
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; //link for spotify login page
 const SCOPES = "user-read-recently-played user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read user-read-recently-played user-top-read";
 
