@@ -1,7 +1,7 @@
 "use client";
-import CurrentlyPlaying from "./main";
-import SpotifyDeviceStatus from "./component/pages/components/navbar/connected_device";
-import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
+import CurrentlyPlaying from "../main";
+import SpotifyDeviceStatus from "../component/pages/components/navbar/connected_device";
+import DropdownMenu from "../component/pages/components/navbar/DropdownMenu";
 import { useState, useEffect } from "react";
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID; //Spotify unique I
