@@ -8,15 +8,6 @@ const nextConfig = {
     images: {
         domains: ['i.scdn.co'],
     },
-    async redirects() {
-        return [
-            {
-                source: '/',
-                destination: '/home',
-                permanent: false, // or true if you want a 308 redirect
-            },
-        ];
-    },
 };
 
 export default nextConfig;
