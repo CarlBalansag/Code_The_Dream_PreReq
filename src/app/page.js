@@ -20,14 +20,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col justify-center items-center text-center">
-      <h1 className="text-4xl mb-6">Welcome to Your Spotify Dashboard</h1>
-      <button
-        onClick={loginWithSpotify}
-        className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-full text-lg"
-      >
-        Log In with Spotify
-      </button>
+    <div className="flex items-center justify-center h-screen pb-10">
+      <div className="text-center">
+        <h1 className="text-4xl pb-5">Log in to Spotify</h1>
+        <button
+          onClick={loginToSpotify}
+          className="w-5/6 bg-[#1db954] text-black text-lg h-12 rounded-3xl"
+        >
+          Continue to Spotify
+        </button>
+      </div>
     </div>
   );
 }
