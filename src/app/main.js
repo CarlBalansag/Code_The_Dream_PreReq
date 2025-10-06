@@ -147,7 +147,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
   );
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div className="absolute inset-0 overflow-hidden -mt-5">
       {/* layout shell */}
       <div className="h-full w-full mx-auto px-[5%] xl:px-6 flex flex-col">
         {/* CONTENT AREA */}
@@ -212,7 +212,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
                     </div>
                   </div>
                 </div>
-                <FloatingActionButton />
+                {/* <FloatingActionButton /> */}
               </div>
             )
           ) : (

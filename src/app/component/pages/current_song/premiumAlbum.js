@@ -67,7 +67,7 @@ if (!albums.length) return <p className="text-white">Loading albums...</p>;
 
 return (
     <div
-    className="p-4 bg-[#181818] rounded-md max-w-lg overflow-y-auto custom-scrollbar"
+    className="p-4 rounded-md max-w-lg overflow-y-auto custom-scrollbar"
     style={{ maxHeight: "800px" }}
     >
     <h2 className="text-[#1DB954] text-xl font-semibold mb-3 text-center">
