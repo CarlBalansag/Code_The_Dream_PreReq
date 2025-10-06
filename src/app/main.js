@@ -201,7 +201,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
                       <UserTopArtists accessToken={accessToken} />
                     </div>
                   </div>
-                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
+                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0 ">
                     <div className="h-full min-h-0 overflow-hidden rounded-xl">
                       <UserTopTracks accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
                     </div>

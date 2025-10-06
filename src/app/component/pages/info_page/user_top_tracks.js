@@ -1,7 +1,7 @@
 // user_top_tracks.js
 "use client";
 import { useState, useEffect } from "react";
-import CirclePlayButton from "../../circle_play_button";
+import CirclePlayButton from "../components/circle_play_button";
 
 export default function UserTopTracks({ accessToken, setShowInfoPage }) {
 const [topTracks, setTopTracks] = useState([]);
