@@ -20,7 +20,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
   const [activeIndex, setActiveIndex] = useState(0);
   const [swiperRef, setSwiperRef] = useState(null);
   const [quit, setQuit] = useState(false);
-  const [showInfoPage, setShowInfoPage] = useState(false);
+  const [showInfoPage, setShowInfoPage] = useState(true); // default to stats page
 
   const swipeHintsInfoPage = [
     "Swipe right for Top Tracks",
@@ -54,6 +54,8 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
     return () => clearInterval(interval);
   }, [accessToken, quit]);
 
+  const toggleNowPlaying = () => setShowInfoPage((prev) => !prev);
+
   const MobileNavigation = () => (
     <>
       <button
@@ -73,6 +75,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
     </>
   );
 
+  // no song playing mobile view 
   const MobileSwiper = () => (
     <div className="block lg:hidden w-full px-4 pb-16 relative">
       <div className="w-full max-w-[640px] mx-auto relative">
@@ -108,6 +111,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
     </div>
   );
 
+  // A song is playing on mobile view 
   const MobileNowPlayingSwiper = () => (
     <div className="block lg:hidden w-full px-4 pb-16 relative">
       <div className="w-full max-w-[640px] mx-auto relative">
@@ -146,6 +150,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
     </div>
   );
 
+  //Desktop view
   return (
     <div className="absolute inset-0 overflow-hidden -mt-5">
       {/* layout shell */}
@@ -153,10 +158,36 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
         {/* CONTENT AREA */}
         <div className="flex-1 min-h-0">
           {premium ? (
-            !deviceConnected && !showInfoPage && song && song.item ? (
-              <>
+            showInfoPage ? (
+              <div className="w-full h-full">
+                {MobileSwiper()}
+                {/* Desktop / Large screens - Info Page Layout */}
+                <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-12 gap-6 h-[calc(100%-4rem)] min-h-0">
+                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
+                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
+                      <UserTopArtists accessToken={accessToken} />
+                    </div>
+                  </div>
+                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0 ">
+                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
+                      <UserTopTracks accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
+                    </div>
+                  </div>
+                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0 mt-10">
+                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
+                      <RecentlyPlayedList accessToken={accessToken} name={name} />
+                    </div>
+                  </div>
+                </div>
+                {/* Floating Action Button to toggle to Now Playing */}
+                {song && song.item && (
+                  <FloatingActionButton onClick={toggleNowPlaying} showInfoPage={showInfoPage} />
+                )}
+              </div>
+            ) : (
+              <>                
                 {MobileNowPlayingSwiper()}
-                {/* Desktop / Large screens - FIXED LAYOUT */}
+                {/* Desktop / Large screens - FIXED LAYOUT Device is premium and is currently playing music*/} 
                 <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-12 gap-6 h-full min-h-0">
                   {/* First column - Live Song */}
                   <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
@@ -164,7 +195,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
                       <div className="p-4">
                         <LiveSong song={song} isPlaying={isPlaying} accessToken={accessToken} getSong={getSong} />
                         <div className="mt-5 pl-18 text-center">
-                          <QuitButton setSong={setSong} setQuit={setQuit} accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
+                          {/* <QuitButton setSong={setSong} setQuit={setQuit} accessToken={accessToken} setShowInfoPage={setShowInfoPage} /> */}
                         </div>
                       </div>
                     </div>
@@ -190,30 +221,9 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
                     </div>
                   </div>
                 </div>
+                {/* Floating Action Button to toggle back to Stats */}
+                <FloatingActionButton onClick={toggleNowPlaying} showInfoPage={showInfoPage} />
               </>
-            ) : (
-              <div className="w-full h-full">
-                {MobileSwiper()}
-                {/* Desktop / Large screens - Info Page Layout */}
-                <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-12 gap-6 h-[calc(100%-4rem)] min-h-0">
-                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
-                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
-                      <UserTopArtists accessToken={accessToken} />
-                    </div>
-                  </div>
-                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0 ">
-                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
-                      <UserTopTracks accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
-                    </div>
-                  </div>
-                  <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0">
-                    <div className="h-full min-h-0 overflow-hidden rounded-xl">
-                      <RecentlyPlayedList accessToken={accessToken} name={name} />
-                    </div>
-                  </div>
-                </div>
-                {/* <FloatingActionButton /> */}
-              </div>
             )
           ) : (
             <div className="w-full h-full">

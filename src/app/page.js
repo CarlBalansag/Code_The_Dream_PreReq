@@ -12,7 +12,7 @@ const SCOPES = "user-read-recently-played user-read-private user-read-email user
 export default function Home() {
   const [accessToken, setAccessToken] = useState(null);
   const [code, setCode] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);  
   const [userID, setUserID] = useState(null);
   const [user, setUser] = useState(null);
   const [premium, setPremium] = useState(null);
@@ -90,6 +90,7 @@ export default function Home() {
   };
 
   return (
+    //hero page
     <div>
       {isLoggedIn && user ? (
         <div className="min-h-screen flex flex-col">
