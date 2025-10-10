@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import CirclePlayButton from "../components/circle_play_button";
+import { Play } from "lucide-react";
 
 export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingChange, onPlayClick }) {
     const [tracksCache, setTracksCache] = useState({
@@ -9,7 +9,7 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
         long_term: []
     });
     const [timeRange, setTimeRange] = useState("short_term");
-    const [currentTrackId, setCurrentTrackId] = useState(null);
+    const [hoveredTrackId, setHoveredTrackId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const onLoadingChangeRef = useRef(onLoadingChange);
     const hasFetchedRef = useRef(false);
@@ -80,6 +80,49 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
         return null;
     }
 
+    const handlePlayTrack = async (trackUri, trackId) => {
+        try {
+            const deviceRes = await fetch("https://api.spotify.com/v1/me/player/devices", {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            const deviceData = await deviceRes.json();
+            const activeDevice = deviceData.devices.find((d) => d.is_active);
+
+            if (!activeDevice) {
+                alert("No active Spotify device found. Open Spotify on a device and try again.");
+                return;
+            }
+
+            if (onPlayClick) {
+                onPlayClick(trackId, setShowInfoPage);
+            }
+
+            const playRes = await fetch(
+                `https://api.spotify.com/v1/me/player/play?device_id=${activeDevice.id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ uris: [trackUri] }),
+                }
+            );
+
+            if (playRes.status === 204) {
+                console.log("✅ Track started playing");
+            } else {
+                const errorText = await playRes.text();
+                console.error("❌ Failed to play track. Response:", errorText);
+            }
+        } catch (error) {
+            console.error("🔥 Exception during playback:", error);
+        }
+    };
+
     return (
         <div className="w-full h-full min-h-0 rounded-xl bg-[#121212] flex flex-col">
             {/* Header (fixed within card, not in scroll) */}
@@ -111,31 +154,32 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                 {currentTracks.length > 0 ? (
                     <ul className="space-y-4 mt-3">
                         {currentTracks.map((item, index) => (
-                            <li key={item.id} className="bg-[#212121] rounded-lg p-3">
-                                <div className="flex items-center gap-4">
-                                    <img
-                                        src={item.image}
-                                        alt={item.name}
-                                        className="w-16 h-16 rounded-md object-cover flex-none"
-                                    />
-                                    <div className="flex-grow min-w-0">
-                                        <p className="text-white font-semibold text-md truncate">
-                                            {index + 1}. {item.name}
-                                        </p>
-                                        <p className="text-gray-400 text-sm truncate">By {item.artists}</p>
-                                    </div>
-                                    <div className="flex-none pr-10">
-                                        <CirclePlayButton
-                                            size={35}
-                                            trackUri={item.uri}
-                                            accessToken={accessToken}
-                                            setCurrentTrackId={setCurrentTrackId}
-                                            currentTrackId={currentTrackId}
-                                            trackId={item.id}
-                                            setShowInfoPage={setShowInfoPage}
-                                            onPlayClick={onPlayClick}
-                                        />
-                                    </div>
+                            <li
+                                key={item.id}
+                                className="bg-[#212121] hover:bg-[#2a2a2a] rounded-lg p-3 flex items-center space-x-4 cursor-pointer transition-colors group"
+                                onMouseEnter={() => setHoveredTrackId(item.id)}
+                                onMouseLeave={() => setHoveredTrackId(null)}
+                                onClick={() => handlePlayTrack(item.uri, item.id)}
+                                data-tour={index === 0 ? "play-button" : undefined}
+                            >
+                                {/* Track number / Play icon */}
+                                <div className="w-8 flex items-center justify-center text-gray-400 flex-shrink-0">
+                                    {hoveredTrackId === item.id ? (
+                                        <Play size={20} className="text-[#1DB954] fill-[#1DB954]" />
+                                    ) : (
+                                        <span className="text-sm font-medium">{index + 1}</span>
+                                    )}
+                                </div>
+
+                                {/* Album cover */}
+                                <img src={item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover flex-shrink-0" />
+
+                                {/* Track info */}
+                                <div className="flex-grow min-w-0">
+                                    <p className="text-white font-semibold text-md truncate group-hover:text-[#1DB954] transition-colors">
+                                        {item.name}
+                                    </p>
+                                    <p className="text-sm text-gray-400 truncate">{item.artists}</p>
                                 </div>
                             </li>
                         ))}

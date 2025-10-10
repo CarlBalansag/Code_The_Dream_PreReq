@@ -9,6 +9,7 @@ export default function CirclePlayButton({
   currentTrackId,
   setShowInfoPage,
   onPlayClick,
+  dataTour,
 }) {
   const handleClick = async () => {
     try {
@@ -110,6 +111,7 @@ export default function CirclePlayButton({
 
       <label
         onClick={handleClick}
+        data-tour={dataTour}
         className={`circle-button-container transition duration-200 ${
           isActive ? "scale-110" : "opacity-80 hover:opacity-100"
         }`}

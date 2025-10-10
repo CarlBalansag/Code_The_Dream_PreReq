@@ -1,13 +1,13 @@
 "use client";
 
-export default function FloatingActionButton({ onClick, showInfoPage }) {
+export default function FloatingActionButton({ onClick, showInfoPage, tourActive }) {
 return (
-    <div className="fixed bottom-6 right-6 z-[9999]">
+    <div id="floating-action-button" className={`fixed bottom-6 right-6 ${tourActive ? 'z-[10001]' : 'z-[9999]'}`}>
     <div
-        onClick={onClick}
+        onClick={tourActive ? (e) => e.preventDefault() : onClick}
         className="group relative flex justify-center items-center text-zinc-600 text-sm font-bold"
     >
-        <div className="shadow-md flex items-center group-hover:gap-2 bg-gradient-to-br from-lime-200 to-yellow-200 p-5 rounded-full cursor-pointer duration-300">
+        <div className={`shadow-md flex items-center group-hover:gap-2 bg-gradient-to-br from-lime-200 to-yellow-200 p-5 rounded-full duration-300 ${tourActive ? 'cursor-default' : 'cursor-pointer'}`}>
         {/* Use your original SVG for both states */}
         <svg
             fill="none"

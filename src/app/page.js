@@ -2,7 +2,9 @@
 import CurrentlyPlaying from "./main";
 import SpotifyDeviceStatus from "./component/pages/components/navbar/connected_device";
 import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
+import SpotifyTour from "./component/pages/components/SpotifyTour";
 import { useState, useEffect } from "react";
+import { BadgeHelp } from "lucide-react";
 
 const CLIENT_ID = "2751136537024052b892a475c49906e1";
 const REDIRECT_URI = "http://127.0.0.1:3000";
@@ -17,6 +19,8 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [premium, setPremium] = useState(null);
   const [deviceConnected, setDeviceConnected] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -30,7 +34,6 @@ export default function Home() {
       return () => clearTimeout(timer);
     }
   }, [deviceConnected]);
-
 
   useEffect(() => {
     if (!code) return;
@@ -84,25 +87,64 @@ export default function Home() {
     fetchTokenAndUser();
   }, [code]);
 
+  // Show tour after login
+  useEffect(() => {
+    if (isLoggedIn && user) {
+      setMounted(true);
+
+      const hasSeenTour = localStorage.getItem('spotify-tour-completed');
+      if (!hasSeenTour) {
+        setTimeout(() => {
+          setShowTour(true);
+        }, 1500);
+      }
+    }
+  }, [isLoggedIn, user]);
+
+  const handleTourComplete = () => {
+    localStorage.setItem('spotify-tour-completed', 'true');
+    setShowTour(false);
+  };
+
   const loginToSpotify = () => {
     const url = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}`;
     window.location.href = url;
   };
 
   return (
-    //hero page
     <div>
       {isLoggedIn && user ? (
         <div className="min-h-screen flex flex-col">
           <div id="navbar" className="w-full h-16 px-6 flex items-center justify-between shadow-md z-2 mb-10">
               <div className="mb-6">
-                <SpotifyDeviceStatus accessToken={accessToken} onDeviceConnect={() => setDeviceConnected(true)}/>
+                <SpotifyDeviceStatus accessToken={accessToken} onDeviceConnect={() => setDeviceConnected(true)} data-tour="connect-device"/>
               </div>
-              <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} accessToken={accessToken}/>
+              <div className="flex items-center gap-4 mb-6 mt-5">
+                {/* Tour Button */}
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('spotify-tour-completed');
+                    setShowTour(true);
+                  }}
+                  className="p-2 rounded-full hover:bg-gray-800/50 transition-colors"
+                  title="Take a tour"
+                >
+                  <BadgeHelp size={24} className="text-[#1DB954]" />
+                </button>
+                <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} accessToken={accessToken}/>
+              </div>
           </div>
           <div className="flex-1 p-6 z-1 w-full h-full relative ">
-            <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} deviceConnected={deviceConnected}/>
+            <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} deviceConnected={deviceConnected} tourActive={showTour}/>
           </div>
+
+          {/* Tour Component */}
+          {showTour && mounted && (
+            <SpotifyTour
+              onComplete={handleTourComplete}
+              premium={premium}
+            />
+          )}
         </div>
       ) : (
         <div className="flex items-center justify-center h-screen pb-10">
