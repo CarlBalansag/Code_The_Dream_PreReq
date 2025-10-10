@@ -251,6 +251,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
     </>
   );
 
+  //mobile buttons to go left and right 
   const MobileNavigation = () => (
     <>
       <button
@@ -311,7 +312,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
     </div>
   );
 
-  // A song is playing on mobile view 
+  //Mobile view when a song is playing
   const MobileNowPlayingSwiper = () => (
     <div className="block lg:hidden w-full px-4 pb-16 relative">
       <div className="w-full max-w-[640px] mx-auto relative">
@@ -337,7 +338,6 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
                 onLoadingChange={handleLiveSongLoadingChange}
               />
               <div className="mt-2 flex justify-center">
-                <QuitButton setSong={setSong} setQuit={setQuit} accessToken={accessToken} setShowInfoPage={setShowInfoPage} />
               </div>
             </div>
           </SwiperSlide>
@@ -371,9 +371,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
   //Desktop view
   return (
     <div className="absolute inset-0 overflow-hidden -mt-5">
-      {/* layout shell */}
       <div className="h-full w-full mx-auto px-[5%] xl:px-6 flex flex-col">
-        {/* CONTENT AREA */}
         <div className="flex-1 min-h-0">
           {premium ? (
             showInfoPage ? (

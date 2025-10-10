@@ -3,12 +3,16 @@ import { useState, useEffect, useRef } from "react";
 import CirclePlayButton from "../components/circle_play_button";
 
 export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingChange, onPlayClick }) {
-    const [topTracks, setTopTracks] = useState([]);
+    const [tracksCache, setTracksCache] = useState({
+        short_term: [],
+        medium_term: [],
+        long_term: []
+    });
     const [timeRange, setTimeRange] = useState("short_term");
     const [currentTrackId, setCurrentTrackId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const onLoadingChangeRef = useRef(onLoadingChange);
-    const isFetchingRef = useRef(false);
+    const hasFetchedRef = useRef(false);
 
     // Keep ref up to date
     useEffect(() => {
@@ -16,45 +20,64 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
     }, [onLoadingChange]);
 
     useEffect(() => {
-        if (!accessToken || isFetchingRef.current) return;
+        if (!accessToken || hasFetchedRef.current) return;
 
-        const fetchTopTracks = async () => {
-            isFetchingRef.current = true;
+        const fetchAllTimeRanges = async () => {
+            hasFetchedRef.current = true;
             setIsLoading(true);
             if (onLoadingChangeRef.current) onLoadingChangeRef.current(true);
 
             try {
-                const res = await fetch(
-                    `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}`,
-                    { headers: { Authorization: `Bearer ${accessToken}` } }
-                );
-                if (!res.ok) {
-                    console.error("Error fetching top tracks:", res.status);
-                    return;
-                }
-                const data = await res.json();
-                const formatted = data.items.map((track) => ({
-                    id: track.id,
-                    name: track.name,
-                    uri: track.uri,
-                    image: track.album?.images[0]?.url || "",
-                    artists: track.artists.map((a) => a.name).join(", "),
-                }));
-                setTopTracks(formatted);
+                // Fetch all three time ranges in parallel
+                const [shortTerm, mediumTerm, longTerm] = await Promise.all([
+                    fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=short_term`, {
+                        headers: { Authorization: `Bearer ${accessToken}` }
+                    }),
+                    fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=medium_term`, {
+                        headers: { Authorization: `Bearer ${accessToken}` }
+                    }),
+                    fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=long_term`, {
+                        headers: { Authorization: `Bearer ${accessToken}` }
+                    })
+                ]);
+
+                // Process all responses
+                const formatTracks = (data) => 
+                    data.items.map((track) => ({
+                        id: track.id,
+                        name: track.name,
+                        uri: track.uri,
+                        image: track.album?.images[0]?.url || "",
+                        artists: track.artists.map((a) => a.name).join(", "),
+                    }));
+
+                const [shortData, mediumData, longData] = await Promise.all([
+                    shortTerm.json(),
+                    mediumTerm.json(),
+                    longTerm.json()
+                ]);
+
+                setTracksCache({
+                    short_term: formatTracks(shortData),
+                    medium_term: formatTracks(mediumData),
+                    long_term: formatTracks(longData)
+                });
             } catch (error) {
-                console.error("Error:", error);
+                console.error("Error fetching tracks:", error);
             } finally {
                 setIsLoading(false);
-                isFetchingRef.current = false;
                 if (onLoadingChangeRef.current) onLoadingChangeRef.current(false);
             }
         };
 
-        fetchTopTracks();
-    }, [accessToken, timeRange]);
+        fetchAllTimeRanges();
+    }, [accessToken]);
+
+    // Get current tracks based on selected time range (no loading!)
+    const currentTracks = tracksCache[timeRange];
 
     if (isLoading && onLoadingChange) {
-        return null; // Return null while loading if parent handles overlay
+        return null;
     }
 
     return (
@@ -66,7 +89,7 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                     {["short_term", "medium_term", "long_term"].map((range) => (
                         <button
                             key={range}
-                            className={`px-3 py-1 rounded-md text-sm font-medium ${
+                            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                                 timeRange === range
                                     ? "bg-[#1DB954] text-white"
                                     : "bg-white hover:bg-gray-200 text-black"
@@ -85,9 +108,9 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
 
             {/* Scrollable list */}
             <div className="custom-scrollbar flex-1 min-h-0 overflow-y-auto px-4 pb-4">
-                {topTracks.length > 0 ? (
+                {currentTracks.length > 0 ? (
                     <ul className="space-y-4 mt-3">
-                        {topTracks.map((item, index) => (
+                        {currentTracks.map((item, index) => (
                             <li key={item.id} className="bg-[#212121] rounded-lg p-3">
                                 <div className="flex items-center gap-4">
                                     <img
@@ -123,4 +146,4 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
             </div>
         </div>
     );
-}   
+}
