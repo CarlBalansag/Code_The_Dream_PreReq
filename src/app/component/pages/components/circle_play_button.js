@@ -7,7 +7,8 @@ export default function CirclePlayButton({
   accessToken,
   setCurrentTrackId,
   currentTrackId,
-  setShowInfoPage, // ✅ New prop
+  setShowInfoPage,
+  onPlayClick,
 }) {
   const handleClick = async () => {
     try {
@@ -25,6 +26,11 @@ export default function CirclePlayButton({
         return;
       }
 
+      // ✅ First, trigger loading if callback exists
+      if (onPlayClick) {
+        onPlayClick(trackId, setShowInfoPage);
+      }
+
       const playRes = await fetch(
         `https://api.spotify.com/v1/me/player/play?device_id=${activeDevice.id}`,
         {
@@ -39,7 +45,7 @@ export default function CirclePlayButton({
 
       if (playRes.status === 204) {
         setCurrentTrackId(trackId);
-        if (setShowInfoPage) setShowInfoPage(false); // ✅ Flip back to premium layout
+        console.log("✅ Track started playing, waiting for song detection...");
       } else {
         const errorText = await playRes.text();
         console.error("❌ Failed to play track. Response:", errorText);
