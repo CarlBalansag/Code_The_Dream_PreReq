@@ -357,9 +357,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
                     </div>
                   </div>
                 </div>
-                {(song && song.item || tourActive) && (
-                  <FloatingActionButton onClick={toggleNowPlaying} showInfoPage={showInfoPage} tourActive={tourActive} />
-                )}
+                <FloatingActionButton onClick={toggleNowPlaying} showInfoPage={showInfoPage} tourActive={tourActive} disabled={!song || !song.item} />
                 {mounted && isAnyInfoLoading && createPortal(
                   <div data-loading-portal="true">
                     <LoadingOverlay />

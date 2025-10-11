@@ -120,6 +120,9 @@ export default function Home() {
                 <SpotifyDeviceStatus accessToken={accessToken} onDeviceConnect={() => setDeviceConnected(true)} data-tour="connect-device"/>
               </div>
               <div className="flex items-center gap-4 mb-6 mt-5">
+                {/* Floating Action Button Placeholder */}
+                <div id="fab-navbar-slot"></div>
+
                 {/* Tour Button */}
                 <button
                   onClick={() => {
