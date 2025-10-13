@@ -77,7 +77,7 @@ export default function UserTopArtists({ accessToken, onLoadingChange }) {
     }
 
     return (
-        <div className="w-full h-full min-h-0 rounded-xl bg-[#121212] flex flex-col">
+        <div className="w-full h-full min-h-0 rounded-xl flex flex-col">
             {/* Header (not inside overflow). No jump, always on top of this card */}
             <div className="z-10 px-4 pt-5 pb-4 text-center shadow-md">
                 <p className="text-[#1DB954] text-xl font-semibold">Top Artists</p>
@@ -103,7 +103,7 @@ export default function UserTopArtists({ accessToken, onLoadingChange }) {
                 {currentArtists.length > 0 ? (
                     <ul className="space-y-4 mt-3">
                         {currentArtists.map((item, index) => (
-                            <li key={item.id} className="bg-[#212121] rounded-lg p-3 flex items-center gap-4">
+                            <li key={item.id} className=" bg-[#18181B] border-1 border-[#0A0A0C] rounded-lg p-3 flex items-center gap-4">
                                 <img src={item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover flex-none" />
                                 <div className="flex-grow min-w-0">
                                     <p className="text-white font-semibold text-md truncate">

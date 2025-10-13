@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { Play } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 
 export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingChange, onPlayClick }) {
     const [tracksCache, setTracksCache] = useState({
@@ -10,6 +10,7 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
     });
     const [timeRange, setTimeRange] = useState("short_term");
     const [hoveredTrackId, setHoveredTrackId] = useState(null);
+    const [playingTrackId, setPlayingTrackId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const onLoadingChangeRef = useRef(onLoadingChange);
     const hasFetchedRef = useRef(false);
@@ -96,6 +97,25 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                 return;
             }
 
+            // If clicking on the currently playing track, pause it
+            if (playingTrackId === trackId) {
+                const pauseRes = await fetch(
+                    `https://api.spotify.com/v1/me/player/pause`,
+                    {
+                        method: "PUT",
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    }
+                );
+
+                if (pauseRes.status === 204) {
+                    setPlayingTrackId(null);
+                    console.log("⏸️ Track paused");
+                }
+                return;
+            }
+
             if (onPlayClick) {
                 onPlayClick(trackId, setShowInfoPage);
             }
@@ -113,6 +133,7 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
             );
 
             if (playRes.status === 204) {
+                setPlayingTrackId(trackId);
                 console.log("✅ Track started playing");
             } else {
                 const errorText = await playRes.text();
@@ -124,7 +145,7 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
     };
 
     return (
-        <div className="w-full h-full min-h-0 rounded-xl bg-[#121212] flex flex-col">
+        <div className="w-full h-full min-h-0 rounded-xl flex flex-col">
             {/* Header (fixed within card, not in scroll) */}
             <div className="z-10 px-4 pt-5 pb-4 text-center shadow-md">
                 <p className="text-[#1DB954] text-xl font-semibold">Top Tracks</p>
@@ -156,15 +177,17 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                         {currentTracks.map((item, index) => (
                             <li
                                 key={item.id}
-                                className="bg-[#212121] hover:bg-[#2a2a2a] rounded-lg p-3 flex items-center space-x-4 cursor-pointer transition-colors group"
+                                className=" hover:bg-[#18181B] bg-[#18181B] border-1 border-[#0A0A0C] rounded-lg p-3 flex items-center space-x-4 cursor-pointer transition-colors group"
                                 onMouseEnter={() => setHoveredTrackId(item.id)}
                                 onMouseLeave={() => setHoveredTrackId(null)}
                                 onClick={() => handlePlayTrack(item.uri, item.id)}
                                 data-tour={index === 0 ? "play-button" : undefined}
                             >
-                                {/* Track number / Play icon */}
+                                {/* Track number / Play/Pause icon */}
                                 <div className="w-8 flex items-center justify-center text-gray-400 flex-shrink-0">
-                                    {hoveredTrackId === item.id ? (
+                                    {playingTrackId === item.id ? (
+                                        <Pause size={20} className="text-[#1DB954] fill-[#1DB954]" />
+                                    ) : hoveredTrackId === item.id ? (
                                         <Play size={20} className="text-[#1DB954] fill-[#1DB954]" />
                                     ) : (
                                         <span className="text-sm font-medium">{index + 1}</span>

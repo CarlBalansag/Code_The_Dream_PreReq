@@ -55,7 +55,7 @@ export default function Home() {
         }
 
         const tokenData = await tokenRes.json();
-        console.log("🔑 Token Response:", tokenData);
+        console.log("Token Response:", tokenData);
 
         if (tokenData.access_token) {
           const userRes = await fetch("https://api.spotify.com/v1/me", {
@@ -112,10 +112,10 @@ export default function Home() {
   };
 
   return (
-    <div>
+    <div className="bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950">
       {isLoggedIn && user ? (
         <div className="min-h-screen flex flex-col">
-          <div id="navbar" className="w-full h-16 px-6 flex items-center justify-between shadow-md z-2 mb-10">
+          <div id="navbar" className="w-full h-16 px-6 flex items-center justify-between shadow-md z-2 mb-10 ">
               <div className="mb-6">
                 <SpotifyDeviceStatus accessToken={accessToken} onDeviceConnect={() => setDeviceConnected(true)} data-tour="connect-device"/>
               </div>
@@ -137,7 +137,7 @@ export default function Home() {
                 <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} accessToken={accessToken}/>
               </div>
           </div>
-          <div className="flex-1 p-6 z-1 w-full h-full relative ">
+          <div className="flex-1 p-6 z-1 w-full h-full relative">
             <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} deviceConnected={deviceConnected} tourActive={showTour}/>
           </div>
 

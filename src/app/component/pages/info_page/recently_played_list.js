@@ -54,7 +54,7 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
     }
 
     return (
-        <div className="w-full h-full min-h-0 rounded-xl bg-[#121212] flex flex-col">
+        <div className="w-full h-full min-h-0 rounded-xl flex flex-col ">
             {/* Header (fixed within card, not in scroll) */}
             <div className="z-10 px-4 pt-5 pb-4 text-center shadow-md">
                 <p className="text-[#1DB954] text-xl font-semibold">
@@ -69,15 +69,15 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
                         {recentTracks.map((item, index) => (
                             <li
                                 key={item.id + index}
-                                className="bg-[#212121] rounded-lg p-3 flex items-center gap-4"
+                                className=" rounded-lg p-3 flex items-center gap-4 bg-[#18181B] border-1 border-[#0A0A0C]"
                             >
                                 <img
                                     src={item.image}
                                     alt={item.name}
                                     className="w-16 h-16 rounded-md object-cover flex-none"
                                 />
-                                <div className="flex-grow min-w-0">
-                                    <p className="text-white font-semibold text-md truncate">
+                                <div className="flex-grow min-w-0 ">
+                                    <p className="text-white font-semibold text-md truncate ">
                                         {index + 1}. {item.name}
                                     </p>
                                     <p className="text-gray-400 text-sm truncate">By {item.artists}</p>

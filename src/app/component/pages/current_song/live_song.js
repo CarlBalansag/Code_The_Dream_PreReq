@@ -13,6 +13,14 @@ export async function fetchCurrentlyPlaying(accessToken) {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (res.status === 204) return null;
+
+    // Handle rate limiting
+    if (res.status === 429) {
+      const retryAfter = res.headers.get('Retry-After');
+      console.warn(`⚠️ Rate limited. Retry after ${retryAfter || '60'} seconds`);
+      return null; // Return null instead of erroring out
+    }
+
     if (!res.ok) {
       console.error("Error fetching currently playing:", res.status);
       return null;
@@ -25,27 +33,12 @@ export async function fetchCurrentlyPlaying(accessToken) {
 }
 
 export default function LiveSong({ song, isPlaying, accessToken, getSong, onLoadingChange }) {
-  const [prevSongId, setPrevSongId] = useState(null);
-
-  // Track loading state when song changes
+  // Notify parent we're done loading as soon as we have song data
   useEffect(() => {
-    if (!song || !song.item) {
-      // No song data - notify parent we're loading
-      if (onLoadingChange) onLoadingChange(true);
-    } else {
-      // If song ID changed, show loading briefly
-      if (prevSongId !== song.item.id) {
-        if (onLoadingChange) onLoadingChange(true);
-        setPrevSongId(song.item.id);
-        // Simulate loading time for smooth transition
-        setTimeout(() => {
-          if (onLoadingChange) onLoadingChange(false);
-        }, 500);
-      } else {
-        if (onLoadingChange) onLoadingChange(false);
-      }
+    if (song && song.item && onLoadingChange) {
+      onLoadingChange(false);
     }
-  }, [song, prevSongId, onLoadingChange]);
+  }, [song, onLoadingChange]);
 
   // If no song, return null (parent will show loading overlay)
   if (!song || !song.item) return null;

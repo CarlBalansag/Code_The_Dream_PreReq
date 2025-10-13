@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { Play } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 
 export default function PremiumTopTracks({ artistId, accessToken, onLoadingChange }) {
     const [tracks, setTracks] = useState([]);
     const [artistName, setArtistName] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [hoveredTrackId, setHoveredTrackId] = useState(null);
+    const [playingTrackId, setPlayingTrackId] = useState(null);
     const onLoadingChangeRef = useRef(onLoadingChange);
     const previousArtistIdRef = useRef(null);
     const isFetchingRef = useRef(false);
@@ -79,12 +80,13 @@ export default function PremiumTopTracks({ artistId, accessToken, onLoadingChang
         fetchData();
     }, [artistId, accessToken]);
 
+    // Don't render anything while loading, parent will show skeleton
     if (isLoading) {
-        return null; // Return null while loading, parent will show overlay
+        return null;
     }
 
     if (!tracks || tracks.length === 0) {
-        return <p className="text-white">No recommendations available.</p>;
+        return <p className="text-white text-center p-4">No top tracks available.</p>;
     }
 
     const handlePlayTrack = async (trackUri, trackId) => {
@@ -103,6 +105,25 @@ export default function PremiumTopTracks({ artistId, accessToken, onLoadingChang
                 return;
             }
 
+            // If clicking on the currently playing track, pause it
+            if (playingTrackId === trackId) {
+                const pauseRes = await fetch(
+                    `https://api.spotify.com/v1/me/player/pause`,
+                    {
+                        method: "PUT",
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    }
+                );
+
+                if (pauseRes.status === 204) {
+                    setPlayingTrackId(null);
+                    console.log("⏸️ Track paused");
+                }
+                return;
+            }
+
             const playRes = await fetch(
                 `https://api.spotify.com/v1/me/player/play?device_id=${activeDevice.id}`,
                 {
@@ -116,6 +137,7 @@ export default function PremiumTopTracks({ artistId, accessToken, onLoadingChang
             );
 
             if (playRes.status === 204) {
+                setPlayingTrackId(trackId);
                 console.log("✅ Track started playing");
             } else {
                 const errorText = await playRes.text();
@@ -140,9 +162,11 @@ export default function PremiumTopTracks({ artistId, accessToken, onLoadingChang
                         onMouseLeave={() => setHoveredTrackId(null)}
                         onClick={() => handlePlayTrack(track.uri, track.id)}
                     >
-                        {/* Track number / Play icon */}
+                        {/* Track number / Play/Pause icon */}
                         <div className="w-8 flex items-center justify-center text-gray-400 flex-shrink-0">
-                            {hoveredTrackId === track.id ? (
+                            {playingTrackId === track.id ? (
+                                <Pause size={20} className="text-[#1DB954] fill-[#1DB954]" />
+                            ) : hoveredTrackId === track.id ? (
                                 <Play size={20} className="text-[#1DB954] fill-[#1DB954]" />
                             ) : (
                                 <span className="text-sm font-medium">{index + 1}</span>

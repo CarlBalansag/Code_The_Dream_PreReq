@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import LoadingDots from "../components/loading";
@@ -12,18 +12,37 @@ const [albumTracks, setAlbumTracks] = useState([]);
 const [loading, setLoading] = useState(false);
 const [mounted, setMounted] = useState(false);
 const [isInitialLoading, setIsInitialLoading] = useState(true);
+const onLoadingChangeRef = useRef(onLoadingChange);
+const previousArtistIdRef = useRef(null);
+const isFetchingRef = useRef(false);
+
+// Keep ref up to date
+useEffect(() => {
+    onLoadingChangeRef.current = onLoadingChange;
+}, [onLoadingChange]);
 
 useEffect(() => {
     setMounted(true);
 }, []);
 
 useEffect(() => {
-    if (!artistId || !accessToken) return;
+    // Prevent duplicate fetches
+    if (!artistId || !accessToken || isFetchingRef.current) {
+        return;
+    }
+
+    // Only fetch if artistId actually changed
+    if (previousArtistIdRef.current === artistId) {
+        return;
+    }
 
     const fetchData = async () => {
+        isFetchingRef.current = true;
+        previousArtistIdRef.current = artistId;
+
         setIsInitialLoading(true);
         // Notify parent that we're loading
-        if (onLoadingChange) onLoadingChange(true);
+        if (onLoadingChangeRef.current) onLoadingChangeRef.current(true);
 
         try {
             // Fetch albums
@@ -66,8 +85,9 @@ useEffect(() => {
             console.error("Error fetching data:", err);
         } finally {
             setIsInitialLoading(false);
+            isFetchingRef.current = false;
             // Notify parent that we're done loading
-            if (onLoadingChange) onLoadingChange(false);
+            if (onLoadingChangeRef.current) onLoadingChangeRef.current(false);
         }
     };
 
@@ -147,11 +167,14 @@ const formatDuration = (ms) => {
     return `${minutes}:${seconds.padStart(2, "0")}`;
 };
 
+// Don't render anything while loading, parent will show skeleton
 if (isInitialLoading) {
-    return null; // Return null while loading, parent will show overlay
+    return null;
 }
 
-if (!albums.length) return <p className="text-white">Loading albums...</p>;
+if (!albums.length) {
+    return <p className="text-white text-center p-4">No albums available.</p>;
+}
 
 // Modal component using React Portal - Shows loading state with DotsContainer
 const ModalContent = () => (
