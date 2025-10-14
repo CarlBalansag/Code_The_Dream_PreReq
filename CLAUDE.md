@@ -1,12 +1,7 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
 
-This is a Next.js 15 application that integrates with the Spotify Web API to display currently playing music, user statistics, and control playback. The app is currently in Spotify development mode (limited to 20 authorized users).
-
-**Important:** Spotify API credentials (`CLIENT_ID` and `CLIENT_SECRET`) are currently hardcoded in `src/app/page.js:7` and `src/app/api/token/route.js:14-15`. These should be moved to environment variables before production.
+This is a Next.js 15 application that integrates with the Spotify Web API to display currently playing music, user statistics, and control playback. The app is currently in Spotify development mode (limited to 20 authorized users)..
 
 ## Development Commands
 
