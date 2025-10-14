@@ -149,7 +149,7 @@ export default function PremiumTopTracks({ artistId, accessToken, onLoadingChang
     };
 
     return (
-        <div className="custom-scrollbar p-4 rounded-md overflow-y-auto w-full" style={{ maxHeight: "800px" }}>
+        <div className="p-4 rounded-md w-full">
             <p className="text-[#1DB954] text-xl font-semibold mb-2 text-center">
                 Top Tracks for {artistName}
             </p>
@@ -157,13 +157,15 @@ export default function PremiumTopTracks({ artistId, accessToken, onLoadingChang
                 {tracks.map((track, index) => (
                     <li
                         key={track.id}
-                        className="bg-[#212121] hover:bg-[#2a2a2a] rounded-lg p-3 flex items-center space-x-4 cursor-pointer transition-colors group"
+                        className="bg-[#212121] hover:bg-[#2a2a2a] rounded-lg p-3 flex items-center space-x-4 transition-colors group"
                         onMouseEnter={() => setHoveredTrackId(track.id)}
                         onMouseLeave={() => setHoveredTrackId(null)}
-                        onClick={() => handlePlayTrack(track.uri, track.id)}
                     >
                         {/* Track number / Play/Pause icon */}
-                        <div className="w-8 flex items-center justify-center text-gray-400 flex-shrink-0">
+                        <button
+                            onClick={() => handlePlayTrack(track.uri, track.id)}
+                            className="w-8 flex items-center justify-center text-gray-400 flex-shrink-0 cursor-pointer"
+                        >
                             {playingTrackId === track.id ? (
                                 <Pause size={20} className="text-[#1DB954] fill-[#1DB954]" />
                             ) : hoveredTrackId === track.id ? (
@@ -171,7 +173,7 @@ export default function PremiumTopTracks({ artistId, accessToken, onLoadingChang
                             ) : (
                                 <span className="text-sm font-medium">{index + 1}</span>
                             )}
-                        </div>
+                        </button>
 
                         {/* Album cover */}
                         <img src={track.image} alt={track.name} className="w-16 h-16 rounded-md object-cover flex-shrink-0" />

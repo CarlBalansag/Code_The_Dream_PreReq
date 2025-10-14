@@ -4,7 +4,7 @@ import SpotifyDeviceStatus from "./component/pages/components/navbar/connected_d
 import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
 import SpotifyTour from "./component/pages/components/SpotifyTour";
 import { useState, useEffect } from "react";
-import { BadgeHelp } from "lucide-react";
+import { HelpCircle } from "lucide-react";
 
 const CLIENT_ID = "2751136537024052b892a475c49906e1";
 const REDIRECT_URI = "http://127.0.0.1:3000";
@@ -132,7 +132,7 @@ export default function Home() {
                   className="p-2 rounded-full hover:bg-gray-800/50 transition-colors"
                   title="Take a tour"
                 >
-                  <BadgeHelp size={24} className="text-[#1DB954]" />
+                  <HelpCircle size={24} className="text-[#1DB954]" />
                 </button>
                 <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} accessToken={accessToken}/>
               </div>

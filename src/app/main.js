@@ -243,6 +243,9 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
         <BottomMiniPlayer
           song={song}
           onClick={() => setIsExpanded(true)}
+          accessToken={accessToken}
+          isPlaying={isPlaying}
+          getSong={getSong}
         />
       )}
 

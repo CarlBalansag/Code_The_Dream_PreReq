@@ -85,10 +85,10 @@ export default function UserTopArtists({ accessToken, onLoadingChange }) {
                     {["short_term", "medium_term", "long_term"].map((range) => (
                         <button
                             key={range}
-                            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                            className={`px-4 py-2 rounded-lg text-sm transition-all ${
                                 timeRange === range
-                                    ? "bg-[#1DB954] text-white"
-                                    : "bg-white hover:bg-gray-200 text-black"
+                                    ? "bg-[#1DB954] text-black font-medium"
+                                    : "bg-[#282828] text-white font-medium hover:bg-[#333333]"
                             }`}
                             onClick={() => setTimeRange(range)}
                         >

@@ -139,10 +139,10 @@ export default function ExpandedPlayer({
         <button
           id="close-now-playing-btn"
           onClick={handleClose}
-          className="absolute top-20 right-6 w-14 h-14 bg-zinc-800/90 hover:bg-zinc-700 rounded-full flex items-center justify-center transition-all duration-300 z-[100] hover:scale-110 shadow-lg"
+          className="absolute top-20 right-6 text-white hover:text-[#1DB954] transition-colors z-[100]"
           style={{ pointerEvents: 'auto' }}
         >
-          <ChevronDown className="text-green-500" size={32} />
+          <ChevronDown size={28} />
         </button>
 
         {/* Mobile View: Swiper */}
@@ -225,7 +225,7 @@ export default function ExpandedPlayer({
 
               {/* Column 2: Top Tracks */}
               <div className="h-full overflow-hidden rounded-xl relative">
-                <div className="p-4 h-full overflow-y-auto">
+                <div className="p-4 h-full overflow-y-auto custom-scrollbar">
                   {loadingStates.topTracks && <TopTracksSkeleton />}
                   <div className={loadingStates.topTracks ? "hidden" : ""}>
                     <PremiumTopTracks
@@ -239,7 +239,7 @@ export default function ExpandedPlayer({
 
               {/* Column 3: Albums */}
               <div className="h-full overflow-hidden rounded-xl relative">
-                <div className="p-4 h-full overflow-y-auto">
+                <div className="p-4 h-full overflow-y-auto custom-scrollbar">
                   {loadingStates.albums && <AlbumsSkeleton />}
                   <div className={loadingStates.albums ? "hidden" : ""}>
                     <PremiumAlbum
