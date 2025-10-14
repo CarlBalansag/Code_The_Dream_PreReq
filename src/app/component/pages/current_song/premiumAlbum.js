@@ -263,10 +263,7 @@ const ModalContent = () => (
 
 return (
     <>
-    <div
-        className="p-4 rounded-md max-w-lg overflow-y-auto custom-scrollbar"
-        style={{ maxHeight: "800px" }}
-        >
+    <div className="p-4 rounded-md max-w-lg">
             <h2 className="text-[#1DB954] text-xl font-semibold mb-3 text-center">
         Albums by {artistName}
         </h2>

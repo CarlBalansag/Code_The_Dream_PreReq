@@ -78,9 +78,10 @@ export default function SpotifyDeviceStatus({ accessToken, onDeviceConnect, "dat
           setOpen((prev) => !prev);
         }}
         data-tour={dataTour}
-        className="flex items-center gap-2 px-4 py-3 text-sm font-bold rounded-full text-[#1DB954] border-2 border-green-500 hover:text-white bg-black/40 hover:bg-black/50 transition-all duration-300 ease-[cubic-bezier(0.165,0.84,0.44,1)] shadow-inner shadow-white/5 hover:shadow-inner hover:shadow-green-300/10"
+        className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#1DB954] bg-transparent text-[#1DB954] hover:text-white hover:bg-white/5 transition-all"
       >
-        {connectedDevice ? `Connected to ${connectedDevice}` : "Connect Device"}
+        <div className="w-2 h-2 rounded-full bg-[#1DB954] animate-pulse"></div>
+        <span className="text-sm font-medium">{connectedDevice ? `Connected to ${connectedDevice}` : "Connect Device"}</span>
       </button>
 
       {open && (

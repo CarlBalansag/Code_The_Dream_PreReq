@@ -153,10 +153,10 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                     {["short_term", "medium_term", "long_term"].map((range) => (
                         <button
                             key={range}
-                            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                            className={`px-4 py-2 rounded-lg text-sm transition-all ${
                                 timeRange === range
-                                    ? "bg-[#1DB954] text-white"
-                                    : "bg-white hover:bg-gray-200 text-black"
+                                    ? "bg-[#1DB954] text-black font-medium"
+                                    : "bg-[#282828] text-white font-medium hover:bg-[#333333]"
                             }`}
                             onClick={() => setTimeRange(range)}
                         >
@@ -177,14 +177,16 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                         {currentTracks.map((item, index) => (
                             <li
                                 key={item.id}
-                                className=" hover:bg-[#18181B] bg-[#18181B] border-1 border-[#0A0A0C] rounded-lg p-3 flex items-center space-x-4 cursor-pointer transition-colors group"
+                                className=" hover:bg-[#18181B] bg-[#18181B] border-1 border-[#0A0A0C] rounded-lg p-3 flex items-center space-x-4 transition-colors group"
                                 onMouseEnter={() => setHoveredTrackId(item.id)}
                                 onMouseLeave={() => setHoveredTrackId(null)}
-                                onClick={() => handlePlayTrack(item.uri, item.id)}
                                 data-tour={index === 0 ? "play-button" : undefined}
                             >
                                 {/* Track number / Play/Pause icon */}
-                                <div className="w-8 flex items-center justify-center text-gray-400 flex-shrink-0">
+                                <button
+                                    onClick={() => handlePlayTrack(item.uri, item.id)}
+                                    className="w-8 flex items-center justify-center text-gray-400 flex-shrink-0 cursor-pointer"
+                                >
                                     {playingTrackId === item.id ? (
                                         <Pause size={20} className="text-[#1DB954] fill-[#1DB954]" />
                                     ) : hoveredTrackId === item.id ? (
@@ -192,7 +194,7 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                                     ) : (
                                         <span className="text-sm font-medium">{index + 1}</span>
                                     )}
-                                </div>
+                                </button>
 
                                 {/* Album cover */}
                                 <img src={item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover flex-shrink-0" />
