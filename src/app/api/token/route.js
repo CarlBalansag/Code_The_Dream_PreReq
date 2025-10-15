@@ -34,6 +34,18 @@ export async function POST(req) {
   const tokenData = await tokenResponse.json();
   console.log("🎯 TOKEN RESPONSE:", tokenData);
 
+  // Check if token exchange failed
+  if (tokenData.error) {
+    console.error("❌ Spotify token error:", tokenData.error_description);
+    return new Response(
+      JSON.stringify({
+        error: tokenData.error,
+        error_description: tokenData.error_description
+      }),
+      { status: 400 }
+    );
+  }
+
   // Fetch Spotify profile
   const profileResponse = await fetch("https://api.spotify.com/v1/me", {
     headers: {
@@ -43,6 +55,18 @@ export async function POST(req) {
 
   const userProfile = await profileResponse.json();
   console.log("👤 Spotify user profile:", userProfile);
+
+  // Check if profile fetch failed
+  if (userProfile.error) {
+    console.error("❌ Spotify profile error:", userProfile.error.message);
+    return new Response(
+      JSON.stringify({
+        error: "profile_fetch_failed",
+        error_description: userProfile.error.message
+      }),
+      { status: 401 }
+    );
+  }
 
   // Save user to MongoDB
   await connectToDB();

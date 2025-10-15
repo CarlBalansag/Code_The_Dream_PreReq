@@ -11,7 +11,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      index: true,
     },
 
     // User profile information
@@ -85,7 +84,7 @@ const userSchema = new mongoose.Schema(
 );
 
 // Indexes for performance
-userSchema.index({ spotifyId: 1 }); // Primary lookup
+// Note: spotifyId index is automatically created by unique: true above
 userSchema.index({ email: 1 }); // Lookup by email
 userSchema.index({ hasInitialImport: 1, hasFullImport: 1 }); // Filter by import status
 

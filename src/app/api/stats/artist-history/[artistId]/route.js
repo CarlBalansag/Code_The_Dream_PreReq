@@ -47,7 +47,10 @@ export async function GET(req, { params }) {
     }
 
     // Calculate date range
+    // Set endDate to end of current day (23:59:59) to include all plays today
     const endDate = new Date();
+    endDate.setHours(23, 59, 59, 999);
+
     const startDate = getStartDate(timeRange);
 
     if (!startDate) {
@@ -68,16 +71,21 @@ export async function GET(req, { params }) {
       playedAt: { $gte: startDate, $lte: endDate }
     };
 
+    // Get local timezone for proper day grouping
+    // This ensures plays are grouped by YOUR local day, not UTC day
+    const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    console.log(`   Using timezone: ${localTimezone}`);
+
     // Aggregate plays by day
     const dailyPlays = await Play.aggregate([
       // Filter by user and date range
       { $match: matchStage },
 
-      // Group by day
+      // Group by day (using local timezone to avoid date shifts)
       {
         $group: {
           _id: {
-            date: { $dateToString: { format: "%Y-%m-%d", date: "$playedAt", timezone: "UTC" } }
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$playedAt", timezone: localTimezone } }
           },
           totalSongs: { $sum: 1 },
           artistSongs: {
@@ -130,10 +138,11 @@ export async function GET(req, { params }) {
       );
     }
 
-    // Format chart data
-    const chartData = formatChartData(dailyPlays, timeRange);
+    // Fill missing days with zeros and format chart data
+    const filledDailyPlays = fillMissingDays(dailyPlays, startDate, endDate, localTimezone);
+    const chartData = formatChartData(filledDailyPlays, timeRange);
 
-    console.log(`✅ Found ${chartData.length} days of data`);
+    console.log(`✅ Found ${chartData.length} days of data (including ${chartData.length - dailyPlays.length} empty days)`);
     console.log(`   Artist: ${artistName}`);
 
     return NextResponse.json({
@@ -161,26 +170,91 @@ export async function GET(req, { params }) {
 
 /**
  * Calculate start date based on time range
+ * Sets time to start of day (00:00:00) in local timezone
  */
 function getStartDate(timeRange) {
   const now = new Date();
+  let startDate;
 
   switch (timeRange) {
     case '7D':
-      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      break;
     case '30D':
-      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
     case '3M':
-      return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      break;
     case '6M':
-      return new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+      startDate = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+      break;
     case '1Y':
-      return new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      break;
     case 'ALL':
-      return new Date('2000-01-01'); // Far enough back to get all data
+      startDate = new Date('2000-01-01');
+      break;
     default:
       return null;
   }
+
+  // Set to start of day (00:00:00) to ensure we capture full days
+  startDate.setHours(0, 0, 0, 0);
+  return startDate;
+}
+
+/**
+ * Fill in missing days with zero plays
+ * This ensures the chart shows continuous data without gaps
+ */
+function fillMissingDays(dailyPlays, startDate, endDate, timezone) {
+  // Create a map of existing data by date
+  const dataMap = new Map();
+  dailyPlays.forEach(day => {
+    dataMap.set(day.date, day);
+  });
+
+  // Generate all days in the range
+  const filledData = [];
+  const currentDate = new Date(startDate);
+
+  while (currentDate <= endDate) {
+    // Format date as YYYY-MM-DD in the specified timezone
+    const dateStr = formatDateString(currentDate, timezone);
+
+    // Use existing data or create empty entry
+    if (dataMap.has(dateStr)) {
+      filledData.push(dataMap.get(dateStr));
+    } else {
+      filledData.push({
+        date: dateStr,
+        totalSongs: 0,
+        artistSongs: 0,
+        artistName: null
+      });
+    }
+
+    // Move to next day
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return filledData;
+}
+
+/**
+ * Format date as YYYY-MM-DD string in specified timezone
+ */
+function formatDateString(date, timezone) {
+  // Get the date parts in the specified timezone
+  const options = { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: timezone };
+  const parts = new Intl.DateTimeFormat('en-US', options).formatToParts(date);
+
+  const year = parts.find(p => p.type === 'year').value;
+  const month = parts.find(p => p.type === 'month').value;
+  const day = parts.find(p => p.type === 'day').value;
+
+  return `${year}-${month}-${day}`;
 }
 
 /**
