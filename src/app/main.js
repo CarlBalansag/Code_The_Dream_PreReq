@@ -13,7 +13,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination, Mousewheel, Keyboard } from "swiper/modules";
 
-export default function CurrentlyPlaying({ accessToken, premium, name, deviceConnected }) {
+export default function CurrentlyPlaying({ accessToken, premium, name, userId, deviceConnected }) {
   const [song, setSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [songID, setSongID] = useState(null);
@@ -175,7 +175,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
         >
           <SwiperSlide>
             <div className="p-2 h-[80vh] overflow-y-auto" data-tour="top-artists-mobile">
-              <UserTopArtists accessToken={accessToken} onLoadingChange={handleTopArtistsLoadingChange} />
+              <UserTopArtists accessToken={accessToken} userId={userId} onLoadingChange={handleTopArtistsLoadingChange} />
             </div>
           </SwiperSlide>
           <SwiperSlide>
@@ -208,7 +208,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
             <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-12 gap-6 h-[calc(100%-4rem)] min-h-0">
               <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0" data-tour="top-artists">
                 <div className="h-full min-h-0 overflow-hidden rounded-xl">
-                  <UserTopArtists accessToken={accessToken} onLoadingChange={handleTopArtistsLoadingChange} />
+                  <UserTopArtists accessToken={accessToken} userId={userId} onLoadingChange={handleTopArtistsLoadingChange} />
                 </div>
               </div>
               <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0" data-tour="top-tracks">
@@ -239,10 +239,13 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
       </div>
 
       {/* Bottom Mini Player - shows when song is detected */}
-      {song && song.item && premium && (
+      {song && song.item && (
         <BottomMiniPlayer
           song={song}
-          onClick={() => setIsExpanded(true)}
+          onClick={() => {
+            console.log("BottomMiniPlayer clicked!");
+            setIsExpanded(true);
+          }}
           accessToken={accessToken}
           isPlaying={isPlaying}
           getSong={getSong}
@@ -252,7 +255,10 @@ export default function CurrentlyPlaying({ accessToken, premium, name, deviceCon
       {/* Expanded Player Overlay */}
       <ExpandedPlayer
         isExpanded={isExpanded}
-        onClose={() => setIsExpanded(false)}
+        onClose={() => {
+          console.log("ExpandedPlayer closing!");
+          setIsExpanded(false);
+        }}
         song={song}
         isPlaying={isPlaying}
         accessToken={accessToken}

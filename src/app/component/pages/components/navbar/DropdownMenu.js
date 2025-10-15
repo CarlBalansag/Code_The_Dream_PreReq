@@ -2,9 +2,12 @@
 import Image from 'next/image';
 import { useState, useRef, useEffect } from "react";
 import { spotifyLogOut } from './spotifyLogout';
+import { CirclePlus } from 'lucide-react';
+import ImportDataModal from './ImportDataModal';
 
-export default function DropdownMenu({ ProfilePicture, UserName, UserProduct, accessToken, onDisconnect }) {
+export default function DropdownMenu({ ProfilePicture, UserName, UserProduct, accessToken, onDisconnect, userId }) {
   const [open, setOpen] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const dropdownRef = useRef();
 
   // Close dropdown when clicking outside
@@ -45,6 +48,16 @@ export default function DropdownMenu({ ProfilePicture, UserName, UserProduct, ac
           </div>
 
           <div className="p-1 space-y-0.5">
+            <button
+              onClick={() => {
+                setShowImportModal(true);
+                setOpen(false);
+              }}
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-800 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors"
+            >
+              <CirclePlus className="w-4 h-4 text-[#1DB954]" />
+              Import Data
+            </button>
             <a
               href="#"
               onClick={spotifyLogOut}
@@ -55,6 +68,13 @@ export default function DropdownMenu({ ProfilePicture, UserName, UserProduct, ac
           </div>
         </div>
       )}
+
+      {/* Import Data Modal */}
+      <ImportDataModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        userId={userId}
+      />
     </div>
   );
 }

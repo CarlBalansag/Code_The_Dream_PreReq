@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import ArtistModal from "./ArtistModal";
 
-export default function UserTopArtists({ accessToken, onLoadingChange }) {
+export default function UserTopArtists({ accessToken, userId, onLoadingChange }) {
     const [artistsCache, setArtistsCache] = useState({
         short_term: [],
         medium_term: [],
@@ -9,6 +10,7 @@ export default function UserTopArtists({ accessToken, onLoadingChange }) {
     });
     const [timeRange, setTimeRange] = useState("short_term");
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedArtist, setSelectedArtist] = useState(null);
     const onLoadingChangeRef = useRef(onLoadingChange);
     const hasFetchedRef = useRef(false);
 
@@ -103,7 +105,11 @@ export default function UserTopArtists({ accessToken, onLoadingChange }) {
                 {currentArtists.length > 0 ? (
                     <ul className="space-y-4 mt-3">
                         {currentArtists.map((item, index) => (
-                            <li key={item.id} className=" bg-[#18181B] border-1 border-[#0A0A0C] rounded-lg p-3 flex items-center gap-4">
+                            <li
+                                key={item.id}
+                                className="bg-[#18181B] border-1 border-[#0A0A0C] rounded-lg p-3 flex items-center gap-4 cursor-pointer hover:bg-[#282828] transition-colors"
+                                onClick={() => setSelectedArtist(item)}
+                            >
                                 <img src={item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover flex-none" />
                                 <div className="flex-grow min-w-0">
                                     <p className="text-white font-semibold text-md truncate">
@@ -117,6 +123,15 @@ export default function UserTopArtists({ accessToken, onLoadingChange }) {
                     <p className="text-white">No data available.</p>
                 )}
             </div>
+
+            {/* Artist Modal */}
+            {selectedArtist && (
+                <ArtistModal
+                    artist={selectedArtist}
+                    userId={userId}
+                    onClose={() => setSelectedArtist(null)}
+                />
+            )}
         </div>
     );
 }
