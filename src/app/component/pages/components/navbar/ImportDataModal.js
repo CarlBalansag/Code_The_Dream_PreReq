@@ -12,7 +12,7 @@ import { X, Upload, FileJson, CheckCircle, XCircle, Loader2 } from 'lucide-react
  * @param {string} userId - User's Spotify ID
  */
 export default function ImportDataModal({ isOpen, onClose, userId }) {
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -22,24 +22,38 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
   const [success, setSuccess] = useState(false);
 
   // Handle file selection
-  const handleFileChange = (selectedFile) => {
+  const handleFileChange = (selectedFiles) => {
     setError(null);
     setSuccess(false);
 
-    // Validate file type
-    if (!selectedFile.name.endsWith('.json')) {
-      setError('Please upload a JSON file (.json)');
-      return;
+    const fileArray = Array.from(selectedFiles);
+    const validFiles = [];
+    const errors = [];
+
+    fileArray.forEach((file) => {
+      // Validate file type
+      if (!file.name.endsWith('.json')) {
+        errors.push(`${file.name}: Must be a JSON file`);
+        return;
+      }
+
+      // Validate file size (200MB max per file)
+      const maxSize = 200 * 1024 * 1024; // 200MB
+      if (file.size > maxSize) {
+        errors.push(`${file.name}: Too large (max 200MB)`);
+        return;
+      }
+
+      validFiles.push(file);
+    });
+
+    if (errors.length > 0) {
+      setError(errors.join(', '));
     }
 
-    // Validate file size (200MB max)
-    const maxSize = 200 * 1024 * 1024; // 200MB
-    if (selectedFile.size > maxSize) {
-      setError('File is too large. Maximum size is 200MB.');
-      return;
+    if (validFiles.length > 0) {
+      setFiles((prev) => [...prev, ...validFiles]);
     }
-
-    setFile(selectedFile);
   };
 
   // Drag and drop handlers
@@ -58,8 +72,8 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
     e.stopPropagation();
     setDragActive(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileChange(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileChange(e.dataTransfer.files);
     }
   }, []);
 
@@ -81,7 +95,7 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
       } else if (data.status === 'completed') {
         setProcessing(false);
         setSuccess(true);
-        setFile(null);
+        setFiles([]);
       } else if (data.status === 'failed') {
         setProcessing(false);
         setError(data.errorMessage || 'Import failed');
@@ -95,14 +109,19 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
 
   // Handle file upload and start import
   const handleUpload = async () => {
-    if (!file || !userId) return;
+    if (files.length === 0 || !userId) return;
 
     setUploading(true);
     setError(null);
 
     try {
       const formData = new FormData();
-      formData.append('file', file);
+
+      // Append all files
+      files.forEach((file) => {
+        formData.append('files', file);
+      });
+
       formData.append('userId', userId);
 
       const response = await fetch('/api/import/spotify-history', {
@@ -131,9 +150,14 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
     }
   };
 
+  // Remove a specific file
+  const removeFile = (index) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
   // Reset modal state
   const handleClose = () => {
-    setFile(null);
+    setFiles([]);
     setError(null);
     setSuccess(false);
     setProgress(null);
@@ -180,10 +204,10 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
               <li>Click &quot;Request&quot; (Spotify will email you in 1-30 days)</li>
               <li>Download the ZIP file from your email</li>
               <li>Extract and find files named <code className="bg-black/30 px-1 py-0.5 rounded">StreamingHistory*.json</code></li>
-              <li>Upload those JSON files here (one at a time)</li>
+              <li>Upload all JSON files here (you can select multiple at once)</li>
             </ol>
             <p className="text-xs text-gray-400 mt-3">
-              Note: You may have multiple files (StreamingHistory0.json, StreamingHistory1.json, etc.). Upload each one separately.
+              Note: You can upload multiple files (StreamingHistory0.json, StreamingHistory1.json, etc.) all at once!
             </p>
           </div>
 
@@ -200,20 +224,49 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
               onDragOver={handleDrag}
               onDrop={handleDrop}
             >
-              {file ? (
+              {files.length > 0 ? (
                 <div className="space-y-4">
                   <FileJson className="w-16 h-16 text-[#1DB954] mx-auto" />
-                  <div>
-                    <p className="text-white font-medium">{file.name}</p>
-                    <p className="text-sm text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                  <div className="text-left max-h-48 overflow-y-auto custom-scrollbar space-y-2">
+                    {files.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-[#181818] p-3 rounded-lg"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-medium truncate">{file.name}</p>
+                          <p className="text-xs text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        </div>
+                        <button
+                          onClick={() => removeFile(index)}
+                          className="ml-3 p-1 hover:bg-red-500/20 rounded text-red-400 hover:text-red-300 transition-colors"
+                          aria-label="Remove file"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    {files.length} file{files.length > 1 ? 's' : ''} selected
                   </div>
                   <div className="flex gap-3 justify-center">
                     <button
-                      onClick={() => setFile(null)}
+                      onClick={() => setFiles([])}
                       className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm transition-colors"
                     >
-                      Remove
+                      Clear All
                     </button>
+                    <label className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm cursor-pointer transition-colors">
+                      <input
+                        type="file"
+                        accept=".json"
+                        multiple
+                        onChange={(e) => e.target.files && handleFileChange(e.target.files)}
+                        className="hidden"
+                      />
+                      Add More
+                    </label>
                     <button
                       onClick={handleUpload}
                       disabled={uploading}
@@ -237,21 +290,22 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
                 <div className="space-y-4">
                   <Upload className="w-16 h-16 text-gray-400 mx-auto" />
                   <div>
-                    <p className="text-white font-medium mb-2">Drag and drop your JSON file here</p>
+                    <p className="text-white font-medium mb-2">Drag and drop your JSON files here</p>
                     <p className="text-sm text-gray-400">or</p>
                   </div>
                   <label className="inline-block">
                     <input
                       type="file"
                       accept=".json"
-                      onChange={(e) => e.target.files && handleFileChange(e.target.files[0])}
+                      multiple
+                      onChange={(e) => e.target.files && handleFileChange(e.target.files)}
                       className="hidden"
                     />
                     <span className="px-6 py-2 bg-[#1DB954] hover:bg-[#1ed760] text-black font-medium rounded-lg text-sm cursor-pointer inline-block transition-colors">
                       Browse Files
                     </span>
                   </label>
-                  <p className="text-xs text-gray-500">Maximum file size: 200MB</p>
+                  <p className="text-xs text-gray-500">Maximum file size: 200MB per file</p>
                 </div>
               )}
             </div>
@@ -329,7 +383,7 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
                 <li>Large files may take several minutes to process</li>
                 <li>Duplicate plays will be automatically skipped</li>
                 <li>You can close this modal during import (it continues in the background)</li>
-                <li>Upload each JSON file separately</li>
+                <li>You can upload multiple JSON files at once</li>
               </ul>
             </div>
           )}

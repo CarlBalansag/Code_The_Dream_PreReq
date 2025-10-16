@@ -30,6 +30,7 @@ export async function GET(req, { params }) {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get('userId');
     const timeRange = searchParams.get('timeRange') || '30D';
+    const artistNameParam = searchParams.get('artistName'); // Optional artist name for fallback
 
     // Validate required parameters
     if (!userId) {
@@ -51,17 +52,62 @@ export async function GET(req, { params }) {
     const endDate = new Date();
     endDate.setHours(23, 59, 59, 999);
 
-    const startDate = getStartDate(timeRange);
+    let startDate = getStartDate(timeRange);
 
     if (!startDate) {
       return NextResponse.json(
-        { error: 'Invalid time range. Use: 7D, 30D, 3M, 6M, 1Y, ALL' },
+        { error: 'Invalid time range. Use: 7D, 30D, ALL' },
         { status: 400 }
       );
     }
 
+    // First, try to find the artist name from the artistId
+    // We need this early for the ALL time range query
+    let artistNameFromDb = null;
+    const artistPlay = await Play.findOne({ userId, artistId }).select('artistName');
+    if (artistPlay) {
+      artistNameFromDb = artistPlay.artistName;
+    } else if (artistNameParam) {
+      // Fallback: If artistId not found, use the name from the query parameter
+      // This handles cases where imported data has null artistId
+      artistNameFromDb = artistNameParam;
+      console.log(`ℹ️  Artist ID not found in database, using artistName from parameter: ${artistNameParam}`);
+    }
+
+    // For 'ALL' time range, use the earliest play date for this artist
+    // Match by artistId OR artistName (for plays without artistId)
+    if (timeRange === 'ALL') {
+      const query = {
+        userId,
+        $or: [
+          { artistId: artistId },
+          // Fallback: match by name if artistId is null
+          artistNameFromDb ? { artistId: null, artistName: artistNameFromDb } : null
+        ].filter(Boolean) // Remove null values
+      };
+
+      const earliestPlay = await Play.findOne(query)
+        .sort({ playedAt: 1 })
+        .select('playedAt');
+
+      if (earliestPlay) {
+        startDate = new Date(earliestPlay.playedAt);
+        startDate.setHours(0, 0, 0, 0);
+      } else {
+        // If no plays found, return 404
+        return NextResponse.json(
+          {
+            error: 'No listening history found for this artist',
+            message: `You haven't listened to this artist.`
+          },
+          { status: 404 }
+        );
+      }
+    }
+
     console.log(`📊 Fetching artist history for ${artistId}`);
     console.log(`   User: ${userId}`);
+    console.log(`   Artist Name: ${artistNameFromDb || 'Unknown'}`);
     console.log(`   Time Range: ${timeRange}`);
     console.log(`   Date Range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
@@ -77,6 +123,7 @@ export async function GET(req, { params }) {
     console.log(`   Using timezone: ${localTimezone}`);
 
     // Aggregate plays by day
+    // Match by artistId OR artistName (for plays without artistId)
     const dailyPlays = await Play.aggregate([
       // Filter by user and date range
       { $match: matchStage },
@@ -90,13 +137,37 @@ export async function GET(req, { params }) {
           totalSongs: { $sum: 1 },
           artistSongs: {
             $sum: {
-              $cond: [{ $eq: ["$artistId", artistId] }, 1, 0]
+              $cond: [
+                {
+                  $or: [
+                    { $eq: ["$artistId", artistId] },
+                    // Fallback: match by name if artistId is null
+                    {
+                      $and: [
+                        { $eq: ["$artistId", null] },
+                        artistNameFromDb ? { $eq: ["$artistName", artistNameFromDb] } : false
+                      ]
+                    }
+                  ]
+                },
+                1,
+                0
+              ]
             }
           },
           // Get artist name from first matching play
           artistName: {
             $first: {
-              $cond: [{ $eq: ["$artistId", artistId] }, "$artistName", null]
+              $cond: [
+                {
+                  $or: [
+                    { $eq: ["$artistId", artistId] },
+                    artistNameFromDb ? { $eq: ["$artistName", artistNameFromDb] } : false
+                  ]
+                },
+                "$artistName",
+                null
+              ]
             }
           }
         }
@@ -138,11 +209,21 @@ export async function GET(req, { params }) {
       );
     }
 
-    // Fill missing days with zeros and format chart data
-    const filledDailyPlays = fillMissingDays(dailyPlays, startDate, endDate, localTimezone);
-    const chartData = formatChartData(filledDailyPlays, timeRange);
+    // For "ALL" time range, only show days where the artist was played (no empty days)
+    // For other ranges (7D, 30D), fill in missing days to show gaps
+    let chartData;
+    if (timeRange === 'ALL') {
+      // Filter to only days where artist was played
+      const artistOnlyDays = dailyPlays.filter(day => day.artistSongs > 0);
+      chartData = formatChartData(artistOnlyDays, timeRange);
+      console.log(`✅ Found ${chartData.length} days where ${artistName} was played (All Time mode - no empty days)`);
+    } else {
+      // Fill in missing days with zeros for short time ranges
+      const filledDailyPlays = fillMissingDays(dailyPlays, startDate, endDate, localTimezone);
+      chartData = formatChartData(filledDailyPlays, timeRange);
+      console.log(`✅ Found ${chartData.length} days of data (including ${chartData.length - dailyPlays.length} empty days)`);
+    }
 
-    console.log(`✅ Found ${chartData.length} days of data (including ${chartData.length - dailyPlays.length} empty days)`);
     console.log(`   Artist: ${artistName}`);
 
     return NextResponse.json({
@@ -183,16 +264,8 @@ function getStartDate(timeRange) {
     case '30D':
       startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       break;
-    case '3M':
-      startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-      break;
-    case '6M':
-      startDate = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
-      break;
-    case '1Y':
-      startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-      break;
     case 'ALL':
+      // This is a placeholder - will be replaced with actual earliest play date
       startDate = new Date('2000-01-01');
       break;
     default:

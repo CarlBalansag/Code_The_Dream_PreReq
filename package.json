@@ -2,18 +2,19 @@
   "name": "spotify-app",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:db": "node test-database.js"
+    "check:db": "node check-db.mjs"
   },
   "dependencies": {
     "@ark-ui/react": "^5.26.0",
     "lucide-react": "^0.514.0",
-    "mongodb": "^6.20.0",
-    "mongoose": "^8.19.1",
+    "mongodb": "^6.9.0",
+    "mongoose": "^8.7.1",
     "next": "15.3.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

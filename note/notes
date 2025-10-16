@@ -17,3 +17,19 @@ Second: ("This is your top tracks listened. Use the buttons above to switch betw
 Third: ("These are your recently played songs, showing your most recent listening activity.")
 Fourth: Connect device to spotify (“These are your connected Spotify devices. If you don’t see your device, open Spotify on the device and make sure you’re logged in.”)
 Sixth: View current song (“View the song you’re currently listening to in real time.”)
+
+
+
+October 14 2025 Errors 
+    on Artist Modal a button that updates the api call to get recent listened to music,  like on the top right
+        the chart is updated once every couple minutes that button lets them call the api to update the chart
+
+    BottomMiniPlayer Playback controls currently when a song is played on topTracks there is no queue for what is the next song is played because it plays a    specific song, make it when the next button is played and there is no next song play liked songs or recommend songs
+
+    Fix tour component, missing connected device, and showing what is currently playing in the bottom. also make new tour pages for liveSong section - different type of tour
+
+    On LiveSongs, DropDown to go back to UseStats backround is gone add background
+
+    on profile dropdown its hardcoded free member we need fix
+
+    on charts change the color based on artist pfp color 

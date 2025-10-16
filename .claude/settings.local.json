@@ -7,7 +7,14 @@
       "Bash(npm install:*)",
       "Bash(cat:*)",
       "Bash(npm run lint)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(node test-db-connection.js)",
+      "Bash(node:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []

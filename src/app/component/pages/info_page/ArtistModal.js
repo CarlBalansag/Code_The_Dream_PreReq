@@ -21,6 +21,7 @@ export default function ArtistModal({ artist, userId, onClose }) {
     artist?.id,
     userId,
     timeRange,
+    artist?.name, // Pass artist name for fallback matching
     !!artist // Only fetch when artist is provided
   );
 
@@ -30,10 +31,7 @@ export default function ArtistModal({ artist, userId, onClose }) {
   // Time range options
   const timeRangeOptions = [
     { value: '7D', label: '7 Days' },
-    { value: '30D', label: '30 Days' },
-    { value: '3M', label: '3 Months' },
-    { value: '6M', label: '6 Months' },
-    { value: '1Y', label: '1 Year' },
+    { value: '30D', label: '1 Month' },
     { value: 'ALL', label: 'All Time' },
   ];
 
@@ -143,8 +141,7 @@ export default function ArtistModal({ artist, userId, onClose }) {
           {error && (
             <div className="flex items-center justify-center h-[250px]">
               <div className="text-center">
-                <p className="text-red-400 font-semibold mb-2">Error loading data</p>
-                <p className="text-gray-400 text-sm">{error}</p>
+                <p className="text-gray-400 text-base">No info on {artist.name}</p>
               </div>
             </div>
           )}
@@ -249,10 +246,7 @@ export default function ArtistModal({ artist, userId, onClose }) {
           {!loading && !error && (!data || !data.chartData || data.chartData.length === 0) && (
             <div className="flex items-center justify-center h-[250px]">
               <div className="text-center">
-                <p className="text-gray-400 text-base mb-2">No data available</p>
-                <p className="text-gray-500 text-sm">
-                  You haven&apos;t listened to {artist.name} in the selected time range.
-                </p>
+                <p className="text-gray-400 text-base">No info on {artist.name}</p>
               </div>
             </div>
           )}

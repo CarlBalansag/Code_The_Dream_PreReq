@@ -17,7 +17,7 @@ const playSchema = new mongoose.Schema(
     // Track information
     trackId: {
       type: String,
-      required: true,
+      required: false, // Can be null for imported data without Spotify IDs
       index: true,
     },
 
@@ -29,7 +29,7 @@ const playSchema = new mongoose.Schema(
     // Artist information
     artistId: {
       type: String,
-      required: true,
+      required: false, // Can be null for imported data without Spotify IDs
       index: true,
     },
 
@@ -41,12 +41,12 @@ const playSchema = new mongoose.Schema(
     // Album information
     albumId: {
       type: String,
-      required: true,
+      required: false, // Can be null for imported data without album info
     },
 
     albumName: {
       type: String,
-      required: true,
+      required: false, // Can be null for imported data without album info
     },
 
     albumImage: {

@@ -15,13 +15,13 @@ export async function POST(req) {
 
     // Parse form data
     const formData = await req.formData();
-    const file = formData.get('file');
+    const files = formData.getAll('files');
     const userId = formData.get('userId');
 
     // Validate inputs
-    if (!file) {
+    if (!files || files.length === 0) {
       return NextResponse.json(
-        { error: 'No file uploaded' },
+        { error: 'No files uploaded' },
         { status: 400 }
       );
     }
@@ -29,14 +29,6 @@ export async function POST(req) {
     if (!userId) {
       return NextResponse.json(
         { error: 'userId is required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate file type
-    if (!file.name.endsWith('.json')) {
-      return NextResponse.json(
-        { error: 'File must be a JSON file' },
         { status: 400 }
       );
     }
@@ -54,58 +46,91 @@ export async function POST(req) {
       );
     }
 
-    console.log(`📥 Importing ${file.name} for user ${userId}`);
-    console.log(`   File size: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+    console.log(`📥 Importing ${files.length} file(s) for user ${userId}`);
 
-    // Read and parse JSON file
-    const fileText = await file.text();
-    let spotifyData;
+    // Process all files and combine data
+    const allSpotifyData = [];
+    const fileNames = [];
 
-    try {
-      spotifyData = JSON.parse(fileText);
-    } catch (err) {
+    for (const file of files) {
+      // Validate file type
+      if (!file.name.endsWith('.json')) {
+        return NextResponse.json(
+          { error: `File ${file.name} must be a JSON file` },
+          { status: 400 }
+        );
+      }
+
+      console.log(`   Processing ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+      fileNames.push(file.name);
+
+      // Read and parse JSON file
+      const fileText = await file.text();
+      let spotifyData;
+
+      try {
+        spotifyData = JSON.parse(fileText);
+      } catch (err) {
+        return NextResponse.json(
+          { error: `Invalid JSON format in ${file.name}` },
+          { status: 400 }
+        );
+      }
+
+      // Validate data structure
+      if (!Array.isArray(spotifyData)) {
+        return NextResponse.json(
+          { error: `${file.name} must contain an array of play records` },
+          { status: 400 }
+        );
+      }
+
+      if (spotifyData.length === 0) {
+        console.log(`⚠️  ${file.name} is empty, skipping`);
+        continue;
+      }
+
+      // Validate first entry has required fields
+      const firstEntry = spotifyData[0];
+
+      // Spotify has different formats:
+      // Format 1 (older): endTime, artistName, trackName, msPlayed
+      // Format 2 (newer): ts, master_metadata_album_artist_name, master_metadata_track_name, ms_played
+      const hasOldFormat = firstEntry.endTime && firstEntry.artistName && firstEntry.trackName && firstEntry.msPlayed !== undefined;
+      const hasNewFormat = firstEntry.ts && firstEntry.master_metadata_track_name && firstEntry.ms_played !== undefined;
+
+      if (!hasOldFormat && !hasNewFormat) {
+        console.log(`❌ ${file.name} first entry:`, JSON.stringify(firstEntry, null, 2));
+        return NextResponse.json(
+          {
+            error: `Invalid data format in ${file.name}`,
+            message: 'File does not match expected Spotify export format. Please ensure you are uploading a Spotify listening history JSON file.'
+          },
+          { status: 400 }
+        );
+      }
+
+      console.log(`   ✅ ${file.name}: ${spotifyData.length} entries`);
+      allSpotifyData.push(...spotifyData);
+    }
+
+    if (allSpotifyData.length === 0) {
       return NextResponse.json(
-        { error: 'Invalid JSON file format' },
+        { error: 'No valid data found in any files' },
         { status: 400 }
       );
     }
 
-    // Validate data structure
-    if (!Array.isArray(spotifyData)) {
-      return NextResponse.json(
-        { error: 'JSON file must contain an array of play records' },
-        { status: 400 }
-      );
-    }
-
-    if (spotifyData.length === 0) {
-      return NextResponse.json(
-        { error: 'JSON file is empty' },
-        { status: 400 }
-      );
-    }
-
-    // Validate first entry has required fields
-    const firstEntry = spotifyData[0];
-    if (!firstEntry.endTime || !firstEntry.artistName || !firstEntry.trackName || !firstEntry.msPlayed) {
-      return NextResponse.json(
-        {
-          error: 'Invalid data format',
-          message: 'Each entry must have: endTime, artistName, trackName, msPlayed'
-        },
-        { status: 400 }
-      );
-    }
-
-    console.log(`✅ Valid JSON with ${spotifyData.length} entries`);
+    console.log(`✅ Combined ${allSpotifyData.length} total entries from ${files.length} file(s)`);
 
     // Create import job
-    const job = await ImportJob.createJob(userId, file.name, spotifyData.length);
+    const jobFileName = files.length === 1 ? fileNames[0] : `${files.length} files`;
+    const job = await ImportJob.createJob(userId, jobFileName, allSpotifyData.length);
 
     console.log(`📝 Created import job: ${job._id}`);
 
     // Start background processing (don't await)
-    processImport(job._id.toString(), userId, spotifyData).catch(err => {
+    processImport(job._id.toString(), userId, allSpotifyData).catch(err => {
       console.error('❌ Background import error:', err);
     });
 
@@ -113,7 +138,8 @@ export async function POST(req) {
       success: true,
       jobId: job._id.toString(),
       message: 'Import started',
-      totalTracks: spotifyData.length
+      totalTracks: allSpotifyData.length,
+      filesProcessed: files.length
     });
 
   } catch (error) {
@@ -155,25 +181,65 @@ async function processImport(jobId, userId, spotifyData) {
       const entry = spotifyData[i];
 
       try {
-        // Parse date from Spotify format: "2023-01-15 14:23"
-        const playedAt = parseSpotifyDate(entry.endTime);
+        let playedAt, trackName, artistName, artistId, albumName, durationMs, trackId;
 
-        if (!playedAt) {
+        // Handle different Spotify export formats
+        if (entry.endTime) {
+          // Old format: endTime, artistName, trackName, msPlayed
+          playedAt = parseSpotifyDate(entry.endTime);
+          trackName = entry.trackName;
+          artistName = entry.artistName;
+          artistId = null;
+          albumName = null;
+          durationMs = parseInt(entry.msPlayed) || 0;
+          trackId = null;
+        } else if (entry.ts) {
+          // New format: ts, master_metadata_track_name, master_metadata_album_artist_name, ms_played
+          playedAt = new Date(entry.ts);
+          trackName = entry.master_metadata_track_name;
+          artistName = entry.master_metadata_album_artist_name;
+          albumName = entry.master_metadata_album_album_name || null;
+          durationMs = parseInt(entry.ms_played) || 0;
+
+          // Extract track ID from spotify_track_uri (format: "spotify:track:45ttRl8uNtJkop7r9dmP4e")
+          if (entry.spotify_track_uri && entry.spotify_track_uri.startsWith('spotify:track:')) {
+            trackId = entry.spotify_track_uri.replace('spotify:track:', '');
+          } else {
+            trackId = null;
+          }
+
+          // Extract artist ID from spotify_artist_uri (format: "spotify:artist:2YZyLoL8N0Wb9xBt1NhZWg")
+          if (entry.spotify_artist_uri && entry.spotify_artist_uri.startsWith('spotify:artist:')) {
+            artistId = entry.spotify_artist_uri.replace('spotify:artist:', '');
+          } else {
+            artistId = null;
+          }
+        } else {
+          errors.push(`Row ${i + 1}: Unknown format`);
+          continue;
+        }
+
+        if (!playedAt || isNaN(playedAt.getTime())) {
           errors.push(`Row ${i + 1}: Invalid date format`);
           continue;
+        }
+
+        // Skip entries with no track name or artist name (some entries might be null)
+        if (!trackName || !artistName) {
+          continue; // Silently skip - likely podcast/audiobook entries
         }
 
         // Create play document
         const play = {
           userId: userId,
-          trackId: null,  // Spotify export doesn't include IDs
-          trackName: entry.trackName || 'Unknown Track',
+          trackId: trackId,
+          trackName: trackName,
           artistId: null,
-          artistName: entry.artistName || 'Unknown Artist',
+          artistName: artistName,
           albumId: null,
-          albumName: null,
+          albumName: albumName,
           playedAt: playedAt,
-          durationMs: parseInt(entry.msPlayed) || 0,
+          durationMs: durationMs,
           source: 'full_import'
         };
 

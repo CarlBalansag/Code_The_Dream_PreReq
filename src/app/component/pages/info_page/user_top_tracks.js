@@ -29,7 +29,7 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
             if (onLoadingChangeRef.current) onLoadingChangeRef.current(true);
 
             try {
-                // Fetch all three time ranges in parallel
+                // Fetch all three time ranges in parallel from Spotify API
                 const [shortTerm, mediumTerm, longTerm] = await Promise.all([
                     fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=short_term`, {
                         headers: { Authorization: `Bearer ${accessToken}` }
@@ -43,7 +43,7 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                 ]);
 
                 // Process all responses
-                const formatTracks = (data) => 
+                const formatTracks = (data) =>
                     data.items.map((track) => ({
                         id: track.id,
                         name: track.name,

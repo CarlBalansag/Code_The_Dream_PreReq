@@ -28,7 +28,7 @@ export default function UserTopArtists({ accessToken, userId, onLoadingChange })
             if (onLoadingChangeRef.current) onLoadingChangeRef.current(true);
 
             try {
-                // Fetch all three time ranges in parallel
+                // Fetch all three time ranges in parallel from Spotify API
                 const [shortTerm, mediumTerm, longTerm] = await Promise.all([
                     fetch(`https://api.spotify.com/v1/me/top/artists?time_range=short_term`, {
                         headers: { Authorization: `Bearer ${accessToken}` }
@@ -42,7 +42,7 @@ export default function UserTopArtists({ accessToken, userId, onLoadingChange })
                 ]);
 
                 // Process all responses
-                const formatArtists = (data) => 
+                const formatArtists = (data) =>
                     data.items.map((artist) => ({
                         id: artist.id,
                         name: artist.name,

@@ -14,10 +14,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
  * @param {string} artistId - Spotify artist ID
  * @param {string} userId - User's Spotify ID
  * @param {string} timeRange - Time range (7D, 30D, 3M, 6M, 1Y, ALL)
+ * @param {string} artistName - Artist name for fallback matching (optional)
  * @param {boolean} enabled - Whether to fetch data (default: true)
  * @returns {object} { data, loading, error, refetch }
  */
-export function useArtistHistory(artistId, userId, timeRange = '30D', enabled = true) {
+export function useArtistHistory(artistId, userId, timeRange = '30D', artistName = null, enabled = true) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -49,7 +50,16 @@ export function useArtistHistory(artistId, userId, timeRange = '30D', enabled = 
 
       console.log(`🔄 Fetching artist history: ${artistId}, range: ${timeRange}`);
 
-      const url = `/api/stats/artist-history/${artistId}?userId=${encodeURIComponent(userId)}&timeRange=${timeRange}`;
+      // Add artist name to URL for fallback matching
+      const params = new URLSearchParams({
+        userId,
+        timeRange
+      });
+      if (artistName) {
+        params.append('artistName', artistName);
+      }
+
+      const url = `/api/stats/artist-history/${artistId}?${params.toString()}`;
       const response = await fetch(url, {
         signal: abortController.signal,
       });
@@ -61,6 +71,19 @@ export function useArtistHistory(artistId, userId, timeRange = '30D', enabled = 
       }
 
       if (!response.ok) {
+        // Handle 404 (no data) as empty data state, not an error
+        if (response.status === 404) {
+          console.log('ℹ️ No data available for this artist in the selected time range');
+
+          // Set empty data state instead of error
+          if (isMountedRef.current && !abortController.signal.aborted) {
+            setData({ chartData: [], totalPlays: 0, totalDays: 0 });
+            setLoading(false);
+          }
+          return;
+        }
+
+        // For other errors, throw
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to fetch artist history');
       }
