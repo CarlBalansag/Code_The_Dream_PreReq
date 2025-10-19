@@ -1,17 +1,29 @@
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
-import RecentlyPlayedList from "./component/pages/info_page/recently_played_list";
-import UserTopArtists from "./component/pages/info_page/user_top_artists";
-import UserTopTracks from "./component/pages/info_page/user_top_tracks";
-import { fetchCurrentlyPlaying } from "./component/pages/current_song/live_song";
-import LoadingDots from "./component/pages/components/loading";
-import BottomMiniPlayer from "./component/pages/components/bottom_player/BottomMiniPlayer";
-import ExpandedPlayer from "./component/pages/components/bottom_player/ExpandedPlayer";
+// import UserTopTracks from "./component/pages/info_page/user_top_tracks";
+// import { fetchCurrentlyPlaying } from "./component/pages/current_song/live_song";
+// import LoadingDots from "./component/pages/components/loading";
+// import BottomMiniPlayer from "./component/pages/components/bottom_player/BottomMiniPlayer";
+// import ExpandedPlayer from "./component/pages/components/bottom_player/ExpandedPlayer";
+// import { Swiper, SwiperSlide } from "swiper/react";
+// import "swiper/css";
+// import "swiper/css/pagination";
+// import { Pagination, Mousewheel, Keyboard } from "swiper/modules";
+
+import RecentlyPlayedList from "./component/info_page/recently_played_list";
+import UserTopArtists from "./component/info_page/user_top_artists";
+import UserTopTracks from "./component/info_page/user_top_tracks";
+import { fetchCurrentlyPlaying } from "./component/current_song/live_song";
+import LoadingDots from "./component/components/loading";
+import BottomMiniPlayer from "./component/components/bottom_player/BottomMiniPlayer";
+import ExpandedPlayer from "./component/components/bottom_player/ExpandedPlayer";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination, Mousewheel, Keyboard } from "swiper/modules";
+
+
 
 export default function CurrentlyPlaying({ accessToken, premium, name, userId, deviceConnected }) {
 const [song, setSong] = useState(null);
