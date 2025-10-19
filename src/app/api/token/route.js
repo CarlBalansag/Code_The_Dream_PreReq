@@ -34,6 +34,37 @@ export async function POST(req) {
     });
 
     //parse json response, access token, refresh token.
-    const data = await tokenResponse.json();
-    return Response.json(data);
+    const tokenData = await tokenResponse.json();
+
+    // Check if token exchange failed
+    if (!tokenResponse.ok || tokenData.error) {
+        console.error("Token exchange failed:", tokenData);
+        return Response.json(tokenData, { status: tokenResponse.status });
+    }
+
+    // Fetch user profile using the access token
+    const userResponse = await fetch("https://api.spotify.com/v1/me", {
+        headers: {
+            Authorization: `Bearer ${tokenData.access_token}`,
+        },
+    });
+
+    const userData = await userResponse.json();
+
+    // Return formatted response with tokens and user data
+    return Response.json({
+        tokens: {
+            access_token: tokenData.access_token,
+            refresh_token: tokenData.refresh_token,
+            expires_in: tokenData.expires_in,
+        },
+        user: {
+            spotifyId: userData.id,
+            displayName: userData.display_name,
+            email: userData.email,
+            product: userData.product,
+            profileImage: userData.images?.[0]?.url,
+            images: userData.images,
+        },
+    });
 }
