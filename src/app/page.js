@@ -1,95 +1,199 @@
 "use client";
+import CurrentlyPlaying from "./main";
+import SpotifyDeviceStatus from "./component/pages/components/navbar/connected_device";
+import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
+import SpotifyTour from "./component/pages/components/SpotifyTour";
 import { useState, useEffect } from "react";
-import CurrentlyPlaying from "./component/main";
-import DropdownMenu from "./component/spotify component/DropdownMenu";
+import { HelpCircle } from "lucide-react";
+import { usePlayTracking } from "@/hooks/usePlayTracking";
 
 const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app"; //link that tells spotify where to send user back after log in 
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; //link for spotify login page
-//SCOPES what permissions website is requesting from user
-const SCOPES = "user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read user-read-recently-played";
+const SCOPES ="user-read-recently-played user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read user-read-recently-played user-top-read";
 const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID; //Spotify unique I
 
 export default function Home() {
-  const [accessToken, setAccessToken] = useState(null);   //Stores clients ID
-  const [code, setCode] = useState(null);                 //Stores auth code from URL
-  const [isLoggedIn, setIsLoggedIn] = useState(false);    //Check if user is logged in 
-  const [userID, setUserID] = useState(null);             //Stores Spotify User ID
-  const [user, setUser] = useState(null);                 //Store the full User profile
-  const [premium, setPremium] = useState(null);           //Checks if User is a premium member
+  const [accessToken, setAccessToken] = useState(null);
+  const [code, setCode] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userID, setUserID] = useState(null);
+  const [user, setUser] = useState(null);
+  const [premium, setPremium] = useState(null);
+  const [deviceConnected, setDeviceConnected] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {     //On first load extracts the users authorization code after user logs in
+  // ✅ Enable play tracking when user is logged in
+  const { lastPollResult, isPolling } = usePlayTracking(
+    user,
+    3 * 60 * 1000,
+    isLoggedIn
+  );
+
+  useEffect(() => {
+    if (lastPollResult?.newPlays > 0) {
+      console.log(`🎵 Detected ${lastPollResult.newPlays} new plays!`);
+    }
+  }, [lastPollResult]);
+
+  // ✅ Step 1: Get code from URL
+  useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get("code");
-    setCode(authCode);
+    console.log("🧠 URL Code:", authCode);
+    if (authCode) {
+      setCode(authCode);
+    }
   }, []);
 
-  useEffect(() => {     //fetch access token from backend and retrieve user profile
+  // ✅ Step 2: Reset device notice
+  useEffect(() => {
+    if (deviceConnected) {
+      const timer = setTimeout(() => setDeviceConnected(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [deviceConnected]);
+
+  // ✅ Step 3: When we get a code, exchange it for tokens + user
+  useEffect(() => {
     if (!code) return;
 
-    const fetchTokenAndUser = async () => {     //fetch for access_token
+    const fetchTokenAndUser = async () => {
       try {
+        console.log("📥 Sending to /api/token:", {
+          code,
+          redirect_uri: REDIRECT_URI,
+        });
+
         const tokenRes = await fetch("/api/token", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ code, redirect_uri: REDIRECT_URI }),
+          body: JSON.stringify({
+            code,
+            redirect_uri: REDIRECT_URI,
+          }),
         });
 
-        if (!tokenRes.ok) { //If fetch fails
+        if (!tokenRes.ok) {
           const errorText = await tokenRes.text();
-          console.error("Token request failed:", errorText);
+          console.error("❌ /api/token failed with status:", tokenRes.status);
+          console.error("❌ Full response body:", errorText);
           return;
         }
 
         const tokenData = await tokenRes.json();
+        console.log("🎯 Full Backend Response:", tokenData);
 
-        if (tokenData.access_token) {   //If successful, use access token to fetch user profile
-          const userRes = await fetch("https://api.spotify.com/v1/me", {
-            headers: {
-              Authorization: `Bearer ${tokenData.access_token}`,
-            },
-          });
+        // ✅ Use backend response to update state
+        if (tokenData.tokens?.access_token && tokenData.user) {
+          const userData = tokenData.user;
 
-          if (!userRes.ok) { // Handle failed user profile fetch
-            const errorText = await userRes.text();
-            console.error("User profile fetch failed:", errorText);
-            return;
-          }
-
-          const userData = await userRes.json();
-
-          // Store user data and login state
           setUser(userData);
-          setUserID(userData.id);
-          setAccessToken(tokenData.access_token);
+          setUserID(userData.spotifyId);
+          setAccessToken(tokenData.tokens.access_token);
           setIsLoggedIn(true);
-          setPremium(userData.product === "premium");
+          
+          // 🔧 FIXED: Better premium detection with debug logging
+          const isPremium = userData.product === "premium";
+          console.log("🎵 Premium Status Check:", {
+            product: userData.product,
+            isPremium: isPremium,
+            userData: userData
+          });
+          setPremium(isPremium);
+
+          // ✅ Remove ?code= from URL
+          window.history.replaceState({}, document.title, "/");
+        } else {
+          console.warn("⚠️ Missing expected data in response:", tokenData);
         }
       } catch (err) {
-        console.error("Error fetching token or user:", err);
+        console.error("❌ Error fetching token or user:", err);
       }
     };
-    fetchTokenAndUser();
-  }, [code]);  // Runs only when `code` useState changes
 
-  //Triggers Spotify login redirect
-  const loginToSpotify = () => {
-    const url = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}`;                                //Redirects to spotify log in page 
-    window.location.href = url; //Redirects user to Spotify login page
+    fetchTokenAndUser();
+  }, [code]);
+
+  // ✅ Step 4: Show Spotify Tour after first login
+  useEffect(() => {
+    if (isLoggedIn && user) {
+      setMounted(true);
+      const hasSeenTour = localStorage.getItem("spotify-tour-completed");
+      if (!hasSeenTour) {
+        setTimeout(() => setShowTour(true), 1500);
+      }
+    }
+  }, [isLoggedIn, user]);
+
+  const handleTourComplete = () => {
+    localStorage.setItem("spotify-tour-completed", "true");
+    setShowTour(false);
   };
 
-  //Return the page user sees first, Log in page
+  const loginToSpotify = () => {
+    const url = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}`;
+    window.location.href = url;
+  };
+
   return (
-    <div>
+    <div className="bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950">
       {isLoggedIn && user ? (
         <div className="min-h-screen flex flex-col">
-          <div className="w-full h-16 px-6 flex items-center justify-end shadow-md z-2">
-            <DropdownMenu ProfilePicture={user?.images?.[0]?.url} UserName={user.display_name} UserProduct={user.product} />
+          {/* Navbar */}
+          <div
+            id="navbar"
+            className="w-full h-16 px-6 flex items-center justify-between shadow-md z-2 mb-10"
+          >
+            <div className="mb-6">
+              <SpotifyDeviceStatus
+                accessToken={accessToken}
+                onDeviceConnect={() => setDeviceConnected(true)}
+                data-tour="connect-device"
+              />
+            </div>
+            <div className="flex items-center gap-4 mb-6 mt-5">
+              <div id="fab-navbar-slot"></div>
+
+              <button
+                onClick={() => {
+                  localStorage.removeItem("spotify-tour-completed");
+                  setShowTour(true);
+                }}
+                className="p-2 rounded-full hover:bg-gray-800/50 transition-colors"
+                title="Take a tour"
+              >
+                <HelpCircle size={24} className="text-[#1DB954]" />
+              </button>
+
+              <DropdownMenu
+                ProfilePicture={user?.profileImage || user?.images?.[0]?.url}
+                UserName={user.displayName || user.display_name}
+                UserProduct={premium ? "premium" : "free"}
+                accessToken={accessToken}
+                userId={userID}
+              />
+            </div>
           </div>
-          <div className="flex-1 p-6 z-1 w-full h-full relative mt-10 ">
-            <CurrentlyPlaying accessToken={accessToken} premium={premium} name={user.display_name} />
+
+          {/* Main Content */}
+          <div className="flex-1 p-6 z-1 w-full h-full relative">
+            <CurrentlyPlaying
+              accessToken={accessToken}
+              premium={premium}
+              name={user.displayName || user.display_name}
+              userId={userID}
+              deviceConnected={deviceConnected}
+              tourActive={showTour}
+            />
           </div>
+
+          {/* Tour */}
+          {showTour && mounted && (
+            <SpotifyTour onComplete={handleTourComplete} premium={premium} />
+          )}
         </div>
       ) : (
         <div className="flex items-center justify-center h-screen pb-10">
