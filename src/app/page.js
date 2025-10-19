@@ -1,11 +1,20 @@
 "use client";
+// import CurrentlyPlaying from "./main";
+// import SpotifyDeviceStatus from "./component/pages/components/navbar/connected_device";
+// import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
+// import SpotifyTour from "./component/pages/components/SpotifyTour";
+// import { useState, useEffect } from "react";
+// import { HelpCircle } from "lucide-react";
+// import { usePlayTracking } from "@/hooks/usePlayTracking";
+
 import CurrentlyPlaying from "./main";
-import SpotifyDeviceStatus from "./component/pages/components/navbar/connected_device";
-import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
-import SpotifyTour from "./component/pages/components/SpotifyTour";
+import SpotifyDeviceStatus from "./component/components/navbar/connected_device";
+import DropdownMenu from "./component/components/navbar/DropdownMenu";
+import SpotifyTour from "./component/components/SpotifyTour";
+import { usePlayTracking } from "@/hooks/usePlayTracking";
 import { useState, useEffect } from "react";
 import { HelpCircle } from "lucide-react";
-import { usePlayTracking } from "@/hooks/usePlayTracking";
+
 
 const REDIRECT_URI = "https://code-the-dream-pre-req-7atz.vercel.app"; //link that tells spotify where to send user back after log in 
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; //link for spotify login page
