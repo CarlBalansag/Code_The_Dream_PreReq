@@ -1,3 +1,5 @@
+import { saveUser } from '@/lib/db/userOperations.js';
+
 //Uses post request to exchange authorization code for an access token
 export async function POST(req) {
 
@@ -50,6 +52,24 @@ export async function POST(req) {
     });
 
     const userData = await userResponse.json();
+
+    // ✅ Save user to database with tokens
+    try {
+        await saveUser({
+            spotifyId: userData.id,
+            displayName: userData.display_name,
+            email: userData.email,
+            country: userData.country,
+            profileImage: userData.images?.[0]?.url,
+            spotifyAccessToken: tokenData.access_token,
+            spotifyRefreshToken: tokenData.refresh_token,
+            tokenExpiresAt: new Date(Date.now() + tokenData.expires_in * 1000),
+        });
+        console.log(`✅ User saved to database: ${userData.display_name}`);
+    } catch (error) {
+        console.error("❌ Failed to save user to database:", error);
+        // Continue anyway - user will be saved on next operation
+    }
 
     // Return formatted response with tokens and user data
     return Response.json({
