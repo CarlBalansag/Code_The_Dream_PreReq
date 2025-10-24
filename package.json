@@ -2,18 +2,31 @@
   "name": "spotify-app",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check:db": "node check-db.mjs"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@ark-ui/react": "^5.18.3",
     "lucide-react": "^0.514.0",
     "next": "15.3.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+=======
+    "@ark-ui/react": "^5.26.0",
+    "lucide-react": "^0.514.0",
+    "mongodb": "^6.9.0",
+    "mongoose": "^8.7.1",
+    "next": "15.3.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^3.2.1",
+>>>>>>> 5625fef1c0320696788e336f69741fec7df9774c
     "swiper": "^11.2.8",
     "tailwind-scrollbar": "^4.0.2"
   },
@@ -21,7 +34,11 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "autoprefixer": "^10.4.21",
+<<<<<<< HEAD
     "dotenv": "^16.5.0",
+=======
+    "dotenv": "^16.6.1",
+>>>>>>> 5625fef1c0320696788e336f69741fec7df9774c
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
     "postcss": "^8.5.6",
