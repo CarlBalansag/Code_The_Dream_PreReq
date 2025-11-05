@@ -8,17 +8,12 @@ import { fetchCurrentlyPlaying } from "./component/pages/current_song/live_song"
 import LoadingDots from "./component/pages/components/loading";
 import BottomMiniPlayer from "./component/pages/components/bottom_player/BottomMiniPlayer";
 import ExpandedPlayer from "./component/pages/components/bottom_player/ExpandedPlayer";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/pagination";
-import { Pagination, Mousewheel, Keyboard } from "swiper/modules";
+import Navbar from "./component/pages/components/navbar/Navbar";
 
-export default function CurrentlyPlaying({ accessToken, premium, name, userId, deviceConnected }) {
+export default function CurrentlyPlaying({ accessToken, premium, name, userId, deviceConnected, tourButton, profileDropdown }) {
   const [song, setSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [songID, setSongID] = useState(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [swiperRef, setSwiperRef] = useState(null);
   const [quit, setQuit] = useState(false);
   const [mounted, setMounted] = useState(false);
   const waitingForSongRef = useRef(null);
@@ -152,76 +147,70 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
     </>
   );
 
-  //Mobile view stats
-  const MobileSwiper = () => (
-    <div className="block lg:hidden w-full px-4 pb-20 relative">
-      <div className="w-full max-w-[640px] mx-auto relative pb-12">
-        <Swiper
-          slidesPerView={1}
-          onSwiper={setSwiperRef}
-          onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
-          modules={[Pagination, Mousewheel, Keyboard]}
-          pagination={{
-            clickable: true,
-            bulletClass: 'swiper-pagination-bullet',
-            bulletActiveClass: 'swiper-pagination-bullet-active',
-          }}
-          className="mySwiper h-[85vh] "
-          style={{
-            '--swiper-pagination-color': '#1ed760',
-            '--swiper-pagination-bullet-inactive-color': '#1DB954',
-            '--swiper-pagination-bottom': '-0px',
-          }}
-        >
-          <SwiperSlide>
-            <div className="p-2 h-[80vh] overflow-y-auto" data-tour="top-artists-mobile">
-              <UserTopArtists accessToken={accessToken} userId={userId} onLoadingChange={handleTopArtistsLoadingChange} />
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="p-2 h-[80vh] overflow-y-auto" data-tour="top-tracks-mobile">
-              <UserTopTracks
-                accessToken={accessToken}
-                onLoadingChange={handleUserTopTracksLoadingChange}
-                onPlayClick={handlePlayButtonClick}
-              />
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="p-2 h-[80vh] overflow-y-auto" data-tour="recently-played-mobile">
-              <RecentlyPlayedList accessToken={accessToken} name={name} onLoadingChange={handleRecentlyPlayedLoadingChange} />
-            </div>
-          </SwiperSlide>
-        </Swiper>
+  // NEW Mobile View - Vertical scroll with stacked sections (NO Swiper)
+  const MobileView = () => (
+    <div className="block lg:hidden w-full pt-16 pb-20 px-4 overflow-y-auto h-full">
+      {/* Top Artists - Horizontal scroll */}
+      <div data-tour="top-artists-mobile">
+        <UserTopArtists
+          accessToken={accessToken}
+          userId={userId}
+          onLoadingChange={handleTopArtistsLoadingChange}
+        />
+      </div>
+
+      {/* Top Tracks - Vertical scroll, single column */}
+      <div data-tour="top-tracks-mobile">
+        <UserTopTracks
+          accessToken={accessToken}
+          onLoadingChange={handleUserTopTracksLoadingChange}
+          onPlayClick={handlePlayButtonClick}
+        />
+      </div>
+
+      {/* Recently Played - Horizontal scroll */}
+      <div data-tour="recently-played-mobile">
+        <RecentlyPlayedList
+          accessToken={accessToken}
+          name={name}
+          onLoadingChange={handleRecentlyPlayedLoadingChange}
+        />
       </div>
     </div>
   );
 
   //Desktop View
   return (
-    <div className="absolute inset-0 overflow-hidden -mt-5">
-      <div className="h-full w-full mx-auto px-[5%] xl:px-6 flex flex-col">
+    <div className="absolute inset-0 overflow-hidden">
+      {/* Navbar - Fixed at top */}
+      <Navbar tourButton={tourButton} profileDropdown={profileDropdown} />
+
+      <div className="h-full w-full flex flex-col">
         <div className="flex-1 min-h-0">
           {/* Stats View - Always shown */}
           <div className="w-full h-full">
-            {MobileSwiper()}
-            <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-12 gap-6 h-[calc(100%-4rem)] min-h-0">
-              <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0" data-tour="top-artists">
-                <div className="h-full min-h-0 overflow-hidden rounded-xl">
+            {/* MOBILE - NEW vertical scroll layout */}
+            {MobileView()}
+
+            {/* DESKTOP - Full width layout */}
+            <div className="hidden lg:block h-full w-full overflow-y-auto">
+              <div className="w-full px-10 pt-20 pb-6">
+                {/* Top Artists - Full width, horizontal scroll */}
+                <div className="h-auto min-h-[280px] mt-[-20px]" data-tour="top-artists">
                   <UserTopArtists accessToken={accessToken} userId={userId} onLoadingChange={handleTopArtistsLoadingChange} />
                 </div>
-              </div>
-              <div className="lg:col-span-1 xl:col-span-4 h-full min-h-0" data-tour="top-tracks">
-                <div className="h-full min-h-0 overflow-hidden rounded-xl">
+
+                {/* Top Tracks - Full width */}
+                <div className="h-auto min-h-[400px]" data-tour="top-tracks">
                   <UserTopTracks
                     accessToken={accessToken}
                     onLoadingChange={handleUserTopTracksLoadingChange}
                     onPlayClick={handlePlayButtonClick}
                   />
                 </div>
-              </div>
-              <div className="lg:col-span-1 xl:col-span-4 h-[80vh] min-h-0 mt-10" data-tour="recently-played">
-                <div className="h-full min-h-0 overflow-hidden rounded-xl">
+
+                {/* Recently Played - Full width, horizontal scroll */}
+                <div className="h-auto min-h-[280px] " data-tour="recently-played">
                   <RecentlyPlayedList accessToken={accessToken} name={name} onLoadingChange={handleRecentlyPlayedLoadingChange} />
                 </div>
               </div>

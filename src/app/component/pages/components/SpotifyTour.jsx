@@ -13,7 +13,7 @@ export default function SpotifyTour({ onComplete, premium }) {
       title: 'Your Top Artists',
       description: 'These are your top listened to artists. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time rankings.',
       target: '[data-tour="top-artists"]',
-      placement: 'right',
+      placement: 'bottom',
     },
     {
       id: 'top-tracks',
@@ -49,21 +49,21 @@ export default function SpotifyTour({ onComplete, premium }) {
       title: 'Your Top Artists',
       description: 'These are your top listened to artists. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time rankings.',
       target: '[data-tour="top-artists"]',
-      placement: 'right',
+      placement: 'bottom',
     },
     {
       id: 'top-tracks',
       title: 'Your Top Tracks',
       description: 'This is your top tracks listened. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time favorites.',
       target: '[data-tour="top-tracks"]',
-      placement: 'left',
+      placement: 'top',
     },
     {
       id: 'recently-played',
       title: 'Recently Played',
       description: 'These are your recently played songs, showing your most recent listening activity.',
       target: '[data-tour="recently-played"]',
-      placement: 'left',
+      placement: 'top',
     },
   ], [premium]);
 

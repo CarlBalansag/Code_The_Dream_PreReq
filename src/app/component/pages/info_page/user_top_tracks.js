@@ -31,13 +31,13 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
             try {
                 // Fetch all three time ranges in parallel from Spotify API
                 const [shortTerm, mediumTerm, longTerm] = await Promise.all([
-                    fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=short_term`, {
+                    fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=30`, {
                         headers: { Authorization: `Bearer ${accessToken}` }
                     }),
-                    fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=medium_term`, {
+                    fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=medium_term&limit=30`, {
                         headers: { Authorization: `Bearer ${accessToken}` }
                     }),
-                    fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=long_term`, {
+                    fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=long_term&limit=30`, {
                         headers: { Authorization: `Bearer ${accessToken}` }
                     })
                 ]);
@@ -145,18 +145,18 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
     };
 
     return (
-        <div className="w-full h-full min-h-0 rounded-xl flex flex-col">
+        <div className="w-full h-full min-h-0 flex flex-col">
             {/* Header (fixed within card, not in scroll) */}
-            <div className="z-10 px-4 pt-5 pb-4 text-center shadow-md">
-                <p className="text-[#1DB954] text-xl font-semibold">Top Tracks</p>
-                <div className="flex justify-center gap-2 mt-3">
+            <div className="z-10 px-4 lg:px-6 pt-6 pb-5">
+                <p className="text-white text-2xl font-bold mb-4">Top Tracks</p>
+                <div className="flex justify-start gap-2">
                     {["short_term", "medium_term", "long_term"].map((range) => (
                         <button
                             key={range}
-                            className={`px-4 py-2 rounded-lg text-sm transition-all ${
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                                 timeRange === range
-                                    ? "bg-[#1DB954] text-black font-medium"
-                                    : "bg-[#282828] text-white font-medium hover:bg-[#333333]"
+                                    ? "bg-[#1DB954] text-black"
+                                    : "bg-[rgba(255,255,255,0.05)] text-white hover:bg-[rgba(255,255,255,0.1)]"
                             }`}
                             onClick={() => setTimeRange(range)}
                         >
@@ -170,14 +170,14 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                 </div>
             </div>
 
-            {/* Scrollable list */}
-            <div className="custom-scrollbar flex-1 min-h-0 overflow-y-auto px-4 pb-4">
+            {/* Scrollable list - Two columns on desktop, single column on mobile */}
+            <div className="custom-scrollbar flex-1 min-h-0 overflow-y-auto px-4 lg:px-6 pb-6 max-h-[500px] lg:max-h-[600px]">
                 {currentTracks.length > 0 ? (
-                    <ul className="space-y-4 mt-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                         {currentTracks.map((item, index) => (
-                            <li
+                            <div
                                 key={item.id}
-                                className=" hover:bg-[#18181B] bg-[#18181B] border-1 border-[#0A0A0C] rounded-lg p-3 flex items-center space-x-4 transition-colors group"
+                                className="bg-[rgba(255,255,255,0.03)] border border-transparent rounded-lg p-3 lg:p-4 flex items-center gap-3 lg:gap-4 transition-all hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] active:scale-[0.98] lg:active:scale-100 group"
                                 onMouseEnter={() => setHoveredTrackId(item.id)}
                                 onMouseLeave={() => setHoveredTrackId(null)}
                                 data-tour={index === 0 ? "play-button" : undefined}
@@ -185,32 +185,36 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                                 {/* Track number / Play/Pause icon */}
                                 <button
                                     onClick={() => handlePlayTrack(item.uri, item.id)}
-                                    className="w-8 flex items-center justify-center text-gray-400 flex-shrink-0 cursor-pointer"
+                                    className="w-8 lg:w-10 flex items-center justify-center text-[#b3b3b3] flex-shrink-0 cursor-pointer"
                                 >
                                     {playingTrackId === item.id ? (
                                         <Pause size={20} className="text-[#1DB954] fill-[#1DB954]" />
                                     ) : hoveredTrackId === item.id ? (
                                         <Play size={20} className="text-[#1DB954] fill-[#1DB954]" />
                                     ) : (
-                                        <span className="text-sm font-medium">{index + 1}</span>
+                                        <span className="text-base lg:text-lg font-semibold">{index + 1}</span>
                                     )}
                                 </button>
 
                                 {/* Album cover */}
-                                <img src={item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover flex-shrink-0" />
+                                <img
+                                    src={item.image}
+                                    alt={item.name}
+                                    className="w-12 h-12 lg:w-14 lg:h-14 rounded-md object-cover flex-shrink-0"
+                                />
 
                                 {/* Track info */}
                                 <div className="flex-grow min-w-0">
-                                    <p className="text-white font-semibold text-md truncate group-hover:text-[#1DB954] transition-colors">
+                                    <p className="text-white font-semibold text-sm lg:text-base truncate">
                                         {item.name}
                                     </p>
-                                    <p className="text-sm text-gray-400 truncate">{item.artists}</p>
+                                    <p className="text-xs lg:text-sm text-[#b3b3b3] truncate">{item.artists}</p>
                                 </div>
-                            </li>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 ) : (
-                    <p className="text-white">No data available.</p>
+                    <p className="text-white text-center py-8">No data available.</p>
                 )}
             </div>
         </div>

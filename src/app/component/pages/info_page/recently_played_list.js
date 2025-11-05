@@ -54,39 +54,45 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
     }
 
     return (
-        <div className="w-full h-full min-h-0 rounded-xl flex flex-col ">
+        <div className="w-full h-full min-h-0 flex flex-col">
             {/* Header (fixed within card, not in scroll) */}
-            <div className="z-10 px-4 pt-5 pb-4 text-center shadow-md">
-                <p className="text-[#1DB954] text-xl font-semibold">
-                    Recently Played For {name}
+            <div className="z-10 px-4 lg:px-6 pt-6 pb-5">
+                <p className="text-white text-2xl font-bold">
+                    Recently Played
                 </p>
+                {name && <p className="text-[#b3b3b3] text-sm mt-1">For {name}</p>}
             </div>
 
-            {/* Scrollable list */}
-            <div className="custom-scrollbar flex-1 min-h-0 overflow-y-auto px-4 pb-4">
+            {/* Horizontal scrollable container */}
+            <div className="flex-1 min-h-0 overflow-x-auto horizontal-scrollbar px-4 lg:px-6 pb-6">
                 {recentTracks.length > 0 ? (
-                    <ul className="space-y-4 mt-3">
+                    <div className="flex gap-3 lg:gap-4 min-w-min pb-2">
                         {recentTracks.map((item, index) => (
-                            <li
+                            <div
                                 key={item.id + index}
-                                className=" rounded-lg p-3 flex items-center gap-4 bg-[#18181B] border-1 border-[#0A0A0C]"
+                                className="flex-shrink-0 w-36 lg:w-40 bg-[rgba(255,255,255,0.03)] rounded-lg p-3 cursor-pointer transition-all active:scale-95"
                             >
+                                {/* Album cover */}
                                 <img
                                     src={item.image}
                                     alt={item.name}
-                                    className="w-16 h-16 rounded-md object-cover flex-none"
+                                    className="w-full aspect-square rounded-md object-cover mb-2.5"
                                 />
-                                <div className="flex-grow min-w-0 ">
-                                    <p className="text-white font-semibold text-md truncate ">
-                                        {index + 1}. {item.name}
-                                    </p>
-                                    <p className="text-gray-400 text-sm truncate">By {item.artists}</p>
-                                </div>
-                            </li>
+
+                                {/* Track Name */}
+                                <p className="text-white font-semibold text-[13px] leading-tight mb-1 line-clamp-2">
+                                    {item.name}
+                                </p>
+
+                                {/* Artist Name */}
+                                <p className="text-[#b3b3b3] text-[11px] truncate">
+                                    {item.artists}
+                                </p>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 ) : (
-                    <p className="text-white">No data available.</p>
+                    <p className="text-white text-center py-8">No data available.</p>
                 )}
             </div>
         </div>

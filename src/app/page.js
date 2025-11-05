@@ -143,44 +143,10 @@ export default function Home() {
     <div className="bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950">
       {isLoggedIn && user ? (
         <div className="min-h-screen flex flex-col">
-          {/* Navbar */}
-          <div
-            id="navbar"
-            className="w-full h-16 px-6 flex items-center justify-between shadow-md z-2 mb-10"
-          >
-            <div className="mb-6">
-              <SpotifyDeviceStatus
-                accessToken={accessToken}
-                onDeviceConnect={() => setDeviceConnected(true)}
-                data-tour="connect-device"
-              />
-            </div>
-            <div className="flex items-center gap-4 mb-6 mt-5">
-              <div id="fab-navbar-slot"></div>
-
-              <button
-                onClick={() => {
-                  localStorage.removeItem("spotify-tour-completed");
-                  setShowTour(true);
-                }}
-                className="p-2 rounded-full hover:bg-gray-800/50 transition-colors"
-                title="Take a tour"
-              >
-                <HelpCircle size={24} className="text-[#1DB954]" />
-              </button>
-
-              <DropdownMenu
-                ProfilePicture={user?.profileImage || user?.images?.[0]?.url}
-                UserName={user.displayName || user.display_name}
-                UserProduct={premium ? "premium" : "free"}
-                accessToken={accessToken}
-                userId={userID}
-              />
-            </div>
-          </div>
+          {/* REMOVED OLD NAVBAR - Now using new Navbar component in main.js */}
 
           {/* Main Content */}
-          <div className="flex-1 p-6 z-1 w-full h-full relative">
+          <div className="flex-1 z-1 w-full h-full relative">
             <CurrentlyPlaying
               accessToken={accessToken}
               premium={premium}
@@ -188,6 +154,27 @@ export default function Home() {
               userId={userID}
               deviceConnected={deviceConnected}
               tourActive={showTour}
+              tourButton={
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("spotify-tour-completed");
+                    setShowTour(true);
+                  }}
+                  className="p-2 rounded-full hover:bg-gray-800/50 transition-colors"
+                  title="Take a tour"
+                >
+                  <HelpCircle size={24} className="text-[#1DB954]" />
+                </button>
+              }
+              profileDropdown={
+                <DropdownMenu
+                  ProfilePicture={user?.profileImage || user?.images?.[0]?.url}
+                  UserName={user.displayName || user.display_name}
+                  UserProduct={premium ? "premium" : "free"}
+                  accessToken={accessToken}
+                  userId={userID}
+                />
+              }
             />
           </div>
 
