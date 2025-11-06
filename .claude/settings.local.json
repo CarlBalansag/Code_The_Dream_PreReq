@@ -15,7 +15,11 @@
       "Bash(tasklist:*)",
       "Bash(findstr:*)",
       "Bash(taskkill:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(ping:*)",
+      "Bash(npm run migrate:dry-run:*)",
+      "Bash(npm run migrate:*)",
+      "Bash(npm run verify:*)"
     ],
     "deny": [],
     "ask": []
