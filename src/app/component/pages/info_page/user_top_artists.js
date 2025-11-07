@@ -385,8 +385,8 @@ export default function UserTopArtists({ accessToken, userId }) {
   );
 
   return (
-    <div className="w-full h-full min-h-0 flex flex-col">
-      <div className="z-10 px-4 lg:px-6 pt-6 pb-5">
+    <div className="w-full h-full min-h-0 flex flex-col ">
+      <div className="z-10 px-4 lg:px-6 pt-6 mb-5">
         <p className="text-white text-2xl font-bold mb-4">Top Artists</p>
         <div className="flex justify-start gap-2 flex-wrap">
           {TIME_RANGES.map(({ key, label }) => (
@@ -407,7 +407,7 @@ export default function UserTopArtists({ accessToken, userId }) {
         {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
       </div>
 
-      <div className="flex-1 min-h-0 overflow-x-auto horizontal-scrollbar px-4 lg:px-6 pb-6">
+      <div className=" pt-5 flex-1 min-h-0 overflow-x-auto horizontal-scrollbar px-4 lg:px-6 pb-6">
         {isLoading ? (
           <div className="flex gap-4 min-w-min pb-2">
             {[...Array(6)].map((_, index) => (
