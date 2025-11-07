@@ -22,7 +22,6 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
   const [isExpanded, setIsExpanded] = useState(false);
 
   const [infoLoadingStates, setInfoLoadingStates] = useState({
-    topArtists: true,
     userTopTracks: true,
     recentlyPlayed: true,
   });
@@ -72,13 +71,6 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
   const handlePlayButtonClick = useCallback((trackId) => {
     console.log("🎵 Play button clicked, waiting for track:", trackId);
     waitingForSongRef.current = trackId;
-  }, []);
-
-  const handleTopArtistsLoadingChange = useCallback((isLoading) => {
-    setInfoLoadingStates(prev => ({
-      ...prev,
-      topArtists: isLoading
-    }));
   }, []);
 
   const handleUserTopTracksLoadingChange = useCallback((isLoading) => {
@@ -155,7 +147,6 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
         <UserTopArtists
           accessToken={accessToken}
           userId={userId}
-          onLoadingChange={handleTopArtistsLoadingChange}
         />
       </div>
 
@@ -197,7 +188,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
               <div className="w-full px-10 pt-20 pb-6">
                 {/* Top Artists - Full width, horizontal scroll */}
                 <div className="h-auto min-h-[280px] mt-[-20px]" data-tour="top-artists">
-                  <UserTopArtists accessToken={accessToken} userId={userId} onLoadingChange={handleTopArtistsLoadingChange} />
+                  <UserTopArtists accessToken={accessToken} userId={userId} />
                 </div>
 
                 {/* Top Tracks - Full width */}

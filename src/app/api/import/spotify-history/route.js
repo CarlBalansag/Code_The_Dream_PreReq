@@ -1,6 +1,13 @@
-import { connectToDB } from '@/lib/mongodb.js';
-import { ImportJob } from '@/lib/models/ImportJob.js';
-import { Play } from '@/lib/models/Play.js';
+import {
+  completeJob,
+  createJob,
+  failJob,
+  getActiveJob,
+  getJobById,
+  markJobStarted,
+  updateJobProgress,
+} from '@/lib/db/importJob.js';
+import { trackMultiplePlays } from '@/lib/db/play.js';
 import { NextResponse } from 'next/server';
 
 /**
@@ -11,8 +18,6 @@ import { NextResponse } from 'next/server';
  */
 export async function POST(req) {
   try {
-    await connectToDB();
-
     // Parse form data
     const formData = await req.formData();
     const files = formData.getAll('files');
@@ -34,13 +39,13 @@ export async function POST(req) {
     }
 
     // Check if user already has an active import job
-    const existingJob = await ImportJob.getActiveJob(userId);
+    const existingJob = await getActiveJob(userId);
     if (existingJob) {
       return NextResponse.json(
         {
           error: 'Import already in progress',
           message: 'You already have an import in progress. Please wait for it to complete.',
-          jobId: existingJob._id.toString()
+          jobId: existingJob.id.toString()
         },
         { status: 409 }
       );
@@ -125,18 +130,18 @@ export async function POST(req) {
 
     // Create import job
     const jobFileName = files.length === 1 ? fileNames[0] : `${files.length} files`;
-    const job = await ImportJob.createJob(userId, jobFileName, allSpotifyData.length);
+    const job = await createJob(userId, jobFileName, allSpotifyData.length);
 
-    console.log(`📝 Created import job: ${job._id}`);
+    console.log(`📝 Created import job: ${job.id}`);
 
     // Start background processing (don't await)
-    processImport(job._id.toString(), userId, allSpotifyData).catch(err => {
+    processImport(job.id.toString(), userId, allSpotifyData).catch(err => {
       console.error('❌ Background import error:', err);
     });
 
     return NextResponse.json({
       success: true,
-      jobId: job._id.toString(),
+      jobId: job.id.toString(),
       message: 'Import started',
       totalTracks: allSpotifyData.length,
       filesProcessed: files.length
@@ -159,21 +164,15 @@ export async function POST(req) {
  * Processes the import in batches
  */
 async function processImport(jobId, userId, spotifyData) {
-  let job;
-
   try {
-    await connectToDB();
-
-    // Get job and mark as processing
-    job = await ImportJob.getJobById(jobId);
+    const job = await getJobById(jobId);
     if (!job) {
       throw new Error('Import job not found');
     }
 
-    await job.start();
-    console.log(`🔄 Starting import processing for job ${jobId}`);
+    await markJobStarted(jobId);
+    console.log(`dY", Starting import processing for job ${jobId}`);
 
-    // Transform and validate data
     const plays = [];
     const errors = [];
 
@@ -181,81 +180,69 @@ async function processImport(jobId, userId, spotifyData) {
       const entry = spotifyData[i];
 
       try {
-        let playedAt, trackName, artistName, artistId, albumName, durationMs, trackId;
+        let playedAt;
+        let trackName;
+        let artistName;
+        let artistId = null;
+        let albumName = null;
+        let durationMs;
+        let trackId = null;
 
-        // Handle different Spotify export formats
         if (entry.endTime) {
-          // Old format: endTime, artistName, trackName, msPlayed
           playedAt = parseSpotifyDate(entry.endTime);
           trackName = entry.trackName;
           artistName = entry.artistName;
-          artistId = null;
-          albumName = null;
-          durationMs = parseInt(entry.msPlayed) || 0;
-          trackId = null;
+          durationMs = parseInt(entry.msPlayed, 10) || 0;
         } else if (entry.ts) {
-          // New format: ts, master_metadata_track_name, master_metadata_album_artist_name, ms_played
           playedAt = new Date(entry.ts);
           trackName = entry.master_metadata_track_name;
           artistName = entry.master_metadata_album_artist_name;
           albumName = entry.master_metadata_album_album_name || null;
-          durationMs = parseInt(entry.ms_played) || 0;
+          durationMs = parseInt(entry.ms_played, 10) || 0;
 
-          // Extract track ID from spotify_track_uri (format: "spotify:track:45ttRl8uNtJkop7r9dmP4e")
-          if (entry.spotify_track_uri && entry.spotify_track_uri.startsWith('spotify:track:')) {
+          if (entry.spotify_track_uri?.startsWith('spotify:track:')) {
             trackId = entry.spotify_track_uri.replace('spotify:track:', '');
-          } else {
-            trackId = null;
           }
 
-          // Extract artist ID from spotify_artist_uri (format: "spotify:artist:2YZyLoL8N0Wb9xBt1NhZWg")
-          if (entry.spotify_artist_uri && entry.spotify_artist_uri.startsWith('spotify:artist:')) {
+          if (entry.spotify_artist_uri?.startsWith('spotify:artist:')) {
             artistId = entry.spotify_artist_uri.replace('spotify:artist:', '');
-          } else {
-            artistId = null;
           }
         } else {
           errors.push(`Row ${i + 1}: Unknown format`);
           continue;
         }
 
-        if (!playedAt || isNaN(playedAt.getTime())) {
+        if (!playedAt || Number.isNaN(playedAt.getTime())) {
           errors.push(`Row ${i + 1}: Invalid date format`);
           continue;
         }
 
-        // Skip entries with no track name or artist name (some entries might be null)
         if (!trackName || !artistName) {
-          continue; // Silently skip - likely podcast/audiobook entries
+          continue;
         }
 
-        // Create play document
-        const play = {
-          userId: userId,
-          trackId: trackId,
-          trackName: trackName,
-          artistId: null,
-          artistName: artistName,
-          albumId: null,
-          albumName: albumName,
-          playedAt: playedAt,
-          durationMs: durationMs,
-          source: 'full_import'
-        };
-
-        plays.push(play);
+        plays.push({
+          userId,
+          trackId,
+          trackName,
+          artistId,
+          artistName,
+          albumName,
+          playedAt,
+          durationMs,
+          source: 'full_import',
+        });
       } catch (err) {
         errors.push(`Row ${i + 1}: ${err.message}`);
       }
     }
 
-    if (plays.length === 0) {
+    if (!plays.length) {
       throw new Error('No valid plays to import');
     }
 
-    console.log(`✅ Transformed ${plays.length} plays (${errors.length} errors)`);
+    console.log(`?o. Transformed ${plays.length} plays (${errors.length} errors)`);
 
-    // Process in batches of 1000
     const BATCH_SIZE = 1000;
     let processedCount = 0;
     let insertedCount = 0;
@@ -263,55 +250,37 @@ async function processImport(jobId, userId, spotifyData) {
 
     for (let i = 0; i < plays.length; i += BATCH_SIZE) {
       const batch = plays.slice(i, i + BATCH_SIZE);
+      const result = await trackMultiplePlays(batch);
 
-      try {
-        // Insert batch with ordered: false to skip duplicates
-        const result = await Play.insertMany(batch, {
-          ordered: false,
-          writeConcern: { w: 1 }
-        });
+      insertedCount += result.inserted;
+      skippedCount += batch.length - result.inserted;
+      processedCount += batch.length;
 
-        insertedCount += result.length;
-        processedCount += batch.length;
+      await updateJobProgress(jobId, processedCount);
 
-      } catch (err) {
-        // Handle duplicate key errors
-        if (err.code === 11000) {
-          // Some duplicates, count what was inserted
-          const inserted = err.insertedDocs ? err.insertedDocs.length : 0;
-          insertedCount += inserted;
-          skippedCount += (batch.length - inserted);
-          processedCount += batch.length;
-
-          console.log(`⚠️ Batch ${Math.floor(i / BATCH_SIZE) + 1}: Inserted ${inserted}, skipped ${batch.length - inserted} duplicates`);
-        } else {
-          throw err;
-        }
-      }
-
-      // Update progress
-      await job.updateProgress(processedCount);
-
-      console.log(`📊 Progress: ${processedCount} / ${plays.length} (${Math.round((processedCount / plays.length) * 100)}%)`);
+      console.log(
+        `dY"S Progress: ${processedCount} / ${plays.length} (${Math.round(
+          (processedCount / plays.length) * 100
+        )}%)`
+      );
     }
 
-    // Mark as complete
-    await job.complete();
+    await completeJob(jobId);
 
-    console.log(`✅ Import complete!`);
+    console.log(`?o. Import complete!`);
     console.log(`   Total: ${plays.length}`);
     console.log(`   Inserted: ${insertedCount}`);
     console.log(`   Skipped (duplicates): ${skippedCount}`);
     console.log(`   Errors: ${errors.length}`);
-
   } catch (error) {
-    console.error('❌ Import processing error:', error);
+    console.error('??O Import processing error:', error);
 
-    if (job) {
-      await job.fail(error.message);
+    if (jobId) {
+      await failJob(jobId, error.message);
     }
   }
 }
+
 
 /**
  * Parse Spotify date format to JavaScript Date

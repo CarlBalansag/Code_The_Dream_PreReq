@@ -19,7 +19,11 @@
       "Bash(ping:*)",
       "Bash(npm run migrate:dry-run:*)",
       "Bash(npm run migrate:*)",
-      "Bash(npm run verify:*)"
+      "Bash(npm run verify:*)",
+      "Bash(npm run check:db:*)",
+      "Bash(git show:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(del:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,5 +1,4 @@
-import { connectToDB } from '@/lib/mongodb.js';
-import { Play } from '@/lib/models/Play.js';
+import { getTopArtists } from '@/lib/db/play.js';
 import { NextResponse } from 'next/server';
 
 /**
@@ -21,8 +20,6 @@ import { NextResponse } from 'next/server';
  */
 export async function GET(req) {
   try {
-    await connectToDB();
-
     // Get parameters
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get('userId');
@@ -64,8 +61,7 @@ export async function GET(req) {
       console.log(`   Date Range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
     }
 
-    // Fetch top artists using the Play model method
-    const artists = await Play.getTopArtists(userId, {
+    const artists = await getTopArtists(userId, {
       startDate,
       endDate,
       limit

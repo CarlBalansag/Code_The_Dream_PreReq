@@ -1,5 +1,4 @@
-import { connectToDB } from '@/lib/mongodb.js';
-import { ImportJob } from '@/lib/models/ImportJob.js';
+import { getJobById } from '@/lib/db/importJob.js';
 import { NextResponse } from 'next/server';
 
 /**
@@ -10,8 +9,6 @@ import { NextResponse } from 'next/server';
  */
 export async function GET(req, { params }) {
   try {
-    await connectToDB();
-
     const { jobId } = params;
 
     if (!jobId) {
@@ -21,8 +18,7 @@ export async function GET(req, { params }) {
       );
     }
 
-    // Get job
-    const job = await ImportJob.getJobById(jobId);
+    const job = await getJobById(jobId);
 
     if (!job) {
       return NextResponse.json(
@@ -31,8 +27,9 @@ export async function GET(req, { params }) {
       );
     }
 
-    // Calculate progress
-    const percentComplete = job.getProgress();
+    const percentComplete = job.totalTracks
+      ? Math.round((job.processedTracks / job.totalTracks) * 100)
+      : 0;
 
     // Estimate time remaining (very rough estimate)
     let estimatedTimeRemaining = null;
@@ -59,7 +56,7 @@ export async function GET(req, { params }) {
 
     // Return status
     return NextResponse.json({
-      jobId: job._id.toString(),
+      jobId: job.id.toString(),
       userId: job.userId,
       status: job.status,
       fileName: job.fileName,

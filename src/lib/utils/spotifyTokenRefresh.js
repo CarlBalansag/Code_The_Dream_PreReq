@@ -1,9 +1,24 @@
-import { updateUserTokens } from "../db/userOperations.js";
+import { updateUserTokens } from "../db/user.js";
 
 /**
  * Spotify Token Refresh Utility
  * Handles automatic token refresh when tokens expire
  */
+
+const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000;
+
+function needsTokenRefresh(user) {
+  if (!user?.tokenExpiresAt) {
+    return true;
+  }
+
+  const expiresAt = new Date(user.tokenExpiresAt);
+  if (Number.isNaN(expiresAt.getTime())) {
+    return true;
+  }
+
+  return expiresAt.getTime() <= Date.now() + TOKEN_REFRESH_BUFFER_MS;
+}
 
 /**
  * Refresh Spotify access token using refresh token
@@ -78,8 +93,7 @@ export async function refreshSpotifyToken(refreshToken, spotifyId = null) {
  * @returns {string} Valid access token
  */
 export async function getValidAccessToken(user) {
-  // Check if token needs refresh
-  if (user.needsTokenRefresh()) {
+  if (needsTokenRefresh(user)) {
     console.log(`🔄 Token expired, refreshing for user: ${user.displayName}`);
 
     const { accessToken } = await refreshSpotifyToken(
@@ -155,7 +169,7 @@ export async function batchRefreshTokens(users) {
 
   for (const user of users) {
     try {
-      if (user.needsTokenRefresh()) {
+      if (needsTokenRefresh(user)) {
         await refreshSpotifyToken(user.spotifyRefreshToken, user.spotifyId);
         results.success.push(user.spotifyId);
       }

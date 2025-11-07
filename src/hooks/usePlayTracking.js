@@ -24,7 +24,7 @@ export function usePlayTracking(user, intervalMs = 3 * 60 * 1000, enabled = true
       setIsPolling(true);
       setError(null);
 
-      console.log('🔄 Polling for new plays...');
+      console.log('🔄 Polling Prisma-backed history service for new plays...');
 
       const response = await fetch('/api/poll/plays', {
         method: 'POST',

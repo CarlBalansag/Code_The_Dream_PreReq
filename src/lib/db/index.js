@@ -1,17 +1,5 @@
-/**
- * Database API
- * Central export point for all database operations
- */
+export { prisma } from "../prisma.js";
 
-// Connection
-export { connectToDB, disconnectFromDB, getConnectionStatus } from "../mongodb.js";
-
-// Models
-export { User } from "../models/User.js";
-export { Play } from "../models/Play.js";
-export { ImportJob } from "../models/ImportJob.js";
-
-// User Operations
 export {
   saveUser,
   getUserBySpotifyId,
@@ -23,35 +11,29 @@ export {
   getAllUsers,
   deleteUser,
   getUserStats,
-} from "./userOperations.js";
+  needsInitialImport,
+} from "./user.js";
 
-// Play Operations
 export {
   trackPlay,
   trackMultiplePlays,
   getRecentPlays,
-  getPlaysByDateRange,
-  getTotalPlays,
-  getTotalListeningTime,
-  getLastPlayTimestamp,
-  deleteUserPlays,
-  getPlayStats,
-  getTrackPlays,
-  getArtistPlays,
-  getAlbumPlays,
-} from "./playOperations.js";
-
-// Stats Queries
-export {
-  getTopTracks,
+  countUserPlays,
+  countUserPlaysInRange,
   getTopArtists,
-  getTopAlbums,
-  getListeningTimeline,
-  getComprehensiveStats,
-  getStatsByPeriod,
-  getListeningByDayOfWeek,
-  getListeningByHourOfDay,
-  getFirstListenDate,
-  getListeningStreaks,
-  getRecentlyDiscoveredArtists,
-} from "./statsQueries.js";
+  getArtistDailyHistory,
+  getArtistFirstPlayDate,
+  getArtistPlayCount,
+} from "./play.js";
+
+export {
+  createJob,
+  getJobById,
+  getActiveJob,
+  getUserJobs,
+  markJobStarted,
+  updateJobProgress,
+  completeJob,
+  failJob,
+  cleanupOldJobs,
+} from "./importJob.js";

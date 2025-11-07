@@ -191,9 +191,13 @@ playSchema.statics.getTopArtists = async function (
     { $match: matchStage },
     {
       $group: {
-        _id: {
-          artistId: "$artistId",
-          artistName: "$artistName",
+        // Group by artistName only (to handle null artistIds)
+        // Keep the first non-null artistId we find for each artist
+        _id: "$artistName",
+        artistId: {
+          $first: {
+            $cond: [{ $ne: ["$artistId", null] }, "$artistId", null]
+          }
         },
         playCount: { $sum: 1 },
         totalDurationMs: { $sum: "$durationMs" },
@@ -207,8 +211,8 @@ playSchema.statics.getTopArtists = async function (
     {
       $project: {
         _id: 0,
-        artistId: "$_id.artistId",
-        artistName: "$_id.artistName",
+        artistId: 1,
+        artistName: "$_id",
         playCount: 1,
         totalDurationMs: 1,
         firstPlayed: 1,

@@ -1,5 +1,8 @@
-import { connectToDB } from '@/lib/mongodb.js';
-import { Play } from '@/lib/models/Play.js';
+import {
+  countUserPlays,
+  countUserPlaysInRange,
+  getRecentPlays,
+} from '@/lib/db/play.js';
 import { NextResponse } from 'next/server';
 
 /**
@@ -10,8 +13,6 @@ import { NextResponse } from 'next/server';
  */
 export async function GET(req) {
   try {
-    await connectToDB();
-
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get('userId');
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -23,26 +24,23 @@ export async function GET(req) {
       );
     }
 
-    // Get recent plays
-    const plays = await Play.find({ userId })
-      .sort({ playedAt: -1 })
-      .limit(limit)
-      .lean();
-
+    const plays = await getRecentPlays(userId, limit);
     // Format for debugging
     const debugInfo = {
       userId,
-      totalPlays: await Play.countDocuments({ userId }),
+      totalPlays: await countUserPlays(userId),
       serverTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       serverTime: new Date().toISOString(),
       recentPlays: plays.map(play => ({
         trackName: play.trackName,
         artistName: play.artistName,
         playedAt: play.playedAt,
-        playedAtISO: play.playedAt.toISOString(),
-        playedAtLocal: play.playedAt.toLocaleString(),
+        playedAtISO: play.playedAt?.toISOString(),
+        playedAtLocal: play.playedAt?.toLocaleString(),
         source: play.source,
-        daysAgo: Math.floor((Date.now() - play.playedAt.getTime()) / (1000 * 60 * 60 * 24))
+        daysAgo: play.playedAt
+          ? Math.floor((Date.now() - play.playedAt.getTime()) / (1000 * 60 * 60 * 24))
+          : null,
       }))
     };
 
@@ -52,10 +50,7 @@ export async function GET(req) {
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
-    debugInfo.todayPlaysCount = await Play.countDocuments({
-      userId,
-      playedAt: { $gte: todayStart, $lte: todayEnd }
-    });
+    debugInfo.todayPlaysCount = await countUserPlaysInRange(userId, todayStart, todayEnd);
 
     debugInfo.todayDateRange = {
       start: todayStart.toISOString(),

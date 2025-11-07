@@ -1,4 +1,3 @@
-import { connectToDB } from '@/lib/mongodb.js';
 import { pollRecentlyPlayed } from '@/lib/services/continuousPolling.js';
 import { NextResponse } from 'next/server';
 
@@ -10,9 +9,6 @@ import { NextResponse } from 'next/server';
  */
 export async function POST(req) {
   try {
-    // Connect to database
-    await connectToDB();
-
     // Parse request body
     const { spotifyId } = await req.json();
 
@@ -60,8 +56,6 @@ export async function POST(req) {
  */
 export async function GET(req) {
   try {
-    await connectToDB();
-
     const { searchParams } = new URL(req.url);
     const spotifyId = searchParams.get('spotifyId');
 

@@ -1,4 +1,3 @@
-import { connectToDB } from '@/lib/mongodb.js';
 import { saveUser } from '@/lib/db/index.js';
 
 export async function POST(req) {
@@ -68,9 +67,7 @@ export async function POST(req) {
     );
   }
 
-  // Save user to MongoDB
-  await connectToDB();
-
+  // Save user to database
   const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
 
   const savedUser = await saveUser({
