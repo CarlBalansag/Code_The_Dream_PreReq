@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 
 export default function SpotifyTour({ onComplete, premium }) {
   const [currentStep, setCurrentStep] = useState(0);
@@ -20,7 +20,7 @@ export default function SpotifyTour({ onComplete, premium }) {
       title: 'Your Top Tracks',
       description: 'This is your top tracks listened. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time favorites.',
       target: '[data-tour="top-tracks"]',
-      placement: 'left',
+      placement: 'bottom',
     },
     {
       id: 'recently-played',
@@ -56,7 +56,7 @@ export default function SpotifyTour({ onComplete, premium }) {
       title: 'Your Top Tracks',
       description: 'This is your top tracks listened. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time favorites.',
       target: '[data-tour="top-tracks"]',
-      placement: 'top',
+      placement: 'bottom',
     },
     {
       id: 'recently-played',
@@ -67,17 +67,12 @@ export default function SpotifyTour({ onComplete, premium }) {
     },
   ], [premium]);
 
-  useEffect(() => {
-    const element = document.querySelector(steps[currentStep]?.target);
-    if (element) {
-      setTargetElement(element);
-      updateTooltipPosition(element, steps[currentStep].placement);
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [currentStep, steps]);
-
-  const updateTooltipPosition = (element, placement) => {
+  const updateTooltipPosition = useCallback((element, placement) => {
     const rect = element.getBoundingClientRect();
+    const tooltipWidth = 320;
+    const tooltipHeight = 280; // Approximate height
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
     let top = 0;
     let left = 0;
 
@@ -88,35 +83,115 @@ export default function SpotifyTour({ onComplete, premium }) {
         break;
       case 'left':
         top = rect.top + rect.height / 2;
-        left = rect.left - 420;
+        left = rect.left - tooltipWidth - 20;
         break;
       case 'bottom':
         top = rect.bottom + 20;
-        left = rect.left + rect.width / 2 - 200;
+        left = rect.left + rect.width / 2 - tooltipWidth / 2;
         break;
       case 'bottom-right':
         top = rect.bottom + 20;
-        left = rect.right - 400;
+        left = rect.right - tooltipWidth;
         break;
       case 'bottom-left':
         top = rect.bottom + 20;
         left = rect.left;
         break;
       case 'top':
-        top = rect.top - 220;
-        left = rect.left + rect.width / 2 - 200;
+        top = rect.top - tooltipHeight - 20;
+        left = rect.left + rect.width / 2 - tooltipWidth / 2;
         break;
       case 'top-left':
-        top = rect.top - 200;
-        left = rect.left - 420;
+        top = rect.top - tooltipHeight - 20;
+        left = rect.left - tooltipWidth - 20;
         break;
       default:
         top = rect.top;
         left = rect.right + 20;
     }
 
+    // Constrain to viewport - horizontal
+    if (left < 20) {
+      left = 20;
+    } else if (left + tooltipWidth > viewportWidth - 20) {
+      left = viewportWidth - tooltipWidth - 20;
+    }
+
+    // Constrain to viewport - vertical with padding
+    if (top < 20) {
+      top = 20;
+    } else if (top + tooltipHeight > viewportHeight - 20) {
+      top = viewportHeight - tooltipHeight - 20;
+    }
+
     setTooltipPosition({ top, left });
-  };
+  }, []);
+
+  useEffect(() => {
+    // Add delay to let DOM settle after step change
+    const timeout = setTimeout(() => {
+      const element = document.querySelector(steps[currentStep]?.target);
+      if (element) {
+        setTargetElement(element);
+        updateTooltipPosition(element, steps[currentStep].placement);
+
+        // Scroll behavior - use scrollIntoView for all sections
+        const scrollBlock = steps[currentStep]?.id === 'top-tracks' ? 'center' :
+                           steps[currentStep]?.id === 'recently-played' ? 'start' : 'center';
+
+        element.scrollIntoView({ behavior: 'smooth', block: scrollBlock });
+
+        // For top tracks only, reset internal scroll after
+        if (steps[currentStep]?.id === 'top-tracks') {
+          setTimeout(() => {
+            const internalScroll = element.querySelector('.overflow-y-auto');
+            if (internalScroll) {
+              internalScroll.scrollTop = 0;
+            }
+            setTargetElement(element);
+            updateTooltipPosition(element, steps[currentStep].placement);
+          }, 600);
+        }
+      }
+    }, 100);
+
+    // Debounced update function - but not for top-tracks during transition
+    let debounceTimer;
+    let isTopTracksTransitioning = steps[currentStep]?.id === 'top-tracks';
+
+    const handleUpdate = () => {
+      // Skip updates during top-tracks transition
+      if (isTopTracksTransitioning) {
+        return;
+      }
+
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        const currentElement = document.querySelector(steps[currentStep]?.target);
+        if (currentElement) {
+          setTargetElement(currentElement);
+          updateTooltipPosition(currentElement, steps[currentStep].placement);
+        }
+      }, 50);
+    };
+
+    // For top-tracks, allow updates again after transition is complete
+    if (isTopTracksTransitioning) {
+      setTimeout(() => {
+        isTopTracksTransitioning = false;
+      }, 1200); // After all animations complete
+    }
+
+    window.addEventListener('scroll', handleUpdate, true);
+    window.addEventListener('resize', handleUpdate);
+
+    return () => {
+      clearTimeout(timeout);
+      clearTimeout(debounceTimer);
+      window.removeEventListener('scroll', handleUpdate, true);
+      window.removeEventListener('resize', handleUpdate);
+    };
+  }, [currentStep, steps, updateTooltipPosition]);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -139,13 +214,29 @@ export default function SpotifyTour({ onComplete, premium }) {
     // Check if this is the connect-device or floating-button step for tighter padding and circular shape
     const isConnectDevice = steps[currentStep]?.id === 'connect-device';
     const isFloatingButton = steps[currentStep]?.id === 'floating-button';
+    const isTopArtists = steps[currentStep]?.id === 'top-artists';
+    const isTopTracks = steps[currentStep]?.id === 'top-tracks';
+
     const padding = (isConnectDevice || isFloatingButton) ? 2 : 8;
+    // Add extra top padding for top-artists to push it down slightly
+    const topOffset = isTopArtists ? 20 : 0;
+
+    // Limit height for top tracks to show only tracks 1-2 (~200px)
+    let height = rect.height + (padding * 2) - topOffset;
+    if (isTopTracks && height > 200) {
+      height = 236;
+    }
+
+    // Ensure minimum height for sections
+    if (height < 100) {
+      height = 100;
+    }
 
     return {
-      top: rect.top - padding,
+      top: rect.top - padding + topOffset,
       left: rect.left - padding,
       width: rect.width + (padding * 2),
-      height: rect.height + (padding * 2),
+      height: height,
     };
   };
 
@@ -188,13 +279,10 @@ export default function SpotifyTour({ onComplete, premium }) {
 
       {/* Tooltip */}
       <div
-        className="fixed z-[10001] w-[400px] bg-gradient-to-br from-[#1DB954] to-[#1ed760] text-white rounded-xl shadow-2xl p-6 transition-all duration-300"
+        className="fixed z-[10001] w-[320px] max-h-[calc(100vh-40px)] overflow-y-auto custom-scrollbar bg-gradient-to-br from-[#1DB954] to-[#1ed760] text-white rounded-xl shadow-2xl p-5 transition-all duration-300"
         style={{
           top: `${tooltipPosition.top}px`,
           left: `${tooltipPosition.left}px`,
-          transform: steps[currentStep]?.placement === 'right' || steps[currentStep]?.placement === 'left' 
-            ? 'translateY(-50%)' 
-            : 'none',
         }}
       >
         {/* Close Button */}
@@ -206,12 +294,12 @@ export default function SpotifyTour({ onComplete, premium }) {
         </button>
 
         {/* Content */}
-        <div className="space-y-4 mt-2">
+        <div className="space-y-3 mt-2">
           <div>
-            <h3 className="text-2xl font-bold mb-2">
+            <h3 className="text-xl font-bold mb-2">
               {steps[currentStep]?.title}
             </h3>
-            <p className="text-white/95 text-base leading-relaxed">
+            <p className="text-white/95 text-sm leading-relaxed">
               {steps[currentStep]?.description}
             </p>
           </div>
@@ -233,18 +321,18 @@ export default function SpotifyTour({ onComplete, premium }) {
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               {currentStep > 0 && (
                 <button
                   onClick={handlePrev}
-                  className="px-5 py-2.5 bg-white/20 hover:bg-white/30 rounded-lg transition-all font-medium"
+                  className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all font-medium text-sm"
                 >
                   Back
                 </button>
               )}
               <button
                 onClick={handleNext}
-                className="px-5 py-2.5 bg-white text-[#1DB954] hover:bg-white/90 rounded-lg font-bold transition-all shadow-lg"
+                className="px-4 py-2 bg-white text-[#1DB954] hover:bg-white/90 rounded-lg font-bold transition-all shadow-lg text-sm"
               >
                 {currentStep === steps.length - 1 ? 'Got it!' : 'Next'}
               </button>

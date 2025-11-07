@@ -149,7 +149,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
 
   // NEW Mobile View - Vertical scroll with stacked sections (NO Swiper)
   const MobileView = () => (
-    <div className="block lg:hidden w-full pt-16 pb-20 px-4 overflow-y-auto h-full">
+    <div className="block lg:hidden w-full pt-16 pb-20 px-4 overflow-y-auto custom-scrollbar h-full">
       {/* Top Artists - Horizontal scroll */}
       <div data-tour="top-artists-mobile">
         <UserTopArtists
@@ -193,8 +193,8 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
             {MobileView()}
 
             {/* DESKTOP - Full width layout */}
-            <div className="hidden lg:block h-full w-full overflow-y-auto">
-              <div className="w-full px-10 pt-20 pb-6">
+            <div className="hidden lg:block h-full w-full overflow-y-auto custom-scrollbar">
+              <div className="w-full px-10 pt-20 pb-28">
                 {/* Top Artists - Full width, horizontal scroll */}
                 <div className="h-auto min-h-[280px] mt-[-20px]" data-tour="top-artists">
                   <UserTopArtists accessToken={accessToken} userId={userId} onLoadingChange={handleTopArtistsLoadingChange} />

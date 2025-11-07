@@ -13,12 +13,18 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
     }, [onLoadingChange]);
 
     useEffect(() => {
-        if (!accessToken || isFetchingRef.current) return;
+        if (!accessToken) return;
 
-        const fetchRecentlyPlayed = async () => {
+        const fetchRecentlyPlayed = async (isInitialLoad = false) => {
+            if (isFetchingRef.current) return;
+
             isFetchingRef.current = true;
-            setIsLoading(true);
-            if (onLoadingChangeRef.current) onLoadingChangeRef.current(true);
+
+            // Only show loading overlay on initial load
+            if (isInitialLoad) {
+                setIsLoading(true);
+                if (onLoadingChangeRef.current) onLoadingChangeRef.current(true);
+            }
 
             try {
                 const res = await fetch(
@@ -40,13 +46,21 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
             } catch (error) {
                 console.error("Fetch error:", error);
             } finally {
-                setIsLoading(false);
+                if (isInitialLoad) {
+                    setIsLoading(false);
+                    if (onLoadingChangeRef.current) onLoadingChangeRef.current(false);
+                }
                 isFetchingRef.current = false;
-                if (onLoadingChangeRef.current) onLoadingChangeRef.current(false);
             }
         };
 
-        fetchRecentlyPlayed();
+        // Initial fetch with loading overlay
+        fetchRecentlyPlayed(true);
+
+        // Poll every 10 seconds (without loading overlay)
+        const interval = setInterval(() => fetchRecentlyPlayed(false), 10000);
+
+        return () => clearInterval(interval);
     }, [accessToken]);
 
     if (isLoading && onLoadingChange) {
@@ -63,14 +77,14 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
                 {name && <p className="text-[#b3b3b3] text-sm mt-1">For {name}</p>}
             </div>
 
-            {/* Horizontal scrollable container */}
-            <div className="flex-1 min-h-0 overflow-x-auto horizontal-scrollbar px-4 lg:px-6 pb-6">
+            {/* Grid container - 6 most recent */}
+            <div className="flex-1 min-h-0 px-4 lg:px-6 pb-6">
                 {recentTracks.length > 0 ? (
-                    <div className="flex gap-3 lg:gap-4 min-w-min pb-2">
-                        {recentTracks.map((item, index) => (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4">
+                        {recentTracks.slice(0, 6).map((item, index) => (
                             <div
                                 key={item.id + index}
-                                className="flex-shrink-0 w-36 lg:w-40 bg-[rgba(255,255,255,0.03)] rounded-lg p-3 cursor-pointer transition-all active:scale-95"
+                                className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3 cursor-pointer transition-all active:scale-95 hover:bg-[rgba(255,255,255,0.05)]"
                             >
                                 {/* Album cover */}
                                 <img
