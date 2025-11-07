@@ -73,6 +73,17 @@ export async function GET(req, { params }) {
       artistName = artistNameParam || 'Unknown Artist';
     }
 
+    // Get the user's favorite track from this artist in the time range
+    console.log('📍 About to fetch favorite track with params:', { userId, artistId, artistName, startDate, endDate });
+    const favoriteTrack = await getFavoriteTrackForArtist({
+      userId,
+      artistId,
+      artistName: artistName,  // Use resolved artistName, not artistNameParam
+      startDate,
+      endDate,
+    });
+    console.log('📍 Favorite track result:', favoriteTrack);
+
     if (dailyPlays.length === 0 || !dailyPlays.some((day) => day.artistSongs > 0)) {
       return NextResponse.json(
         {
@@ -103,6 +114,7 @@ export async function GET(req, { params }) {
       chartData,
       totalDays: chartData.length,
       totalPlays: chartData.reduce((sum, day) => sum + day.artistSongs, 0),
+      favoriteTrack: favoriteTrack || null,
     });
   } catch (error) {
     console.error('�?O Artist history API error:', error);
@@ -219,4 +231,52 @@ async function resolveArtistName(artistId, fallbackName) {
   }
 
   return fallbackName || null;
+}
+
+async function getFavoriteTrackForArtist({ userId, artistId, artistName, startDate, endDate }) {
+  try {
+    const { Prisma } = await import('@prisma/client');
+
+    console.log('🎵 Fetching favorite track for:', { userId, artistId, artistName, startDate, endDate });
+
+    const rows = await prisma.$queryRaw`
+      SELECT
+        t.id AS track_id,
+        t.name AS track_name,
+        COUNT(*)::bigint AS play_count
+      FROM plays p
+      INNER JOIN tracks t ON t.id = p.track_id
+      INNER JOIN artists ar ON ar.id = t.artist_id
+      WHERE
+        p.user_id = ${userId}
+        ${startDate ? Prisma.sql`AND p.played_at >= ${startDate}` : Prisma.empty}
+        ${endDate ? Prisma.sql`AND p.played_at <= ${endDate}` : Prisma.empty}
+        AND t.name IS NOT NULL
+        AND (
+          ${artistId ? Prisma.sql`t.artist_id = ${artistId}` : Prisma.sql`FALSE`}
+          OR ${artistName ? Prisma.sql`LOWER(ar.name) = LOWER(${artistName})` : Prisma.sql`FALSE`}
+        )
+      GROUP BY t.id, t.name
+      ORDER BY play_count DESC
+      LIMIT 1;
+    `;
+
+    console.log('🎵 Favorite track query result:', rows);
+
+    if (rows.length > 0) {
+      const result = {
+        trackId: rows[0].track_id,
+        trackName: rows[0].track_name,
+        playCount: Number(rows[0].play_count),
+      };
+      console.log('✅ Favorite track found:', result);
+      return result;
+    }
+
+    console.log('⚠️ No favorite track found');
+    return null;
+  } catch (error) {
+    console.error('❌ Error fetching favorite track:', error);
+    return null;
+  }
 }

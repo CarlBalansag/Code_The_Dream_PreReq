@@ -92,6 +92,8 @@ export function useArtistHistory(artistId, userId, timeRange = '30D', artistName
 
       // Only update state if component is still mounted and request wasn't aborted
       if (isMountedRef.current && !abortController.signal.aborted) {
+        console.log('📦 Full API response:', result);
+        console.log('🎵 Favorite track data:', result.favoriteTrack);
         setData(result);
         console.log(`✅ Fetched ${result.chartData.length} days of data for ${result.artistName}`);
       }

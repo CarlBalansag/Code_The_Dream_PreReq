@@ -20,13 +20,19 @@ body {
 }
 
 /* Custom scrollbar for vertical scrolling (default) */
+.custom-scrollbar {
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(29, 185, 84, 0.8) transparent;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   margin: 4px 0;
 }
@@ -35,6 +41,7 @@ body {
   background-color: rgba(29, 185, 84, 0.8);
   border-radius: 10px;
   background-clip: padding-box;
+  border: 2px solid transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -53,33 +60,44 @@ body {
 }
 
 /* Horizontal scrollbar for artist and recently played sections */
+.horizontal-scrollbar {
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(29, 185, 84, 0.8) rgba(255, 255, 255, 0.05);
+}
+
 .horizontal-scrollbar::-webkit-scrollbar {
-  height: 8px;
+  height: 10px;
 }
 
 .horizontal-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
 }
 
 .horizontal-scrollbar::-webkit-scrollbar-thumb {
   background-color: rgba(29, 185, 84, 0.8);
   border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 .horizontal-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: rgba(29, 185, 84, 1);
 }
 
-/* Hide scrollbar on mobile for horizontal sections */
+/* Mobile - keep scrollbar visible but thinner */
 @media (max-width: 1024px) {
   .horizontal-scrollbar::-webkit-scrollbar {
-    display: none;
+    height: 6px;
+  }
+
+  .horizontal-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(29, 185, 84, 0.6);
   }
 
   .horizontal-scrollbar {
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
   }
 }
 

@@ -28,7 +28,7 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
 
             try {
                 const res = await fetch(
-                    `https://api.spotify.com/v1/me/player/recently-played?limit=30`,
+                    `https://api.spotify.com/v1/me/player/recently-played?limit=50`,
                     { headers: { Authorization: `Bearer ${accessToken}` } }
                 );
                 if (!res.ok) {
@@ -71,20 +71,27 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
         <div className="w-full h-full min-h-0 flex flex-col">
             {/* Header (fixed within card, not in scroll) */}
             <div className="z-10 px-4 lg:px-6 pt-6 pb-5">
-                <p className="text-white text-2xl font-bold">
-                    Recently Played
-                </p>
+                <div className="flex items-baseline justify-between">
+                    <p className="text-white text-2xl font-bold">
+                        Recently Played
+                    </p>
+                    {recentTracks.length > 0 && (
+                        <p className="text-[#1DB954] text-xs font-medium">
+                            {Math.min(recentTracks.length, 25)} tracks
+                        </p>
+                    )}
+                </div>
                 {name && <p className="text-[#b3b3b3] text-sm mt-1">For {name}</p>}
             </div>
 
-            {/* Grid container - 6 most recent */}
-            <div className="flex-1 min-h-0 px-4 lg:px-6 pb-6">
+            {/* Horizontal scrolling container - 25 most recent with scrollbar */}
+            <div className="flex-1 min-h-0 overflow-x-auto horizontal-scrollbar px-4 lg:px-6 pb-6">
                 {recentTracks.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4">
-                        {recentTracks.slice(0, 6).map((item, index) => (
+                    <div className="flex gap-3 lg:gap-4 min-w-min pb-2">
+                        {recentTracks.slice(0, 25).map((item, index) => (
                             <div
                                 key={item.id + index}
-                                className="bg-[rgba(255,255,255,0.03)] rounded-lg p-3 cursor-pointer transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_8px_24px_rgba(29,185,84,0.3)] active:scale-95 hover:bg-[rgba(255,255,255,0.05)]"
+                                className="flex-shrink-0 w-36 sm:w-40 bg-[rgba(255,255,255,0.03)] rounded-lg p-3 cursor-pointer transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_8px_24px_rgba(29,185,84,0.3)] active:scale-95 hover:bg-[rgba(255,255,255,0.05)]"
                             >
                                 {/* Album cover */}
                                 <img
