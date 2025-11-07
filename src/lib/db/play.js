@@ -410,3 +410,27 @@ export async function getArtistPlayCount(
 
   return rows[0]?.play_count ? Number(rows[0].play_count) : 0;
 }
+
+/**
+ * Check if a user has any listening history for a specific artist
+ * @param {string} userId - User's Spotify ID
+ * @param {string} artistId - Artist's Spotify ID
+ * @returns {Promise<boolean>} - True if user has listened to this artist
+ */
+export async function hasArtistHistory(userId, artistId) {
+  if (!userId || !artistId) {
+    return false;
+  }
+
+  const count = await prisma.plays.count({
+    where: {
+      user_id: userId,
+      tracks: {
+        artist_id: artistId,
+      },
+    },
+    take: 1, // Only need to know if at least 1 exists
+  });
+
+  return count > 0;
+}

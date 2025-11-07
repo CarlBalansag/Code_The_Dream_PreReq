@@ -1,12 +1,72 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Search, Menu, X } from "lucide-react";
+import { useSpotifySearch } from '@/hooks/useSpotifySearch';
+import SearchResultsDropdown from '@/app/component/pages/search/SearchResultsDropdown';
 
 export default function Navbar({
   tourButton,
-  profileDropdown
+  profileDropdown,
+  accessToken,
+  userId,
+  onArtistClick,
+  onTrackClick,
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showResults, setShowResults] = useState(false);
+
+  // Refs for desktop and mobile search containers
+  const desktopSearchRef = useRef(null);
+  const mobileSearchRef = useRef(null);
+
+  // Use the custom search hook
+  const { results, loading, error, search, clearResults } = useSpotifySearch(accessToken);
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    if (value.length >= 1) {
+      search(value);
+      setShowResults(true);
+    } else {
+      clearResults();
+      setShowResults(false);
+    }
+  };
+
+  // Handle search input focus
+  const handleFocus = () => {
+    if (searchQuery.length >= 1) {
+      setShowResults(true);
+    }
+  };
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        desktopSearchRef.current &&
+        !desktopSearchRef.current.contains(event.target) &&
+        mobileSearchRef.current &&
+        !mobileSearchRef.current.contains(event.target)
+      ) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Close dropdown handler
+  const handleCloseDropdown = () => {
+    setShowResults(false);
+  };
 
   return (
     <>
@@ -26,13 +86,25 @@ export default function Navbar({
           {/* Right side - Search bar + Tour button + Profile */}
           <div className="flex items-center gap-4">
             {/* Search bar */}
-            <div className="relative w-80">
+            <div className="relative w-80" ref={desktopSearchRef}>
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#b3b3b3]" size={20} />
               <input
                 type="text"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onFocus={handleFocus}
                 placeholder="Search for songs, artists..."
                 className="w-full bg-[rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.1)] rounded-full py-2.5 pl-12 pr-4 text-white placeholder-[#b3b3b3] focus:outline-none focus:border-[#1db954] focus:bg-[rgba(255,255,255,0.15)] transition-all"
               />
+              {showResults && (
+                <SearchResultsDropdown
+                  results={results}
+                  loading={loading}
+                  onArtistClick={onArtistClick}
+                  onTrackClick={onTrackClick}
+                  onClose={handleCloseDropdown}
+                />
+              )}
             </div>
 
             {/* Tour button (passed from parent) */}
@@ -57,13 +129,25 @@ export default function Navbar({
           </button>
 
           {/* Search bar */}
-          <div className="relative flex-1">
+          <div className="relative flex-1" ref={mobileSearchRef}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#b3b3b3]" size={18} />
             <input
               type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onFocus={handleFocus}
               placeholder="Search..."
               className="w-full bg-[rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.1)] rounded-full py-2 pl-10 pr-4 text-sm text-white placeholder-[#b3b3b3] focus:outline-none focus:border-[#1db954] focus:bg-[rgba(255,255,255,0.15)] transition-all"
             />
+            {showResults && (
+              <SearchResultsDropdown
+                results={results}
+                loading={loading}
+                onArtistClick={onArtistClick}
+                onTrackClick={onTrackClick}
+                onClose={handleCloseDropdown}
+              />
+            )}
           </div>
 
           {/* Tour button + Profile on mobile (passed from parent) */}

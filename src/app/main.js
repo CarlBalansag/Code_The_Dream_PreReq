@@ -9,6 +9,8 @@ import LoadingDots from "./component/pages/components/loading";
 import BottomMiniPlayer from "./component/pages/components/bottom_player/BottomMiniPlayer";
 import ExpandedPlayer from "./component/pages/components/bottom_player/ExpandedPlayer";
 import Navbar from "./component/pages/components/navbar/Navbar";
+import SongModal from "./component/pages/info_page/SongModal";
+import BasicArtistModal from "./component/pages/info_page/BasicArtistModal";
 
 export default function CurrentlyPlaying({ accessToken, premium, name, userId, deviceConnected, tourButton, profileDropdown }) {
   const [song, setSong] = useState(null);
@@ -25,6 +27,10 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
     userTopTracks: true,
     recentlyPlayed: true,
   });
+
+  // Search modals state
+  const [selectedSong, setSelectedSong] = useState(null);
+  const [selectedArtistForBasicModal, setSelectedArtistForBasicModal] = useState(null);
 
   useEffect(() => {
     setMounted(true);
@@ -85,6 +91,52 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
       ...prev,
       recentlyPlayed: isLoading
     }));
+  }, []);
+
+  // Handle artist click from search
+  const handleArtistClick = useCallback(async (artist) => {
+    console.log('🎨 Artist clicked from search:', artist);
+
+    try {
+      // Check if user has listening history for this artist via API
+      const response = await fetch(
+        `/api/stats/artist-history-check?userId=${userId}&artistId=${artist.id}`
+      );
+
+      if (!response.ok) {
+        console.error('Failed to check artist history');
+        // Fallback to basic modal on error
+        setSelectedArtistForBasicModal(artist);
+        return;
+      }
+
+      const data = await response.json();
+      const hasHistory = data.hasHistory;
+
+      if (hasHistory) {
+        // User has history - this will be handled by UserTopArtists component
+        // We need to trigger the artist modal from there
+        // For now, we'll open the basic modal - you may need to refactor UserTopArtists
+        // to accept an external trigger for opening artist modals
+        console.log('User has history for this artist - opening ArtistModal');
+        // TODO: Integrate with existing ArtistModal from UserTopArtists
+        setSelectedArtistForBasicModal(artist);
+      } else {
+        // No history - show basic info modal
+        console.log('No history for this artist - opening BasicArtistModal');
+        setSelectedArtistForBasicModal(artist);
+      }
+    } catch (error) {
+      console.error('Error checking artist history:', error);
+      // Fallback to basic modal on error
+      setSelectedArtistForBasicModal(artist);
+    }
+  }, [userId]);
+
+  // Handle track click from search
+  const handleTrackClick = useCallback((track) => {
+    console.log('🎵 Track clicked from search:', track);
+    setSelectedSong(track);
   }, []);
 
   const isAnyInfoLoading = Object.values(infoLoadingStates).some(loading => loading);
@@ -174,7 +226,14 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
   return (
     <div className="absolute inset-0 overflow-hidden">
       {/* Navbar - Fixed at top */}
-      <Navbar tourButton={tourButton} profileDropdown={profileDropdown} />
+      <Navbar
+        tourButton={tourButton}
+        profileDropdown={profileDropdown}
+        accessToken={accessToken}
+        userId={userId}
+        onArtistClick={handleArtistClick}
+        onTrackClick={handleTrackClick}
+      />
 
       <div className="h-full w-full flex flex-col">
         <div className="flex-1 min-h-0">
@@ -244,6 +303,24 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
         accessToken={accessToken}
         getSong={getSong}
       />
+
+      {/* Song Modal - from search */}
+      {selectedSong && (
+        <SongModal
+          song={selectedSong}
+          userId={userId}
+          onClose={() => setSelectedSong(null)}
+          onArtistClick={handleArtistClick}
+        />
+      )}
+
+      {/* Basic Artist Modal - from search (no history) */}
+      {selectedArtistForBasicModal && (
+        <BasicArtistModal
+          artist={selectedArtistForBasicModal}
+          onClose={() => setSelectedArtistForBasicModal(null)}
+        />
+      )}
     </div>
   );
 }
