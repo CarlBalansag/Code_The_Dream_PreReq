@@ -171,7 +171,7 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
             </div>
 
             {/* Scrollable list - Two columns on desktop, single column on mobile */}
-            <div className="custom-scrollbar flex-1 min-h-0 overflow-y-auto px-4 lg:px-6 pb-6 max-h-[500px] lg:max-h-[600px]">
+            <div className="custom-scrollbar flex-1 min-h-0 overflow-y-auto px-4 lg:px-6 pb-6 max-h-[400px] lg:max-h-[402px]">
                 {currentTracks.length > 0 ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                         {currentTracks.map((item, index) => (
