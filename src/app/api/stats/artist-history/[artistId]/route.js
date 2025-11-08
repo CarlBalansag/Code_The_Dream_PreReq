@@ -1,4 +1,8 @@
-import { getArtistDailyHistory, getArtistFirstPlayDate } from '@/lib/db/play.js';
+import {
+  getArtistDailyHistory,
+  getArtistFirstPlayDate,
+  getArtistListeningDuration,
+} from '@/lib/db/play.js';
 import prisma from '@/lib/prisma.js';
 import { NextResponse } from 'next/server';
 
@@ -105,6 +109,13 @@ export async function GET(req, { params }) {
       console.log(`�o. Found ${chartData.length} days of data (including ${chartData.length - dailyPlays.length} empty days)`);
     }
 
+    const totalListeningTimeMs = await getArtistListeningDuration(userId, {
+      artistId,
+      artistName: artistNameParam,
+      startDate,
+      endDate,
+    });
+
     return NextResponse.json({
       artistId,
       artistName,
@@ -114,6 +125,7 @@ export async function GET(req, { params }) {
       chartData,
       totalDays: chartData.length,
       totalPlays: chartData.reduce((sum, day) => sum + day.artistSongs, 0),
+      totalListeningTimeMs,
       favoriteTrack: favoriteTrack || null,
     });
   } catch (error) {

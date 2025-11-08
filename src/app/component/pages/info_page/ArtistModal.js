@@ -67,6 +67,44 @@ export default function ArtistModal({ artist, userId, onClose }) {
     return null;
   };
 
+  const formatListeningTime = (ms) => {
+    if (!ms || ms <= 0) {
+      return '0m';
+    }
+
+    const totalMinutes = Math.floor(ms / 60000);
+    const days = Math.floor(totalMinutes / (60 * 24));
+    const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+    const minutes = totalMinutes % 60;
+
+    if (days > 0) {
+      return `${days}d${hours > 0 ? ` ${hours}h` : ''}`;
+    }
+    if (hours > 0) {
+      return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
+    }
+    return `${minutes}m`;
+  };
+
+  const getListeningTimeTooltip = (ms) => {
+    if (!ms || ms <= 0) {
+      return 'No listening time yet';
+    }
+
+    const hours = Math.floor(ms / 3600000);
+    const minutes = Math.floor((ms % 3600000) / 60000);
+    const parts = [];
+
+    if (hours > 0) {
+      parts.push(`${hours} hour${hours === 1 ? '' : 's'}`);
+    }
+    if (minutes > 0) {
+      parts.push(`${minutes} minute${minutes === 1 ? '' : 's'}`);
+    }
+
+    return parts.join(' ') || 'Less than 1 minute';
+  };
+
   // Handle background click
   const handleBackdropClick = (e) => {
     // Only close if clicking the backdrop itself, not its children
@@ -149,7 +187,7 @@ export default function ArtistModal({ artist, userId, onClose }) {
           {!loading && !error && data && data.chartData && data.chartData.length > 0 && (
             <div>
               {/* Stats Summary */}
-              <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-3 sm:mb-4">
                 <div className="bg-[#181818] rounded-lg p-2 sm:p-3">
                   <p className="text-gray-400 text-[10px] sm:text-xs mb-1">Total Plays</p>
                   <p className="text-white text-base sm:text-lg font-bold">{data.totalPlays}</p>
@@ -158,6 +196,15 @@ export default function ArtistModal({ artist, userId, onClose }) {
                   <p className="text-gray-400 text-[10px] sm:text-xs mb-1">Favorite Song</p>
                   <p className="text-white text-base sm:text-lg font-bold truncate" title={data.favoriteTrack?.trackName || 'N/A'}>
                     {data.favoriteTrack?.trackName || 'N/A'}
+                  </p>
+                </div>
+                <div className="bg-[#181818] rounded-lg p-2 sm:p-3">
+                  <p className="text-gray-400 text-[10px] sm:text-xs mb-1">Listening Time</p>
+                  <p
+                    className="text-white text-base sm:text-lg font-bold"
+                    title={getListeningTimeTooltip(data.totalListeningTimeMs)}
+                  >
+                    {formatListeningTime(data.totalListeningTimeMs)}
                   </p>
                 </div>
               </div>

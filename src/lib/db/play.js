@@ -411,6 +411,43 @@ export async function getArtistPlayCount(
   return rows[0]?.play_count ? Number(rows[0].play_count) : 0;
 }
 
+export async function getArtistListeningDuration(
+  userId,
+  { artistId = null, artistName = null, startDate = null, endDate = null } = {}
+) {
+  if (!userId || (!artistId && !artistName)) {
+    return 0;
+  }
+
+  const rows = await prisma.$queryRaw`
+    SELECT COALESCE(SUM(t.duration_ms), 0)::bigint AS total_duration_ms
+    FROM plays p
+    LEFT JOIN tracks t ON t.id = p.track_id
+    LEFT JOIN artists ar ON ar.id = t.artist_id
+    WHERE
+      p.user_id = ${userId}
+      ${startDate ? Prisma.sql`AND p.played_at >= ${startDate}` : Prisma.empty}
+      ${endDate ? Prisma.sql`AND p.played_at <= ${endDate}` : Prisma.empty}
+      AND (
+        ${
+          artistId
+            ? Prisma.sql`t.artist_id = ${artistId}`
+            : Prisma.sql`FALSE`
+        } OR ${
+          artistName
+            ? Prisma.sql`(ar.name IS NOT NULL AND LOWER(ar.name) = LOWER(${artistName}))`
+            : Prisma.sql`FALSE`
+        }
+      );
+  `;
+
+  const totalDuration = rows[0]?.total_duration_ms
+    ? Number(rows[0].total_duration_ms)
+    : 0;
+
+  return totalDuration;
+}
+
 /**
  * Check if a user has any listening history for a specific artist
  * @param {string} userId - User's Spotify ID
