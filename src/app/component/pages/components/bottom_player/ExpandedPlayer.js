@@ -1,5 +1,6 @@
 "use client";
 import { useState, useCallback, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Mousewheel, Keyboard } from "swiper/modules";
@@ -30,9 +31,6 @@ export default function ExpandedPlayer({
     albums: true,
   });
 
-  // Animation state: null (not mounted), 'entering', 'entered', 'exiting'
-  const [animationState, setAnimationState] = useState(null);
-
   const handleLiveSongLoading = useCallback((isLoading) => {
     setLoadingStates(prev => ({ ...prev, liveSong: isLoading }));
     if (onLiveSongLoadingChange) onLiveSongLoadingChange(isLoading);
@@ -48,97 +46,49 @@ export default function ExpandedPlayer({
     if (onAlbumsLoadingChange) onAlbumsLoadingChange(isLoading);
   }, [onAlbumsLoadingChange]);
 
-  // Handle opening animation
-  useEffect(() => {
-    if (isExpanded) {
-      if (animationState === null) {
-        // Mount and start entering
-        setAnimationState('entering');
-        // Trigger animation after mount
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            setAnimationState('entered');
-          });
-        });
-      } else if (animationState === 'exiting') {
-        // If trying to open while exiting, reset to entering
-        setAnimationState('entering');
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            setAnimationState('entered');
-          });
-        });
-      }
-    } else if (!isExpanded && (animationState === 'entered' || animationState === 'entering')) {
-      // Start exit animation
-      setAnimationState('exiting');
-      // Wait for animation to complete before unmounting
-      const timeout = setTimeout(() => {
-        setAnimationState(null);
-      }, 500); // Match transition duration
-      return () => clearTimeout(timeout);
-    }
-  }, [isExpanded, animationState]);
-
   // Lock body scroll when expanded
   useEffect(() => {
-    if (animationState === 'entered') {
-      // Save original overflow
+    if (isExpanded) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
-      
+
       return () => {
-        // Restore original overflow
         document.body.style.overflow = originalOverflow;
       };
     }
-  }, [animationState]);
-
-  const handleClose = () => {
-    // Just call onClose, let the useEffect handle the animation
-    onClose();
-  };
+  }, [isExpanded]);
 
   if (!song || !song.item) return null;
 
-  // Don't render at all if not mounted
-  if (animationState === null) return null;
-
-  // Determine transform based on animation state
-  const getTransform = () => {
-    switch (animationState) {
-      case 'entering':
-        return 'translate-y-full';
-      case 'entered':
-        return 'translate-y-0';
-      case 'exiting':
-        return 'translate-y-full';
-      default:
-        return 'translate-y-full';
-    }
-  };
-
-  const getBackdropOpacity = () => {
-    return animationState === 'entered' ? 'opacity-100' : 'opacity-0';
-  };
-
   return (
-    <>
-      {/* Backdrop overlay */}
-      <div
-        className={`fixed inset-0 bg-black/80 transition-opacity duration-500 z-40 ${getBackdropOpacity()} ${animationState === 'entered' ? 'pointer-events-auto' : 'pointer-events-none'}`}
-        onClick={animationState === 'entered' ? handleClose : undefined}
-      />
+    <AnimatePresence mode="wait">
+      {isExpanded && (
+        <>
+          {/* Backdrop overlay */}
+          <motion.div
+            key="expanded-player-backdrop"
+            className="fixed inset-0 bg-black/80 z-40"
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          />
 
-      {/* Expanded Player Container */}
-      <div
-        id="now-playing-expanded"
-        className={`fixed inset-0 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 transition-transform duration-500 ease-out z-50 ${getTransform()}`}
-      >
+          {/* Expanded Player Container */}
+          <motion.div
+            key="expanded-player"
+            id="now-playing-expanded"
+            className="fixed inset-0 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 z-50"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          >
         {/* Close Button - Top Right */}
         <button
           id="close-now-playing-btn"
-          onClick={handleClose}
+          onClick={onClose}
           className="absolute top-20 right-6 text-white hover:text-[#1DB954] transition-colors z-[100]"
           style={{ pointerEvents: 'auto' }}
         >
@@ -253,7 +203,9 @@ export default function ExpandedPlayer({
             </div>
           </div>
         </div>
-      </div>
-    </>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

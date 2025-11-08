@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, FileJson, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
 /**
@@ -167,17 +168,26 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
     onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
-      onClick={handleClose}
-    >
-      <div
-        className="bg-[#121212] rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <AnimatePresence mode="wait">
+      {isOpen && (
+        <motion.div
+          key="import-modal"
+          className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
+          onClick={handleClose}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            className="bg-[#121212] rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.3 }}
+          >
         {/* Header */}
         <div className="sticky top-0 z-10 bg-[#121212] border-b border-[#282828] p-6 flex items-center justify-between">
           <div>
@@ -388,7 +398,9 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
             </div>
           )}
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

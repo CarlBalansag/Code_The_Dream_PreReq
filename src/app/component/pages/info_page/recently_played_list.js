@@ -85,7 +85,7 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
             </div>
 
             {/* Horizontal scrolling container - 25 most recent with scrollbar */}
-            <div className="flex-1 min-h-0 overflow-x-auto horizontal-scrollbar px-4 lg:px-6 pb-6">
+            <div className="flex-1 min-h-0 overflow-x-auto horizontal-scrollbar scroll-fade-horizontal px-4 lg:px-6 pb-6">
                 {recentTracks.length > 0 ? (
                     <div className="flex gap-3 lg:gap-4 min-w-min pb-2">
                         {recentTracks.slice(0, 25).map((item, index) => (

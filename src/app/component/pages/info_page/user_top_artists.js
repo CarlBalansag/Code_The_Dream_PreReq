@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import ArtistModal from "./ArtistModal";
 
 const TIME_RANGES = [
@@ -195,9 +196,19 @@ export default function UserTopArtists({ accessToken, userId }) {
     all_time: {},
   });
   const [timeRange, setTimeRange] = useState("short_term");
+  const [direction, setDirection] = useState(0);
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Handle time range change with direction tracking
+  const handleTimeRangeChange = (newRange) => {
+    const ranges = TIME_RANGES.map(r => r.key);
+    const currentIndex = ranges.indexOf(timeRange);
+    const newIndex = ranges.indexOf(newRange);
+    setDirection(newIndex > currentIndex ? 1 : -1);
+    setTimeRange(newRange);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -384,22 +395,46 @@ export default function UserTopArtists({ accessToken, userId }) {
     </div>
   );
 
+  // Animation variants for content
+  const contentVariants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction) => ({
+      x: direction > 0 ? -300 : 300,
+      opacity: 0,
+    }),
+  };
+
   return (
     <div className="w-full h-full min-h-0 flex flex-col ">
       <div className="z-10 px-4 lg:px-6 pt-6 mb-5">
         <p className="text-white text-2xl font-bold mb-4">Top Artists</p>
-        <div className="flex justify-start gap-2 flex-wrap">
+        <div className="flex justify-start gap-2 flex-wrap relative">
           {TIME_RANGES.map(({ key, label }) => (
             <button
               key={key}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors z-10 ${
                 timeRange === key
-                  ? "bg-[#1DB954] text-black"
-                  : "bg-[rgba(255,255,255,0.05)] text-white hover:bg-[rgba(255,255,255,0.1)]"
+                  ? "text-black"
+                  : "text-white hover:bg-[rgba(255,255,255,0.1)]"
               }`}
-              onClick={() => setTimeRange(key)}
+              onClick={() => handleTimeRangeChange(key)}
               disabled={isLoading}
             >
+              {timeRange === key && (
+                <motion.div
+                  layoutId="top-artists-pill"
+                  className="absolute inset-0 bg-[#1DB954] rounded-lg"
+                  style={{ zIndex: -1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
               {label}
             </button>
           ))}
@@ -407,31 +442,63 @@ export default function UserTopArtists({ accessToken, userId }) {
         {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
       </div>
 
-      <div className=" pt-5 flex-1 min-h-0 overflow-x-auto horizontal-scrollbar px-4 lg:px-6 pb-6">
-        {isLoading ? (
-          <div className="flex gap-4 min-w-min pb-2">
-            {[...Array(6)].map((_, index) => (
-              <SkeletonCard key={`skeleton-${index}`} />
-            ))}
-          </div>
-        ) : currentArtists.length > 0 ? (
-          <div className="flex gap-4 min-w-min pb-2">
-            {currentArtists.map((artist, index) => renderArtistCard(artist, index))}
-          </div>
-        ) : (
-          <p className="text-white text-center py-8">
-            No data available for this time range.
-          </p>
-        )}
+      <div className=" pt-5 flex-1 min-h-0 overflow-x-auto horizontal-scrollbar scroll-fade-horizontal px-4 lg:px-6 pb-6">
+        <AnimatePresence mode="wait" initial={false} custom={direction}>
+          {isLoading ? (
+            <motion.div
+              key="loading"
+              className="flex gap-4 min-w-min pb-2"
+              variants={contentVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              custom={direction}
+              transition={{ duration: 0.3 }}
+            >
+              {[...Array(6)].map((_, index) => (
+                <SkeletonCard key={`skeleton-${index}`} />
+              ))}
+            </motion.div>
+          ) : currentArtists.length > 0 ? (
+            <motion.div
+              key={timeRange}
+              className="flex gap-4 min-w-min pb-2"
+              variants={contentVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              custom={direction}
+              transition={{ duration: 0.3 }}
+            >
+              {currentArtists.map((artist, index) => renderArtistCard(artist, index))}
+            </motion.div>
+          ) : (
+            <motion.p
+              key="no-data"
+              className="text-white text-center py-8"
+              variants={contentVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              custom={direction}
+              transition={{ duration: 0.3 }}
+            >
+              No data available for this time range.
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
 
-      {selectedArtist && (
-        <ArtistModal
-          artist={selectedArtist}
-          userId={userId}
-          onClose={() => setSelectedArtist(null)}
-        />
-      )}
+      <AnimatePresence mode="wait">
+        {selectedArtist && (
+          <ArtistModal
+            key="artist-modal"
+            artist={selectedArtist}
+            userId={userId}
+            onClose={() => setSelectedArtist(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

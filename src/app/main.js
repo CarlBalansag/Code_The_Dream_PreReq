@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
+import { AnimatePresence } from "framer-motion";
 import RecentlyPlayedList from "./component/pages/info_page/recently_played_list";
 import UserTopArtists from "./component/pages/info_page/user_top_artists";
 import UserTopTracks from "./component/pages/info_page/user_top_tracks";
@@ -305,22 +306,28 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
       />
 
       {/* Song Modal - from search */}
-      {selectedSong && (
-        <SongModal
-          song={selectedSong}
-          userId={userId}
-          onClose={() => setSelectedSong(null)}
-          onArtistClick={handleArtistClick}
-        />
-      )}
+      <AnimatePresence mode="wait">
+        {selectedSong && (
+          <SongModal
+            key="song-modal"
+            song={selectedSong}
+            userId={userId}
+            onClose={() => setSelectedSong(null)}
+            onArtistClick={handleArtistClick}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Basic Artist Modal - from search (no history) */}
-      {selectedArtistForBasicModal && (
-        <BasicArtistModal
-          artist={selectedArtistForBasicModal}
-          onClose={() => setSelectedArtistForBasicModal(null)}
-        />
-      )}
+      <AnimatePresence mode="wait">
+        {selectedArtistForBasicModal && (
+          <BasicArtistModal
+            key="basic-artist-modal"
+            artist={selectedArtistForBasicModal}
+            onClose={() => setSelectedArtistForBasicModal(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { motion } from 'framer-motion';
 
 export default function SpotifyTour({ onComplete, premium }) {
   const [currentStep, setCurrentStep] = useState(0);
@@ -244,7 +245,7 @@ export default function SpotifyTour({ onComplete, premium }) {
     <>
       {/* Backdrop with rectangular cutout using box-shadow */}
       {targetElement && (
-        <div
+        <motion.div
           className={`fixed pointer-events-none z-[9999] transition-all duration-300 ${
             steps[currentStep]?.id === 'connect-device' || steps[currentStep]?.id === 'floating-button' ? 'rounded-full' : 'rounded-xl'
           }`}
@@ -255,35 +256,51 @@ export default function SpotifyTour({ onComplete, premium }) {
             height: getSpotlightStyle().height,
             boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.7)',
           }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
         />
       )}
 
       {/* Clickable overlay to close tour */}
-      <div 
-        className="fixed inset-0 z-[9998]" 
+      <motion.div
+        className="fixed inset-0 z-[9998]"
         onClick={onComplete}
         style={{ pointerEvents: 'auto' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
       />
 
       {/* Spotlight Border */}
       {targetElement && (
-        <div
+        <motion.div
           className={`fixed z-[10000] transition-all duration-300 pointer-events-none border-4 border-[#1ed760] shadow-[0_0_30px_rgba(30,215,96,0.6)] ${
             steps[currentStep]?.id === 'connect-device' || steps[currentStep]?.id === 'floating-button' ? 'rounded-full' : 'rounded-xl'
           }`}
           style={{
             ...getSpotlightStyle(),
           }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.3 }}
         />
       )}
 
       {/* Tooltip */}
-      <div
+      <motion.div
         className="fixed z-[10001] w-[320px] max-h-[calc(100vh-40px)] overflow-y-auto custom-scrollbar bg-gradient-to-br from-[#1DB954] to-[#1ed760] text-white rounded-xl shadow-2xl p-5 transition-all duration-300"
         style={{
           top: `${tooltipPosition.top}px`,
           left: `${tooltipPosition.left}px`,
         }}
+        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 10 }}
+        transition={{ duration: 0.3 }}
       >
         {/* Close Button */}
         <button
@@ -352,7 +369,7 @@ export default function SpotifyTour({ onComplete, premium }) {
             'left-1/2 -translate-x-1/2 -bottom-2'
           }`}
         />
-      </div>
+      </motion.div>
     </>
   );
 }

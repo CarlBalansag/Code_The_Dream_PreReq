@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Search, Menu, X } from "lucide-react";
 import { useSpotifySearch } from '@/hooks/useSpotifySearch';
 import SearchResultsDropdown from '@/app/component/pages/search/SearchResultsDropdown';
@@ -19,6 +20,49 @@ export default function Navbar({
   // Refs for desktop and mobile search containers
   const desktopSearchRef = useRef(null);
   const mobileSearchRef = useRef(null);
+
+  // Variants for sidebar animations
+  const sidebarVariants = {
+    hidden: {
+      x: "-100%",
+      opacity: 0
+    },
+    visible: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    },
+    exit: {
+      x: "-100%",
+      opacity: 0,
+      transition: {
+        duration: 0.3
+      }
+    }
+  };
+
+  const menuItemVariants = {
+    hidden: {
+      x: -20,
+      opacity: 0
+    },
+    visible: {
+      x: 0,
+      opacity: 1
+    }
+  };
+
+  const backdropVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 }
+  };
 
   // Use the custom search hook
   const { results, loading, error, search, clearResults } = useSpotifySearch(accessToken);
@@ -159,54 +203,61 @@ export default function Navbar({
       </div>
 
       {/* Mobile Sidebar */}
-      {isSidebarOpen && (
-        <>
-          {/* Dark overlay */}
-          <div
-            className="lg:hidden fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm"
-            onClick={() => setIsSidebarOpen(false)}
-          />
+      <AnimatePresence mode="wait">
+        {isSidebarOpen && (
+          <>
+            {/* Dark overlay */}
+            <motion.div
+              key="sidebar-backdrop"
+              className="lg:hidden fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm"
+              onClick={() => setIsSidebarOpen(false)}
+              variants={backdropVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            />
 
-          {/* Sidebar panel */}
-          <div className="lg:hidden fixed top-0 left-0 bottom-0 z-[70] w-64 bg-[#0a0a0a] border-r border-[rgba(255,255,255,0.1)] animate-slide-in">
-            {/* Sidebar header */}
-            <div className="p-4 border-b border-[rgba(255,255,255,0.1)] flex items-center justify-between">
-              <h2 className="text-white font-bold text-lg">Menu</h2>
-              <button
-                onClick={() => setIsSidebarOpen(false)}
-                className="p-2 hover:bg-[rgba(255,255,255,0.1)] rounded-lg transition-colors"
-                aria-label="Close menu"
-              >
-                <X className="text-white" size={20} />
-              </button>
-            </div>
+            {/* Sidebar panel */}
+            <motion.div
+              key="sidebar-panel"
+              className="lg:hidden fixed top-0 left-0 bottom-0 z-[70] w-64 bg-[#0a0a0a] border-r border-[rgba(255,255,255,0.1)]"
+              variants={sidebarVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              {/* Sidebar header */}
+              <div className="p-4 border-b border-[rgba(255,255,255,0.1)] flex items-center justify-between">
+                <h2 className="text-white font-bold text-lg">Menu</h2>
+                <button
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="p-2 hover:bg-[rgba(255,255,255,0.1)] rounded-lg transition-colors"
+                  aria-label="Close menu"
+                >
+                  <X className="text-white" size={20} />
+                </button>
+              </div>
 
-            {/* Sidebar navigation */}
-            <div className="p-4 space-y-2">
-              <button className="w-full px-6 py-3 bg-[#1db954] text-black font-semibold rounded-lg hover:bg-[#1ed760] transition-colors text-left">
-                My Music
-              </button>
-              <button className="w-full px-6 py-3 bg-transparent text-[#b3b3b3] font-semibold rounded-lg hover:text-white hover:bg-[rgba(255,255,255,0.1)] transition-colors text-left">
-                Everyone's Listening
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-
-      <style jsx>{`
-        @keyframes slide-in {
-          from {
-            transform: translateX(-100%);
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-        .animate-slide-in {
-          animation: slide-in 0.3s ease-out;
-        }
-      `}</style>
+              {/* Sidebar navigation */}
+              <div className="p-4 space-y-2">
+                <motion.button
+                  className="w-full px-6 py-3 bg-[#1db954] text-black font-semibold rounded-lg hover:bg-[#1ed760] transition-colors text-left"
+                  variants={menuItemVariants}
+                >
+                  My Music
+                </motion.button>
+                <motion.button
+                  className="w-full px-6 py-3 bg-transparent text-[#b3b3b3] font-semibold rounded-lg hover:text-white hover:bg-[rgba(255,255,255,0.1)] transition-colors text-left"
+                  variants={menuItemVariants}
+                >
+                  Everyone's Listening
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useArtistHistory } from '@/hooks/useArtistHistory';
@@ -114,13 +115,21 @@ export default function ArtistModal({ artist, userId, onClose }) {
   };
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 z-[100000] flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-md"
       onClick={handleBackdropClick}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4 }}
     >
-      <div
+      <motion.div
         className="bg-[#121212] rounded-xl shadow-2xl w-full sm:w-[90vw] lg:w-[80vw] max-w-[1200px] max-h-[90vh] sm:max-h-[85vh] overflow-y-auto custom-scrollbar"
         onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.3 }}
       >
         {/* Header */}
         <div className="sticky top-0 z-10 bg-[#121212] border-b border-[#282828] p-3 sm:p-4 flex items-center justify-between">
@@ -302,7 +311,7 @@ export default function ArtistModal({ artist, userId, onClose }) {
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

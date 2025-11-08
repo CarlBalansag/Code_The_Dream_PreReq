@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { X, Music, Calendar, Clock } from 'lucide-react';
 
 /**
@@ -76,13 +77,21 @@ export default function SongModal({ song, userId, onClose, onArtistClick }) {
   };
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 z-[100000] flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-md"
       onClick={handleBackdropClick}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
     >
-      <div
+      <motion.div
         className="bg-[#121212] rounded-xl shadow-2xl w-full sm:w-[600px] max-w-[90vw] max-h-[90vh] overflow-y-auto custom-scrollbar"
         onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.3 }}
       >
         {/* Header */}
         <div className="sticky top-0 z-10 bg-[#121212] border-b border-[#282828] p-3 sm:p-4 flex items-center justify-between">
@@ -189,7 +198,7 @@ export default function SongModal({ song, userId, onClose, onArtistClick }) {
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

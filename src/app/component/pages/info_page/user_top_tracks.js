@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Play, Pause } from "lucide-react";
 
 export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingChange, onPlayClick }) {
@@ -9,11 +10,37 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
         long_term: []
     });
     const [timeRange, setTimeRange] = useState("short_term");
+    const [direction, setDirection] = useState(0);
     const [hoveredTrackId, setHoveredTrackId] = useState(null);
     const [playingTrackId, setPlayingTrackId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const onLoadingChangeRef = useRef(onLoadingChange);
     const hasFetchedRef = useRef(false);
+
+    // Handle time range change with direction tracking
+    const handleTimeRangeChange = (newRange) => {
+        const ranges = ["short_term", "medium_term", "long_term"];
+        const currentIndex = ranges.indexOf(timeRange);
+        const newIndex = ranges.indexOf(newRange);
+        setDirection(newIndex > currentIndex ? 1 : -1);
+        setTimeRange(newRange);
+    };
+
+    // Animation variants for content
+    const contentVariants = {
+        enter: (direction) => ({
+            x: direction > 0 ? 300 : -300,
+            opacity: 0,
+        }),
+        center: {
+            x: 0,
+            opacity: 1,
+        },
+        exit: (direction) => ({
+            x: direction > 0 ? -300 : 300,
+            opacity: 0,
+        }),
+    };
 
     // Keep ref up to date
     useEffect(() => {
@@ -149,17 +176,25 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
             {/* Header (fixed within card, not in scroll) */}
             <div className="z-10 px-4 lg:px-6 pt-6 pb-5">
                 <p className="text-white text-2xl font-bold mb-4">Top Tracks</p>
-                <div className="flex justify-start gap-2">
+                <div className="flex justify-start gap-2 relative">
                     {["short_term", "medium_term", "long_term"].map((range) => (
                         <button
                             key={range}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                            className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors z-10 ${
                                 timeRange === range
-                                    ? "bg-[#1DB954] text-black"
-                                    : "bg-[rgba(255,255,255,0.05)] text-white hover:bg-[rgba(255,255,255,0.1)]"
+                                    ? "text-black"
+                                    : "text-white hover:bg-[rgba(255,255,255,0.1)]"
                             }`}
-                            onClick={() => setTimeRange(range)}
+                            onClick={() => handleTimeRangeChange(range)}
                         >
+                            {timeRange === range && (
+                                <motion.div
+                                    layoutId="top-tracks-pill"
+                                    className="absolute inset-0 bg-[#1DB954] rounded-lg"
+                                    style={{ zIndex: -1 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                />
+                            )}
                             {range === "short_term"
                                 ? "4 Weeks"
                                 : range === "medium_term"
@@ -172,9 +207,19 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
 
             {/* Scrollable list - Two columns on desktop, single column on mobile */}
             <div className="custom-scrollbar flex-1 min-h-0 overflow-y-auto px-4 lg:px-6 pb-6 max-h-[400px] lg:max-h-[402px]">
-                {currentTracks.length > 0 ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                        {currentTracks.map((item, index) => (
+                <AnimatePresence mode="wait" initial={false} custom={direction}>
+                    {currentTracks.length > 0 ? (
+                        <motion.div
+                            key={timeRange}
+                            className="grid grid-cols-1 lg:grid-cols-2 gap-3"
+                            variants={contentVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            custom={direction}
+                            transition={{ duration: 0.3 }}
+                        >
+                            {currentTracks.map((item, index) => (
                             <div
                                 key={item.id}
                                 className="bg-[rgba(255,255,255,0.03)] border border-transparent rounded-lg p-3 lg:p-4 flex items-center gap-3 lg:gap-4 transition-all hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] active:scale-[0.98] lg:active:scale-100 group"
@@ -212,10 +257,22 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                                 </div>
                             </div>
                         ))}
-                    </div>
-                ) : (
-                    <p className="text-white text-center py-8">No data available.</p>
-                )}
+                        </motion.div>
+                    ) : (
+                        <motion.p
+                            key="no-data"
+                            className="text-white text-center py-8"
+                            variants={contentVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            custom={direction}
+                            transition={{ duration: 0.3 }}
+                        >
+                            No data available.
+                        </motion.p>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );
