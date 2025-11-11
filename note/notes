@@ -72,7 +72,21 @@ November 7th, 2025 6:57 AM // TODO
     - hover on graph more maybe zoom in idk fix hover jumping month to month maybe day instead
     - fix tour adjusting highlighted box movement
 
-i cant really do the first two for now till we get a different database because i cant import everything so i could fix it properly for now
+November 11th, 2025
+    Import Data visualization broken no blur
+        and no exit button
 
+    when searching for an artist, if the artist has been listened too, open up there ArtistModal
+        if not listened to we gotta figure out what to replace the other section so it just doesn't say 0 and empty graph
+
+    when searching for song, figure out ideas for what can be on the modal
+
+    on UserTopArtist the Top#1 etc change that to something else not Top#1
+
+    When on mobile view fix tour, maybe need a whole new tour just for mobile view
+
+    Remove 25 tracks on Recently Played
+
+    Remove ArtistModal Insight, find new things to put in there
 
 
