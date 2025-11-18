@@ -269,10 +269,12 @@ return (
         </h2>
         <ul className="space-y-3">
         {albums.map((album) => (
-            <li
-            key={album.id}
+            <li key={album.id}>
+            <button
+            type="button"
             onClick={() => handleAlbumClick(album)}
-            className="flex items-center space-x-4 bg-[#212121] p-3 rounded-lg cursor-pointer hover:bg-[#2a2a2a] transition-colors"
+            className="flex items-center space-x-4 bg-[#212121] p-3 rounded-lg cursor-pointer hover:bg-[#2a2a2a] transition-colors w-full text-left"
+            aria-label={`View tracks for ${album.name}`}
             >
             <Image
                 src={album.images[0]?.url || ""}
@@ -285,6 +287,7 @@ return (
                 <p className="text-white font-medium text-center">{album.name}</p>
                 <p className="text-sm text-gray-400 text-center">{album.release_date}</p>
             </div>
+            </button>
             </li>
         ))}
         </ul>

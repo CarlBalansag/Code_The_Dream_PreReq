@@ -23,7 +23,9 @@
       "Bash(npm run check:db:*)",
       "Bash(git show:*)",
       "Bash(npx prisma generate:*)",
-      "Bash(del:*)"
+      "Bash(del:*)",
+      "Bash(git apply:*)",
+      "Bash(netstat:*)"
     ],
     "deny": [],
     "ask": []

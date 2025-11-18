@@ -115,30 +115,20 @@ export default function Navbar({
   return (
     <>
       {/* Desktop Navbar - Fixed at top for screens >= 1024px */}
-      <nav className="hidden lg:block fixed top-0 left-0 right-0 z-50 bg-[rgba(10,10,10,0.95)] backdrop-blur-md border-b border-[rgba(255,255,255,0.1)]">
-        <div className="w-full px-10 py-4 flex items-center justify-between">
-          {/* Left side - Navigation buttons */}
-          <div className="flex items-center gap-4">
-            <button className="px-6 py-2 bg-[#1db954] text-black font-semibold rounded-full hover:bg-[#1ed760] transition-colors">
-              My Music
-            </button>
-            <button className="px-6 py-2 bg-transparent text-[#b3b3b3] font-semibold rounded-full hover:text-white hover:bg-[rgba(255,255,255,0.1)] transition-colors">
-              Everyone's Listening
-            </button>
-          </div>
-
+      <nav aria-label="Main navigation" className="hidden lg:block fixed top-0 left-0 right-0 z-50 bg-[rgba(10,10,10,0.95)] backdrop-blur-md border-b border-[rgba(255,255,255,0.1)]">
+        <div className="w-full px-10 py-4 flex items-center justify-end">
           {/* Right side - Search bar + Tour button + Profile */}
           <div className="flex items-center gap-4">
             {/* Search bar */}
             <div className="relative w-80" ref={desktopSearchRef}>
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#b3b3b3]" size={20} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-200" size={20} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onFocus={handleFocus}
                 placeholder="Search for songs, artists..."
-                className="w-full bg-[rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.1)] rounded-full py-2.5 pl-12 pr-4 text-white placeholder-[#b3b3b3] focus:outline-none focus:border-[#1db954] focus:bg-[rgba(255,255,255,0.15)] transition-all"
+                className="w-full bg-[rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.1)] rounded-full py-2.5 pl-12 pr-4 text-white placeholder-gray-200 focus:outline-none focus:border-[#1db954] focus:bg-[rgba(255,255,255,0.15)] transition-all"
               />
               {showResults && (
                 <SearchResultsDropdown
@@ -161,12 +151,12 @@ export default function Navbar({
       </nav>
 
       {/* Mobile - Fixed search bar + hamburger menu for screens < 1024px */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[rgba(10,10,10,0.95)] backdrop-blur-md border-b border-[rgba(255,255,255,0.1)]">
+      <nav aria-label="Main navigation" className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[rgba(10,10,10,0.95)] backdrop-blur-md border-b border-[rgba(255,255,255,0.1)]">
         <div className="px-4 py-3 flex items-center gap-3">
           {/* Hamburger menu button */}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 hover:bg-[rgba(255,255,255,0.1)] rounded-lg transition-colors"
+            className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-[rgba(255,255,255,0.1)] rounded-lg transition-colors"
             aria-label="Toggle menu"
           >
             <Menu className="text-white" size={24} />
@@ -174,14 +164,14 @@ export default function Navbar({
 
           {/* Search bar */}
           <div className="relative flex-1" ref={mobileSearchRef}>
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#b3b3b3]" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-200" size={18} />
             <input
               type="text"
               value={searchQuery}
               onChange={handleSearchChange}
               onFocus={handleFocus}
               placeholder="Search..."
-              className="w-full bg-[rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.1)] rounded-full py-2 pl-10 pr-4 text-sm text-white placeholder-[#b3b3b3] focus:outline-none focus:border-[#1db954] focus:bg-[rgba(255,255,255,0.15)] transition-all"
+              className="w-full bg-[rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.1)] rounded-full py-2 pl-10 pr-4 text-sm text-white placeholder-gray-200 focus:outline-none focus:border-[#1db954] focus:bg-[rgba(255,255,255,0.15)] transition-all"
             />
             {showResults && (
               <SearchResultsDropdown
@@ -200,7 +190,7 @@ export default function Navbar({
             {profileDropdown}
           </div>
         </div>
-      </div>
+      </nav>
 
       {/* Mobile Sidebar */}
       <AnimatePresence mode="wait">
@@ -239,21 +229,7 @@ export default function Navbar({
                 </button>
               </div>
 
-              {/* Sidebar navigation */}
-              <div className="p-4 space-y-2">
-                <motion.button
-                  className="w-full px-6 py-3 bg-[#1db954] text-black font-semibold rounded-lg hover:bg-[#1ed760] transition-colors text-left"
-                  variants={menuItemVariants}
-                >
-                  My Music
-                </motion.button>
-                <motion.button
-                  className="w-full px-6 py-3 bg-transparent text-[#b3b3b3] font-semibold rounded-lg hover:text-white hover:bg-[rgba(255,255,255,0.1)] transition-colors text-left"
-                  variants={menuItemVariants}
-                >
-                  Everyone's Listening
-                </motion.button>
-              </div>
+              {/* Sidebar navigation - Reserved for future features */}
             </motion.div>
           </>
         )}

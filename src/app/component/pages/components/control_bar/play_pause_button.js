@@ -34,8 +34,9 @@ return (
     <label
     className="relative flex items-center justify-center cursor-pointer"
     style={{ fontSize: `${size}px` }}
+    aria-label={localPlaying ? "Pause" : "Play"}
     >
-    <input type="checkbox" checked={localPlaying} onChange={togglePlayPause} className="hidden" />
+    <input type="checkbox" checked={localPlaying} onChange={togglePlayPause} className="hidden" aria-label={localPlaying ? "Pause" : "Play"} />
 
     {!localPlaying ? (
         <svg className="fill-white" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512">

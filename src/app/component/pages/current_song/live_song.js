@@ -53,7 +53,7 @@ export default function LiveSong({ song, isPlaying, accessToken, getSong, onLoad
         className="rounded-xl"
       />
       <h2 className="text-white text-3xl mt-4 text-center">{song.item.name}</h2>
-      <p className="text-gray-300 text-2xl mt-3">{song.item.artists[0].name}</p>
+      <p className="text-gray-200 text-2xl mt-3">{song.item.artists[0].name}</p>
       <div className="mt-5 mb-5 flex gap-9">
         <Previous_Button size={18} thickness={5} refreshSong={getSong} accessToken={accessToken} />
         <PlayPauseToggle size={30} accessToken={accessToken} refreshSong={getSong} isPlaying={isPlaying} />

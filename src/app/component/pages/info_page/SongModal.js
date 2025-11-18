@@ -101,7 +101,7 @@ export default function SongModal({ song, userId, onClose, onArtistClick }) {
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-[#282828] transition-colors flex-shrink-0"
+            className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-[#282828] transition-colors flex-shrink-0"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 text-gray-400" />
@@ -138,7 +138,7 @@ export default function SongModal({ song, userId, onClose, onArtistClick }) {
                   });
                 }
               }}
-              className="text-lg text-gray-300 hover:text-[#1DB954] hover:underline transition-colors"
+              className="text-lg text-gray-200 hover:text-[#1DB954] hover:underline transition-colors"
               disabled={!song.artistId || !onArtistClick}
             >
               {song.artist}

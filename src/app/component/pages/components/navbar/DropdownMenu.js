@@ -23,18 +23,20 @@ export default function DropdownMenu({ ProfilePicture, UserName, UserProduct, ac
 
   return (
     <div className="relative inline-flex" ref={dropdownRef}>
-      <div className="relative w-10 h-10">
+      <button
+        onClick={() => setOpen(!open)}
+        aria-haspopup="true"
+        aria-expanded={open}
+        aria-label="User menu"
+        className="relative w-10 h-10 rounded-full focus:ring-2 focus:ring-[#1DB954] focus:outline-none"
+      >
         <Image
           src={ProfilePicture || "/blank_pfp.png"}
           alt="Profile"
           fill
           className="rounded-full object-cover"
-          onClick={() => setOpen(!open)}
-          aria-haspopup="true"
-          aria-expanded={open}
-          aria-label="Dropdown"
         />
-      </div>
+      </button>
 
       {open && (
         <div className="absolute right-0 z-10 min-w-40 mt-16 bg-white shadow-md rounded-lg dark:bg-neutral-800 dark:border dark:border-neutral-700">

@@ -230,7 +230,8 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                                 {/* Track number / Play/Pause icon */}
                                 <button
                                     onClick={() => handlePlayTrack(item.uri, item.id)}
-                                    className="w-8 lg:w-10 flex items-center justify-center text-[#b3b3b3] flex-shrink-0 cursor-pointer"
+                                    className="w-12 h-12 lg:w-10 lg:h-10 flex items-center justify-center text-gray-200 flex-shrink-0 cursor-pointer"
+                                    aria-label={playingTrackId === item.id ? `Pause ${item.name}` : `Play ${item.name}`}
                                 >
                                     {playingTrackId === item.id ? (
                                         <Pause size={20} className="text-[#1DB954] fill-[#1DB954]" />
@@ -245,6 +246,7 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                                 <img
                                     src={item.image}
                                     alt={item.name}
+                                    loading="lazy"
                                     className="w-12 h-12 lg:w-14 lg:h-14 rounded-md object-cover flex-shrink-0"
                                 />
 
@@ -253,7 +255,7 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                                     <p className="text-white font-semibold text-sm lg:text-base truncate">
                                         {item.name}
                                     </p>
-                                    <p className="text-xs lg:text-sm text-[#b3b3b3] truncate">{item.artists}</p>
+                                    <p className="text-xs lg:text-sm text-gray-200 truncate">{item.artists}</p>
                                 </div>
                             </div>
                         ))}

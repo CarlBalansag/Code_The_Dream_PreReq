@@ -3,6 +3,12 @@
 :root {
   --background: #0a0a0a;
   --foreground: #ededed;
+
+  /* Accessible text colors - WCAG AA compliant */
+  --text-primary: #ffffff;
+  --text-secondary: #e5e7eb; /* 7:1 contrast ratio - WCAG AAA */
+  --text-tertiary: #9ca3af;
+  --text-disabled: #6b7280;
 }
 
 @theme inline {
@@ -17,6 +23,12 @@ body {
   background-attachment: fixed;
   color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Global focus indicators for accessibility */
+*:focus-visible {
+  outline: 2px solid #1ed760;
+  outline-offset: 2px;
 }
 
 /* Custom scrollbar for vertical scrolling (default) */

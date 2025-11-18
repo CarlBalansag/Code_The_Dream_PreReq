@@ -91,6 +91,7 @@ export default function ExpandedPlayer({
           onClick={onClose}
           className="absolute top-20 right-6 text-white hover:text-[#1DB954] transition-colors z-[100]"
           style={{ pointerEvents: 'auto' }}
+          aria-label="Close expanded player"
         >
           <ChevronDown size={28} />
         </button>
@@ -105,12 +106,16 @@ export default function ExpandedPlayer({
                 clickable: true,
                 bulletClass: "swiper-pagination-bullet",
                 bulletActiveClass: "swiper-pagination-bullet-active",
+                renderBullet: (index, className) => {
+                  return `<span class="${className}" style="width: 12px; height: 12px; margin: 0 6px;"></span>`;
+                }
               }}
               className="mySwiper h-full"
               style={{
                 "--swiper-pagination-color": "#1ed760",
-                "--swiper-pagination-bullet-inactive-color": "#1DB954",
-                "--swiper-pagination-bottom": "20px",
+                "--swiper-pagination-bullet-inactive-color": "rgba(29, 185, 84, 0.3)",
+                "--swiper-pagination-bullet-inactive-opacity": "1",
+                "--swiper-pagination-bottom": "30px",
               }}
             >
               <SwiperSlide>

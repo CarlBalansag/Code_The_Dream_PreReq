@@ -56,7 +56,7 @@ export default function BasicArtistModal({ artist, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-[#282828] transition-colors flex-shrink-0"
+            className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-[#282828] transition-colors flex-shrink-0"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 text-gray-400" />
@@ -71,6 +71,7 @@ export default function BasicArtistModal({ artist, onClose }) {
               <img
                 src={artist.image}
                 alt={artist.name}
+                loading="lazy"
                 className="w-48 h-48 sm:w-64 sm:h-64 rounded-full shadow-lg object-cover"
               />
             ) : (

@@ -165,6 +165,15 @@ return (
     <div
     className="arrow"
     onClick={handleClick}
+    role="button"
+    tabIndex={0}
+    aria-label="Play next track"
+    onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+        }
+    }}
     style={{
         width: `${size}px`,
         height: `${size * 1.2}px`,

@@ -12,6 +12,7 @@ import ExpandedPlayer from "./component/pages/components/bottom_player/ExpandedP
 import Navbar from "./component/pages/components/navbar/Navbar";
 import SongModal from "./component/pages/info_page/SongModal";
 import BasicArtistModal from "./component/pages/info_page/BasicArtistModal";
+import ArtistModal from "./component/pages/info_page/ArtistModal";
 
 export default function CurrentlyPlaying({ accessToken, premium, name, userId, deviceConnected, tourButton, profileDropdown }) {
   const [song, setSong] = useState(null);
@@ -32,6 +33,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
   // Search modals state
   const [selectedSong, setSelectedSong] = useState(null);
   const [selectedArtistForBasicModal, setSelectedArtistForBasicModal] = useState(null);
+  const [selectedArtist, setSelectedArtist] = useState(null); // For full ArtistModal with history
 
   useEffect(() => {
     setMounted(true);
@@ -115,13 +117,10 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
       const hasHistory = data.hasHistory;
 
       if (hasHistory) {
-        // User has history - this will be handled by UserTopArtists component
-        // We need to trigger the artist modal from there
-        // For now, we'll open the basic modal - you may need to refactor UserTopArtists
-        // to accept an external trigger for opening artist modals
+        // User has history - open full ArtistModal with stats
         console.log('User has history for this artist - opening ArtistModal');
-        // TODO: Integrate with existing ArtistModal from UserTopArtists
-        setSelectedArtistForBasicModal(artist);
+        console.log('Artist object:', artist);
+        setSelectedArtist(artist);
       } else {
         // No history - show basic info modal
         console.log('No history for this artist - opening BasicArtistModal');
@@ -236,7 +235,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
         onTrackClick={handleTrackClick}
       />
 
-      <div className="h-full w-full flex flex-col">
+      <main id="main-content" className="h-full w-full flex flex-col">
         <div className="flex-1 min-h-0">
           {/* Stats View - Always shown */}
           <div className="w-full h-full">
@@ -245,7 +244,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
 
             {/* DESKTOP - Full width layout */}
             <div className="hidden lg:block h-full w-full overflow-y-auto custom-scrollbar">
-              <div className="w-full px-10 pt-20 pb-28">
+              <div className="w-full max-w-[1920px] mx-auto px-10 pt-20 pb-28">
                 {/* Top Artists - Full width, horizontal scroll */}
                 <div className="h-auto min-h-[280px] mt-[-20px]" data-tour="top-artists">
                   <UserTopArtists accessToken={accessToken} userId={userId} />
@@ -276,7 +275,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
             )}
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Bottom Mini Player - shows when song is detected */}
       {song && song.item && (
@@ -314,6 +313,19 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
             userId={userId}
             onClose={() => setSelectedSong(null)}
             onArtistClick={handleArtistClick}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Artist Modal - from search (with history) */}
+      <AnimatePresence mode="wait">
+        {selectedArtist && (
+          <ArtistModal
+            key="artist-modal"
+            artist={selectedArtist}
+            userId={userId}
+            fromSearch={true}
+            onClose={() => setSelectedArtist(null)}
           />
         )}
       </AnimatePresence>

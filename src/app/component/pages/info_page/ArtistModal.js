@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -14,8 +14,12 @@ import { useArtistHistory } from '@/hooks/useArtistHistory';
  * @param {string} userId - User's Spotify ID
  * @param {function} onClose - Function to close the modal
  */
-export default function ArtistModal({ artist, userId, onClose }) {
-  const [timeRange, setTimeRange] = useState('30D');
+export default function ArtistModal({ artist, userId, onClose, fromSearch = false }) {
+  // Start with 'ALL' for search results to check total plays
+  const [timeRange, setTimeRange] = useState(fromSearch ? 'ALL' : '30D');
+
+  // Store the all-time total plays to determine if we should show time range selector
+  const [allTimeTotalPlays, setAllTimeTotalPlays] = useState(null);
 
   // Fetch artist history data
   const { data, loading, error } = useArtistHistory(
@@ -26,8 +30,18 @@ export default function ArtistModal({ artist, userId, onClose }) {
     !!artist // Only fetch when artist is provided
   );
 
+  // Capture all-time total plays when timeRange is 'ALL'
+  useEffect(() => {
+    if (fromSearch && timeRange === 'ALL' && data && data.totalPlays !== undefined && allTimeTotalPlays === null) {
+      setAllTimeTotalPlays(data.totalPlays);
+    }
+  }, [data, timeRange, fromSearch, allTimeTotalPlays]);
+
   // Don't render if no artist
   if (!artist) return null;
+
+  // Check if user has less than 100 plays using all-time data (not current time range)
+  const hasLimitedHistory = fromSearch && allTimeTotalPlays !== null && allTimeTotalPlays < 100;
 
   // Time range options
   const timeRangeOptions = [
@@ -46,13 +60,13 @@ export default function ArtistModal({ artist, userId, onClose }) {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-[#1DB954]" />
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-gray-200">
                 {artist.name}: <span className="font-semibold text-white">{data.artistSongs} plays</span>
               </p>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-[#3b82f6]" />
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-gray-200">
                 Total: <span className="font-semibold text-white">{data.totalSongs} plays</span>
               </p>
             </div>
@@ -138,6 +152,7 @@ export default function ArtistModal({ artist, userId, onClose }) {
               <img
                 src={artist.image}
                 alt={artist.name}
+                loading="lazy"
                 className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0"
               />
             )}
@@ -148,31 +163,33 @@ export default function ArtistModal({ artist, userId, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-[#282828] transition-colors flex-shrink-0"
+            className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-[#282828] transition-colors flex-shrink-0"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 text-gray-400" />
           </button>
         </div>
 
-        {/* Time Range Selector */}
-        <div className="p-3 sm:p-4 border-b border-[#282828]">
-          <div className="flex flex-wrap gap-2">
-            {timeRangeOptions.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => setTimeRange(option.value)}
-                className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                  timeRange === option.value
-                    ? 'bg-[#1DB954] text-black'
-                    : 'bg-[#282828] text-white hover:bg-[#333333]'
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
+        {/* Time Range Selector - Only show if user has 100+ plays */}
+        {!hasLimitedHistory && (
+          <div className="p-3 sm:p-4 border-b border-[#282828]">
+            <div className="flex flex-wrap gap-2">
+              {timeRangeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setTimeRange(option.value)}
+                  className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                    timeRange === option.value
+                      ? 'bg-[#1DB954] text-black'
+                      : 'bg-[#282828] text-white hover:bg-[#333333]'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Chart Area */}
         <div className="p-3 sm:p-4">
@@ -287,14 +304,14 @@ export default function ArtistModal({ artist, userId, onClose }) {
               <div className="mt-3 sm:mt-4 bg-[#181818] rounded-lg p-2 sm:p-3">
                 <h3 className="text-white text-xs sm:text-sm font-semibold mb-2">Insights</h3>
                 <div className="space-y-1.5 text-[10px] sm:text-xs">
-                  <p className="text-gray-300">
-                    • You&apos;ve listened to <span className="text-[#1DB954] font-semibold">{artist.name}</span> a total of <span className="font-semibold">{data.totalPlays} times</span> in the last {timeRange}
+                  <p className="text-gray-200">
+                    • You&apos;ve listened to <span className="text-[#1DB954] font-semibold">{artist.name}</span> a total of <span className="font-semibold">{data.totalPlays} times</span>{hasLimitedHistory ? '' : ` in the last ${timeRange}`}
                   </p>
-                  <p className="text-gray-300">
+                  <p className="text-gray-200">
                     • That&apos;s an average of <span className="font-semibold">{(data.totalPlays / data.totalDays).toFixed(1)} plays per day</span>
                   </p>
                   {data.chartData.length > 0 && (
-                    <p className="text-gray-300">
+                    <p className="text-gray-200">
                       • Peak listening was on <span className="font-semibold">{data.chartData.reduce((max, day) => day.artistSongs > max.artistSongs ? day : max).fullDate}</span> with <span className="font-semibold">{data.chartData.reduce((max, day) => Math.max(max, day.artistSongs), 0)} plays</span>
                     </p>
                   )}

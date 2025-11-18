@@ -164,7 +164,8 @@ export default function PremiumTopTracks({ artistId, accessToken, onLoadingChang
                         {/* Track number / Play/Pause icon */}
                         <button
                             onClick={() => handlePlayTrack(track.uri, track.id)}
-                            className="w-8 flex items-center justify-center text-gray-400 flex-shrink-0 cursor-pointer"
+                            className="w-12 h-12 flex items-center justify-center text-gray-400 flex-shrink-0 cursor-pointer"
+                            aria-label={playingTrackId === track.id ? `Pause ${track.name}` : `Play ${track.name}`}
                         >
                             {playingTrackId === track.id ? (
                                 <Pause size={20} className="text-[#1DB954] fill-[#1DB954]" />
@@ -176,7 +177,7 @@ export default function PremiumTopTracks({ artistId, accessToken, onLoadingChang
                         </button>
 
                         {/* Album cover */}
-                        <img src={track.image} alt={track.name} className="w-16 h-16 rounded-md object-cover flex-shrink-0" />
+                        <img src={track.image} alt={track.name} loading="lazy" className="w-16 h-16 rounded-md object-cover flex-shrink-0" />
 
                         {/* Track info */}
                         <div className="flex-grow min-w-0">

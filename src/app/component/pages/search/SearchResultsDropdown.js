@@ -45,7 +45,7 @@ export default function SearchResultsDropdown({
   };
 
   return (
-    <div className="absolute top-full left-0 right-0 mt-2 bg-[#282828] rounded-lg shadow-2xl border border-[#404040] overflow-hidden z-50 max-h-[400px] overflow-y-auto custom-scrollbar">
+    <div className="absolute top-full left-0 right-0 sm:right-auto sm:w-[400px] mt-2 mx-2 sm:mx-0 bg-[#282828] rounded-lg shadow-2xl border border-[#404040] overflow-hidden z-50 max-h-[70vh] sm:max-h-[400px] overflow-y-auto custom-scrollbar">
       {loading && (
         <div className="p-4">
           <div className="flex items-center gap-3 animate-pulse">
@@ -80,6 +80,7 @@ export default function SearchResultsDropdown({
                     <img
                       src={artist.image}
                       alt={artist.name}
+                      loading="lazy"
                       className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                     />
                   ) : (
@@ -120,6 +121,7 @@ export default function SearchResultsDropdown({
                     <img
                       src={track.image}
                       alt={track.album}
+                      loading="lazy"
                       className="w-12 h-12 rounded object-cover flex-shrink-0"
                     />
                   ) : (

@@ -4,7 +4,7 @@ import SpotifyDeviceStatus from "./component/pages/components/navbar/connected_d
 import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
 import SpotifyTour from "./component/pages/components/SpotifyTour";
 import { useState, useEffect } from "react";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Music, TrendingUp, BarChart3, Clock } from "lucide-react";
 import { usePlayTracking } from "@/hooks/usePlayTracking";
 
 const CLIENT_ID = "2751136537024052b892a475c49906e1";
@@ -184,15 +184,45 @@ export default function Home() {
           )}
         </div>
       ) : (
-        <div className="flex items-center justify-center h-screen pb-10">
-          <div className="text-center">
-            <h1 className="text-4xl pb-5">Log in to Spotify</h1>
+        <div className="flex items-center justify-center min-h-screen px-4 py-12">
+          <div className="max-w-md w-full">
+            {/* Logo/Branding */}
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#1DB954] to-[#1ed760] flex items-center justify-center shadow-[0_0_40px_rgba(29,185,84,0.4)]">
+                <Music size={40} className="text-black" />
+              </div>
+              <h1 className="text-4xl font-bold mb-2">Spotify Tracker</h1>
+              <p className="text-gray-200 text-lg">
+                Discover your music journey
+              </p>
+            </div>
+
+            {/* Feature highlights */}
+            <div className="space-y-3 mb-8">
+              {[
+                { icon: TrendingUp, text: "Track your top artists and songs" },
+                { icon: BarChart3, text: "Visualize your listening history" },
+                { icon: Clock, text: "See your music evolution over time" },
+              ].map((feature, i) => (
+                <div key={i} className="flex items-center gap-3 text-gray-200">
+                  <feature.icon size={20} className="text-[#1DB954] flex-shrink-0" />
+                  <span>{feature.text}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA Button */}
             <button
               onClick={loginToSpotify}
-              className="w-5/6 bg-[#1db954] text-black text-lg h-12 rounded-3xl"
+              className="w-full bg-[#1db954] text-black text-lg font-semibold py-4 rounded-full hover:bg-[#1ed760] transition-all transform hover:scale-105 active:scale-95 shadow-lg"
             >
-              Continue to Spotify
+              Connect with Spotify
             </button>
+
+            {/* Privacy note */}
+            <p className="text-gray-500 text-xs text-center mt-4">
+              We only access your listening data. Your credentials stay secure with Spotify.
+            </p>
           </div>
         </div>
       )}

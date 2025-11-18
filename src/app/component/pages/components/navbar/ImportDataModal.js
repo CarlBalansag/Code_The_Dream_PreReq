@@ -208,7 +208,7 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
           {/* Instructions */}
           <div className="bg-[#1e3a8a]/20 border border-[#3b82f6]/30 rounded-lg p-4">
             <h3 className="text-[#3b82f6] font-semibold mb-3">How to Get Your Spotify Data:</h3>
-            <ol className="text-sm text-gray-300 space-y-2 list-decimal list-inside">
+            <ol className="text-sm text-gray-200 space-y-2 list-decimal list-inside">
               <li>Go to <a href="https://www.spotify.com/account/privacy" target="_blank" rel="noopener noreferrer" className="text-[#1DB954] hover:underline">spotify.com/account/privacy</a></li>
               <li>Scroll to &quot;Download your data&quot;</li>
               <li>Click &quot;Request&quot; (Spotify will email you in 1-30 days)</li>
@@ -362,7 +362,7 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
                 <CheckCircle className="w-8 h-8 text-[#1DB954]" />
                 <div>
                   <h3 className="text-white font-semibold">Import Complete!</h3>
-                  <p className="text-sm text-gray-300">Successfully imported {progress.totalTracks?.toLocaleString()} plays</p>
+                  <p className="text-sm text-gray-200">Successfully imported {progress.totalTracks?.toLocaleString()} plays</p>
                 </div>
               </div>
               <button
@@ -380,7 +380,7 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
               <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-red-400 font-medium">Error</p>
-                <p className="text-sm text-gray-300 mt-1">{error}</p>
+                <p className="text-sm text-gray-200 mt-1">{error}</p>
               </div>
             </div>
           )}
@@ -389,7 +389,7 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
           {!processing && !success && (
             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
               <p className="text-yellow-500 text-sm font-medium mb-1">⚠️ Important</p>
-              <ul className="text-xs text-gray-300 space-y-1 list-disc list-inside">
+              <ul className="text-xs text-gray-200 space-y-1 list-disc list-inside">
                 <li>Large files may take several minutes to process</li>
                 <li>Duplicate plays will be automatically skipped</li>
                 <li>You can close this modal during import (it continues in the background)</li>
