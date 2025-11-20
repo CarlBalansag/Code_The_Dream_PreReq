@@ -37,17 +37,6 @@ export default function ArtistModal({ artist, userId, onClose, fromSearch = fals
     }
   }, [data, timeRange, fromSearch, allTimeTotalPlays]);
 
-  // Add escape key support
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
-
   // Don't render if no artist
   if (!artist) return null;
 
@@ -149,9 +138,6 @@ export default function ArtistModal({ artist, userId, onClose, fromSearch = fals
       transition={{ duration: 0.4 }}
     >
       <motion.div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
         className="bg-[#121212] rounded-xl shadow-2xl w-full sm:w-[90vw] lg:w-[80vw] max-w-[1200px] max-h-[90vh] sm:max-h-[85vh] overflow-y-auto custom-scrollbar"
         onClick={(e) => e.stopPropagation()}
         initial={{ opacity: 0, scale: 0.95 }}

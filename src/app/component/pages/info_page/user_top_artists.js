@@ -356,7 +356,7 @@ export default function UserTopArtists({ accessToken, userId }) {
       <button
         key={`${artist.id}-${index}`}
         type="button"
-        className="flex-shrink-0 w-40 lg:w-44 bg-[rgba(255,255,255,0.05)] backdrop-blur-md border border-[rgba(255,255,255,0.1)] rounded-2xl p-5 cursor-pointer card-hover text-left"
+        className="flex-shrink-0 w-40 lg:w-44 bg-[rgba(255,255,255,0.05)] backdrop-blur-md border border-[rgba(255,255,255,0.1)] rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_8px_24px_rgba(29,185,84,0.3)] active:scale-95 lg:active:scale-100 text-left"
         onClick={() => setSelectedArtist(artist)}
         aria-label={`View details for ${artist.name}`}
       >
@@ -398,12 +398,10 @@ export default function UserTopArtists({ accessToken, userId }) {
     </div>
   );
 
-  // Animation variants for content with reduced motion support
-  const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
+  // Animation variants for content
   const contentVariants = {
     enter: (direction) => ({
-      x: prefersReducedMotion ? 0 : (direction > 0 ? 300 : -300),
+      x: direction > 0 ? 300 : -300,
       opacity: 0,
     }),
     center: {
@@ -411,7 +409,7 @@ export default function UserTopArtists({ accessToken, userId }) {
       opacity: 1,
     },
     exit: (direction) => ({
-      x: prefersReducedMotion ? 0 : (direction > 0 ? -300 : 300),
+      x: direction > 0 ? -300 : 300,
       opacity: 0,
     }),
   };

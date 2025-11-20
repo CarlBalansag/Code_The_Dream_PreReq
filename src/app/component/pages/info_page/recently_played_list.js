@@ -154,14 +154,9 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
   return (
     <div className="w-full h-full min-h-0 flex flex-col">
       {/* Header (fixed within card, not in scroll) */}
-      <div className="z-10 px-4 lg:px-6 pt-6 pb-5">
+      <div className="z-10 px-4 lg:px-6 pt-6 pb-5 pt-10">
         <div className="flex items-baseline justify-between">
           <p className="text-white text-2xl font-bold">Recently Played</p>
-          {recentTracks.length > 0 && (
-            <p className="text-[#1DB954] text-xs font-medium">
-              {Math.min(recentTracks.length, 25)} tracks
-            </p>
-          )}
         </div>
         {name && <p className="text-gray-200 text-sm mt-1">For {name}</p>}
       </div>
@@ -173,7 +168,7 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
             {recentTracks.slice(0, 25).map((item, index) => (
               <div
                 key={item.id + index}
-                className="flex-shrink-0 w-36 sm:w-40 bg-[rgba(255,255,255,0.03)] rounded-lg p-3 cursor-pointer card-hover hover:bg-[rgba(255,255,255,0.05)]"
+                className="flex-shrink-0 w-36 sm:w-40 bg-[rgba(255,255,255,0.03)] rounded-lg p-3 cursor-pointer transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_8px_24px_rgba(29,185,84,0.3)] active:scale-95 hover:bg-[rgba(255,255,255,0.05)]"
               >
                 {/* Album cover */}
                 <img

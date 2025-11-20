@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, FileJson, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
@@ -21,6 +22,13 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
   const [progress, setProgress] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure we're on the client side before using portal
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   // Handle file selection
   const handleFileChange = (selectedFiles) => {
@@ -168,40 +176,56 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
     onClose();
   };
 
-  return (
+  // Don't render on server-side or if not mounted
+  if (!mounted) return null;
+
+  const modalContent = (
     <AnimatePresence mode="wait">
       {isOpen && (
-        <motion.div
-          key="import-modal"
-          className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
-          onClick={handleClose}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        <>
+          {/* Backdrop with blur */}
           <motion.div
-            className="bg-[#121212] rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar"
-            onClick={(e) => e.stopPropagation()}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            key="import-modal-backdrop"
+            className="fixed inset-0 z-[99999] bg-black/85"
+            style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+            onClick={handleClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          />
+
+          {/* Modal Content */}
+          <motion.div
+            key="import-modal-content"
+            className="fixed inset-0 z-[100000] flex items-center justify-center p-4 pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-[#121212] border-b border-[#282828] p-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-white">Import Spotify History</h2>
-            <p className="text-sm text-gray-400 mt-1">Upload your Spotify data export JSON files</p>
-          </div>
-          <button
-            onClick={handleClose}
-            className="p-2 rounded-full hover:bg-[#282828] transition-colors"
-            aria-label="Close modal"
-          >
-            <X className="w-6 h-6 text-gray-400" />
-          </button>
-        </div>
+            <motion.div
+              className="bg-[#121212] rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3, type: "spring", damping: 25 }}
+            >
+              {/* Header */}
+              <div className="sticky top-0 z-10 bg-[#121212] border-b border-[#282828] p-6 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Import Spotify History</h2>
+                  <p className="text-sm text-gray-400 mt-1">Upload your Spotify data export JSON files</p>
+                </div>
+                <button
+                  onClick={handleClose}
+                  className="p-2 rounded-full hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all duration-200 flex-shrink-0"
+                  aria-label="Close modal"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
 
         {/* Content */}
         <div className="p-6 space-y-6">
@@ -398,9 +422,13 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
             </div>
           )}
         </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
+        </>
       )}
     </AnimatePresence>
   );
+
+  // Use portal to render modal at document body level
+  return createPortal(modalContent, document.body);
 }

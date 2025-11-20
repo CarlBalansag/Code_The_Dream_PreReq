@@ -7,125 +7,212 @@ export default function SpotifyTour({ onComplete, premium }) {
   const [targetElement, setTargetElement] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
 
-  // Filter steps based on whether song is playing - memoized to prevent re-creation
-  const steps = useMemo(() => premium ? [
-    {
-      id: 'top-artists',
-      title: 'Your Top Artists',
-      description: 'These are your top listened to artists. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time rankings.',
-      target: '[data-tour="top-artists"]',
-      placement: 'bottom',
-    },
-    {
-      id: 'top-tracks',
-      title: 'Your Top Tracks',
-      description: 'This is your top tracks listened. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time favorites.',
-      target: '[data-tour="top-tracks"]',
-      placement: 'bottom',
-    },
-    {
-      id: 'recently-played',
-      title: 'Recently Played',
-      description: 'These are your recently played songs, showing your most recent listening activity.',
-      target: '[data-tour="recently-played"]',
-      placement: 'left',
-    },
-    {
-      id: 'connect-device',
-      title: 'Connect Device to Spotify',
-      description: 'These are your connected Spotify devices. If you don\'t see your device, open Spotify on the device and make sure you\'re logged in.',
-      target: '[data-tour="connect-device"]',
-      placement: 'bottom-left',
-    },
-    {
-      id: 'floating-button',
-      title: 'Play a Song',
-      description: 'Once your device is connected and music is playing, click this button to view the song you\'re currently listening to in real time.',
-      target: '#floating-action-button',
-      placement: 'top-left',
-    },
-  ] : [
-    {
-      id: 'top-artists',
-      title: 'Your Top Artists',
-      description: 'These are your top listened to artists. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time rankings.',
-      target: '[data-tour="top-artists"]',
-      placement: 'bottom',
-    },
-    {
-      id: 'top-tracks',
-      title: 'Your Top Tracks',
-      description: 'This is your top tracks listened. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time favorites.',
-      target: '[data-tour="top-tracks"]',
-      placement: 'bottom',
-    },
-    {
-      id: 'recently-played',
-      title: 'Recently Played',
-      description: 'These are your recently played songs, showing your most recent listening activity.',
-      target: '[data-tour="recently-played"]',
-      placement: 'top',
-    },
-  ], [premium]);
+  // Check if mobile - use state to trigger re-render on resize
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Filter steps based on whether song is playing and screen size - memoized to prevent re-creation
+  const steps = useMemo(() => {
+    // Mobile steps - simplified tour
+    if (isMobile) {
+      return premium ? [
+        {
+          id: 'top-artists',
+          title: 'Your Top Artists',
+          description: 'Scroll down to see your top artists. Tap the time period buttons to see different rankings.',
+          target: '[data-tour="top-artists"]',
+          placement: 'bottom',
+        },
+        {
+          id: 'top-tracks',
+          title: 'Your Top Tracks',
+          description: 'Keep scrolling to find your most played tracks. Switch time periods to explore your music history.',
+          target: '[data-tour="top-tracks"]',
+          placement: 'bottom',
+        },
+        {
+          id: 'recently-played',
+          title: 'Recently Played',
+          description: 'Your recently played songs appear here, showing your latest listening activity.',
+          target: '[data-tour="recently-played"]',
+          placement: 'bottom',
+        },
+      ] : [
+        {
+          id: 'top-artists',
+          title: 'Your Top Artists',
+          description: 'Scroll down to see your top artists. Tap the time period buttons to see different rankings.',
+          target: '[data-tour="top-artists"]',
+          placement: 'bottom',
+        },
+        {
+          id: 'top-tracks',
+          title: 'Your Top Tracks',
+          description: 'Keep scrolling to find your most played tracks. Switch time periods to explore your music history.',
+          target: '[data-tour="top-tracks"]',
+          placement: 'bottom',
+        },
+        {
+          id: 'recently-played',
+          title: 'Recently Played',
+          description: 'Your recently played songs appear here, showing your latest listening activity.',
+          target: '[data-tour="recently-played"]',
+          placement: 'bottom',
+        },
+      ];
+    }
+
+    // Desktop steps - full tour
+    return premium ? [
+      {
+        id: 'top-artists',
+        title: 'Your Top Artists',
+        description: 'These are your top listened to artists. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time rankings.',
+        target: '[data-tour="top-artists"]',
+        placement: 'bottom',
+      },
+      {
+        id: 'top-tracks',
+        title: 'Your Top Tracks',
+        description: 'This is your top tracks listened. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time favorites.',
+        target: '[data-tour="top-tracks"]',
+        placement: 'bottom',
+      },
+      {
+        id: 'recently-played',
+        title: 'Recently Played',
+        description: 'These are your recently played songs, showing your most recent listening activity.',
+        target: '[data-tour="recently-played"]',
+        placement: 'left',
+      },
+      {
+        id: 'connect-device',
+        title: 'Connect Device to Spotify',
+        description: 'These are your connected Spotify devices. If you don\'t see your device, open Spotify on the device and make sure you\'re logged in.',
+        target: '[data-tour="connect-device"]',
+        placement: 'bottom-left',
+      },
+      {
+        id: 'floating-button',
+        title: 'Play a Song',
+        description: 'Once your device is connected and music is playing, click this button to view the song you\'re currently listening to in real time.',
+        target: '#floating-action-button',
+        placement: 'top-left',
+      },
+    ] : [
+      {
+        id: 'top-artists',
+        title: 'Your Top Artists',
+        description: 'These are your top listened to artists. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time rankings.',
+        target: '[data-tour="top-artists"]',
+        placement: 'bottom',
+      },
+      {
+        id: 'top-tracks',
+        title: 'Your Top Tracks',
+        description: 'This is your top tracks listened. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time favorites.',
+        target: '[data-tour="top-tracks"]',
+        placement: 'bottom',
+      },
+      {
+        id: 'recently-played',
+        title: 'Recently Played',
+        description: 'These are your recently played songs, showing your most recent listening activity.',
+        target: '[data-tour="recently-played"]',
+        placement: 'top',
+      },
+    ];
+  }, [premium, isMobile]);
 
   const updateTooltipPosition = useCallback((element, placement) => {
     const rect = element.getBoundingClientRect();
-    const tooltipWidth = 320;
+    const isMobile = window.innerWidth < 640; // Tailwind sm breakpoint
+    const tooltipWidth = isMobile ? Math.min(window.innerWidth - 32, 320) : 320; // 16px padding on each side for mobile
     const tooltipHeight = 280; // Approximate height
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
+    const padding = 16;
     let top = 0;
     let left = 0;
 
-    switch (placement) {
-      case 'right':
-        top = rect.top + rect.height / 2;
-        left = rect.right + 20;
-        break;
-      case 'left':
-        top = rect.top + rect.height / 2;
-        left = rect.left - tooltipWidth - 20;
-        break;
-      case 'bottom':
-        top = rect.bottom + 20;
-        left = rect.left + rect.width / 2 - tooltipWidth / 2;
-        break;
-      case 'bottom-right':
-        top = rect.bottom + 20;
-        left = rect.right - tooltipWidth;
-        break;
-      case 'bottom-left':
-        top = rect.bottom + 20;
-        left = rect.left;
-        break;
-      case 'top':
-        top = rect.top - tooltipHeight - 20;
-        left = rect.left + rect.width / 2 - tooltipWidth / 2;
-        break;
-      case 'top-left':
-        top = rect.top - tooltipHeight - 20;
-        left = rect.left - tooltipWidth - 20;
-        break;
-      default:
-        top = rect.top;
-        left = rect.right + 20;
+    // On mobile, always position below or above the element (centered)
+    if (isMobile) {
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      // Position below if there's more space, otherwise above
+      if (spaceBelow > tooltipHeight + padding || spaceBelow > spaceAbove) {
+        top = rect.bottom + 12;
+      } else {
+        top = rect.top - tooltipHeight - 12;
+      }
+
+      // Center horizontally with padding
+      left = Math.max(padding, Math.min(
+        (viewportWidth - tooltipWidth) / 2,
+        viewportWidth - tooltipWidth - padding
+      ));
+    } else {
+      // Desktop positioning logic
+      switch (placement) {
+        case 'right':
+          top = rect.top + rect.height / 2;
+          left = rect.right + 20;
+          break;
+        case 'left':
+          top = rect.top + rect.height / 2;
+          left = rect.left - tooltipWidth - 20;
+          break;
+        case 'bottom':
+          top = rect.bottom + 20;
+          left = rect.left + rect.width / 2 - tooltipWidth / 2;
+          break;
+        case 'bottom-right':
+          top = rect.bottom + 20;
+          left = rect.right - tooltipWidth;
+          break;
+        case 'bottom-left':
+          top = rect.bottom + 20;
+          left = rect.left;
+          break;
+        case 'top':
+          top = rect.top - tooltipHeight - 20;
+          left = rect.left + rect.width / 2 - tooltipWidth / 2;
+          break;
+        case 'top-left':
+          top = rect.top - tooltipHeight - 20;
+          left = rect.left - tooltipWidth - 20;
+          break;
+        default:
+          top = rect.top;
+          left = rect.right + 20;
+      }
+
+      // Constrain to viewport - horizontal
+      if (left < 20) {
+        left = 20;
+      } else if (left + tooltipWidth > viewportWidth - 20) {
+        left = viewportWidth - tooltipWidth - 20;
+      }
+
+      // Constrain to viewport - vertical with padding
+      if (top < 20) {
+        top = 20;
+      } else if (top + tooltipHeight > viewportHeight - 20) {
+        top = viewportHeight - tooltipHeight - 20;
+      }
     }
 
-    // Constrain to viewport - horizontal
-    if (left < 20) {
-      left = 20;
-    } else if (left + tooltipWidth > viewportWidth - 20) {
-      left = viewportWidth - tooltipWidth - 20;
-    }
-
-    // Constrain to viewport - vertical with padding
-    if (top < 20) {
-      top = 20;
-    } else if (top + tooltipHeight > viewportHeight - 20) {
-      top = viewportHeight - tooltipHeight - 20;
-    }
-
-    setTooltipPosition({ top, left });
+    setTooltipPosition({ top, left, width: tooltipWidth });
   }, []);
 
   useEffect(() => {
@@ -211,6 +298,7 @@ export default function SpotifyTour({ onComplete, premium }) {
   const getSpotlightStyle = () => {
     if (!targetElement) return {};
     const rect = targetElement.getBoundingClientRect();
+    const isMobile = window.innerWidth < 640;
 
     // Check if this is the connect-device or floating-button step for tighter padding and circular shape
     const isConnectDevice = steps[currentStep]?.id === 'connect-device';
@@ -219,12 +307,12 @@ export default function SpotifyTour({ onComplete, premium }) {
     const isTopTracks = steps[currentStep]?.id === 'top-tracks';
 
     const padding = (isConnectDevice || isFloatingButton) ? 2 : 8;
-    // Add extra top padding for top-artists to push it down slightly
-    const topOffset = isTopArtists ? 20 : 0;
+    // Only add top offset on desktop for top-artists
+    const topOffset = (!isMobile && isTopArtists) ? 20 : 0;
 
-    // Limit height for top tracks to show only tracks 1-2 (~200px)
+    // Limit height for top tracks to show only tracks 1-2 (~200px) - only on desktop
     let height = rect.height + (padding * 2) - topOffset;
-    if (isTopTracks && height > 200) {
+    if (!isMobile && isTopTracks && height > 200) {
       height = 236;
     }
 
@@ -292,10 +380,11 @@ export default function SpotifyTour({ onComplete, premium }) {
 
       {/* Tooltip */}
       <motion.div
-        className="fixed z-[10001] w-[320px] max-h-[calc(100vh-40px)] overflow-y-auto custom-scrollbar bg-gradient-to-br from-[#1DB954] to-[#1ed760] text-white rounded-xl shadow-2xl p-5 transition-all duration-300"
+        className="fixed z-[10001] max-h-[calc(100vh-40px)] overflow-y-auto custom-scrollbar bg-gradient-to-br from-[#1DB954] to-[#1ed760] text-white rounded-xl shadow-2xl p-4 sm:p-5 transition-all duration-300"
         style={{
           top: `${tooltipPosition.top}px`,
           left: `${tooltipPosition.left}px`,
+          width: `${tooltipPosition.width || 320}px`,
         }}
         initial={{ opacity: 0, scale: 0.9, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -313,7 +402,7 @@ export default function SpotifyTour({ onComplete, premium }) {
         {/* Content */}
         <div className="space-y-3 mt-2">
           <div>
-            <h3 className="text-xl font-bold mb-2">
+            <h3 className="text-lg sm:text-xl font-bold mb-2">
               {steps[currentStep]?.title}
             </h3>
             <p className="text-white/95 text-sm leading-relaxed">
@@ -322,7 +411,7 @@ export default function SpotifyTour({ onComplete, premium }) {
           </div>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between pt-4 border-t border-white/20">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-white/20">
             {/* Progress Dots */}
             <div className="flex gap-2">
               {steps.map((_, index) => (
@@ -338,18 +427,18 @@ export default function SpotifyTour({ onComplete, premium }) {
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               {currentStep > 0 && (
                 <button
                   onClick={handlePrev}
-                  className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all font-medium text-sm"
+                  className="flex-1 sm:flex-none px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all font-medium text-sm"
                 >
                   Back
                 </button>
               )}
               <button
                 onClick={handleNext}
-                className="px-4 py-2 bg-white text-[#1DB954] hover:bg-white/90 rounded-lg font-bold transition-all shadow-lg text-sm"
+                className="flex-1 sm:flex-none px-4 py-2 bg-white text-[#1DB954] hover:bg-white/90 rounded-lg font-bold transition-all shadow-lg text-sm"
               >
                 {currentStep === steps.length - 1 ? 'Got it!' : 'Next'}
               </button>

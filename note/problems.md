@@ -1,5 +1,18 @@
 # Comprehensive Security & Code Quality Review
 
+## FIXES COMPLETED
+
+### âœ… Issue #2 - Access Token Exposure in URL Query Parameters (FIXED)
+**Date Fixed:** 2025-11-19
+**Files Changed:**
+- `src/app/api/search/spotify/route.js` - Now reads token from Authorization header
+- `src/app/api/artist/[artistId]/route.js` - Now reads token from Authorization header
+- `src/hooks/useSpotifySearch.js` - Now sends token in Authorization header
+
+**Solution:** Tokens are now sent via `Authorization: Bearer` headers instead of URL query parameters.
+
+---
+
 ## Code Review Summary
 
 This is a Next.js application integrating with Spotify's API to track and visualize user listening history. The application uses PostgreSQL with Prisma ORM for data persistence. While the application demonstrates solid architecture in some areas, there are **critical security vulnerabilities** that must be addressed immediately before this application can be considered production-ready.
@@ -74,99 +87,7 @@ git log -p -- src/app/api/token/route.js
 
 ---
 
-### 2. [CRITICAL] Access Token Exposure in URL Query Parameters
-
-**Location:**
-- `src/app/api/search/spotify/route.js` (Line 7)
-- `src/app/api/artist/[artistId]/route.js` (Line 11)
-- Multiple client-side components passing tokens in URLs
-
-**Issue:**
-```javascript
-// src/app/api/search/spotify/route.js
-const accessToken = searchParams.get('accessToken');
-
-// Client-side usage:
-const response = await fetch(
-  `/api/artist/${artist.id}?accessToken=${encodeURIComponent(accessToken)}`
-);
-```
-
-**Why This Is Critical:**
-- **OWASP Top 10: A01:2021  Broken Access Control**
-- Access tokens in URLs are logged in:
-  - Browser history
-  - Server access logs
-  - Proxy logs
-  - Referrer headers when navigating to external sites
-  - Browser extensions can read them
-- Tokens can be stolen via XSS or browser history access
-- URLs are often shared/copied, leaking tokens
-
-**Impact:**
-- User access tokens exposed in multiple logging systems
-- Tokens can be intercepted and used to impersonate users
-- Violates OAuth 2.0 security best practices
-
-**Remediation:**
-
-**Option 1: Use HTTP-Only Cookies (RECOMMENDED)**
-```javascript
-// src/app/api/token/route.js
-export async function POST(req) {
-  // ... existing code ...
-
-  const response = Response.json({
-    user: savedUser,
-    // Don't send tokens to client
-  });
-
-  // Set HTTP-only cookie
-  response.cookies.set('spotify_access_token', tokenData.access_token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: tokenData.expires_in
-  });
-
-  return response;
-}
-
-// API routes automatically receive cookies:
-export async function GET(req) {
-  const accessToken = req.cookies.get('spotify_access_token')?.value;
-
-  if (!accessToken) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  // ... use token ...
-}
-```
-
-**Option 2: Use Authorization Headers (Alternative)**
-```javascript
-// Client-side:
-const response = await fetch('/api/search/spotify?query=...', {
-  headers: {
-    'Authorization': `Bearer ${accessToken}`
-  }
-});
-
-// Server-side:
-export async function GET(req) {
-  const authHeader = req.headers.get('authorization');
-  const accessToken = authHeader?.replace('Bearer ', '');
-
-  if (!accessToken) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  // ... use token ...
-}
-```
-
----
-
-### 3. [HIGH] SQL Injection via Unsanitized Input in Raw Queries
+### 2. [HIGH] SQL Injection via Unsanitized Input in Raw Queries
 
 **Location:** `src/lib/db/play.js`
 
@@ -181,7 +102,7 @@ export async function getArtistDailyHistory({
   artistName,
   startDate,
   endDate,
-  timezone,  //   User-controlled input
+  timezone,  // ï¿½ User-controlled input
 }) {
   const rows = await prisma.$queryRaw`
     WITH total_by_day AS (
@@ -225,7 +146,7 @@ const localTimezone = validateTimezone(
 
 ---
 
-### 4. [HIGH] No Rate Limiting on API Endpoints
+### 3. [HIGH] No Rate Limiting on API Endpoints
 
 **Location:** All API routes in `src/app/api/`
 
@@ -299,7 +220,7 @@ export const config = {
 
 ---
 
-### 5. [HIGH] No CSRF Protection
+### 4. [HIGH] No CSRF Protection
 
 **Location:** All POST/PUT/DELETE API routes
 
@@ -362,7 +283,7 @@ export async function POST(req) {
 
 ## High Priority Security Issues
 
-### 6. [HIGH] Insufficient Input Validation on File Upload
+### 5. [HIGH] Insufficient Input Validation on File Upload
 
 **Location:** `src/app/api/import/spotify-history/route.js`
 
@@ -464,7 +385,7 @@ export async function POST(req) {
 
 ---
 
-### 7. [HIGH] Missing Authorization Checks on User Data Access
+### 6. [HIGH] Missing Authorization Checks on User Data Access
 
 **Location:** Multiple API routes
 
@@ -473,7 +394,7 @@ export async function POST(req) {
 // src/app/api/stats/top-artists/route.js
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
-  const userId = searchParams.get('userId'); //   User-provided, no verification
+  const userId = searchParams.get('userId'); // ï¿½ User-provided, no verification
 
   // No check if requester is authorized to see this user's data
   const artists = await getTopArtists(userId, { /* ... */ });
@@ -546,18 +467,18 @@ export async function GET(req) {
 
 ---
 
-### 8. [HIGH] Sensitive Data Logged to Console
+### 7. [HIGH] Sensitive Data Logged to Console
 
 **Location:** Throughout the codebase
 
 **Issue:**
 ```javascript
 // src/app/api/token/route.js
-console.log("<¯ TOKEN RESPONSE:", tokenData); // Contains access_token, refresh_token
+console.log("<ï¿½ TOKEN RESPONSE:", tokenData); // Contains access_token, refresh_token
 console.log("=d Spotify user profile:", userProfile); // Contains email, personal data
 
 // src/app/api/stats/artist-history/[artistId]/route.js
-console.log(`=Ê Fetching top artists for user: ${userId}`); // Logs user IDs
+console.log(`=ï¿½ Fetching top artists for user: ${userId}`); // Logs user IDs
 ```
 
 **Why This Is High Risk:**
@@ -600,7 +521,7 @@ export const logger = {
 // Usage:
 import { logger } from '@/lib/logger';
 
-logger.info("<¯ Token exchange response:", tokenData); // Automatically redacts tokens
+logger.info("<ï¿½ Token exchange response:", tokenData); // Automatically redacts tokens
 logger.error("L Failed to fetch user data:", error);
 ```
 
@@ -608,7 +529,7 @@ logger.error("L Failed to fetch user data:", error);
 
 ## Medium Priority Issues
 
-### 9. [MEDIUM] XSS Vulnerability via Unvalidated Artist Names
+### 8. [MEDIUM] XSS Vulnerability via Unvalidated Artist Names
 
 **Location:**
 - `src/app/component/pages/info_page/ArtistModal.js`
@@ -618,7 +539,7 @@ logger.error("L Failed to fetch user data:", error);
 ```javascript
 // ArtistModal.js
 <h2 className="text-base sm:text-lg font-bold text-white truncate">
-  {artist.name} //   Unvalidated user-controlled data
+  {artist.name} // ï¿½ Unvalidated user-controlled data
 </h2>
 
 // user_top_artists.js
@@ -672,7 +593,7 @@ export function validateArtistName(name) {
 
 ---
 
-### 10. [MEDIUM] No Content Security Policy (CSP)
+### 9. [MEDIUM] No Content Security Policy (CSP)
 
 **Location:** Application-wide
 
@@ -740,13 +661,13 @@ const nextConfig = {
 
 ---
 
-### 11. [MEDIUM] Unencrypted HTTP Redirect URI in Production
+### 10. [MEDIUM] Unencrypted HTTP Redirect URI in Production
 
 **Location:** `src/app/page.js`
 
 **Issue:**
 ```javascript
-const REDIRECT_URI = "http://127.0.0.1:3000"; //   HTTP, not HTTPS
+const REDIRECT_URI = "http://127.0.0.1:3000"; // ï¿½ HTTP, not HTTPS
 ```
 
 **Why This Is Medium Risk:**
@@ -765,7 +686,7 @@ And configure HTTPS for production deployment.
 
 ---
 
-### 12. [MEDIUM] Database Connection String Potentially Exposed
+### 11. [MEDIUM] Database Connection String Potentially Exposed
 
 **Location:** Environment variables referenced but not visible
 
@@ -814,7 +735,7 @@ REVOKE DROP ON ALL TABLES IN SCHEMA public FROM spotify_app;
 
 ## Code Quality Issues
 
-### 13. [IMPROVEMENT] Missing Error Boundaries in React Components
+### 12. [IMPROVEMENT] Missing Error Boundaries in React Components
 
 **Location:** `src/app/main.js` and child components
 
@@ -877,7 +798,7 @@ export class ErrorBoundary extends Component {
 
 ---
 
-### 14. [IMPROVEMENT] Potential Memory Leak in useEffect Cleanup
+### 13. [IMPROVEMENT] Potential Memory Leak in useEffect Cleanup
 
 **Location:** `src/hooks/useArtistHistory.js`
 
@@ -945,7 +866,7 @@ useEffect(() => {
 
 ---
 
-### 15. [IMPROVEMENT] Inconsistent Error Handling
+### 14. [IMPROVEMENT] Inconsistent Error Handling
 
 **Location:** Multiple API routes
 
@@ -1010,7 +931,7 @@ export async function GET(req) {
 
 ---
 
-### 16. [IMPROVEMENT] No Request Timeout Configuration
+### 15. [IMPROVEMENT] No Request Timeout Configuration
 
 **Location:** All `fetch` calls
 
@@ -1050,7 +971,7 @@ const response = await fetchWithTimeout(
 
 ---
 
-### 17. [IMPROVEMENT] Missing Index on Frequently Queried Columns
+### 16. [IMPROVEMENT] Missing Index on Frequently Queried Columns
 
 **Location:** Prisma schema has good indexes, but verify with query analysis
 
@@ -1079,7 +1000,7 @@ model plays {
 
 ---
 
-### 18. [IMPROVEMENT] No Pagination on Large Data Sets
+### 17. [IMPROVEMENT] No Pagination on Large Data Sets
 
 **Location:** `src/app/api/stats/top-artists/route.js`
 

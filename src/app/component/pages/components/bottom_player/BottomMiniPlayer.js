@@ -108,19 +108,19 @@ export default function BottomMiniPlayer({ song, onClick, accessToken, isPlaying
         />
       </div>
 
-      <div className="p-3">
+      <div className="px-3 py-2">
         <div className="grid grid-cols-3 items-center max-w-7xl mx-auto gap-4">
 
         {/* LEFT SIDE: Album Art + Song Info */}
         <div className="flex items-center space-x-3 min-w-0">
           {/* Album Art Thumbnail */}
-          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded flex items-center justify-center shadow-lg flex-shrink-0 overflow-hidden">
+          <div className="w-15 h-15 mr-5 bg-gradient-to-br from-green-500 to-green-600 rounded flex items-center justify-center shadow-lg flex-shrink-0 overflow-hidden">
             {albumArt ? (
               <Image
                 src={albumArt}
                 alt={track.name}
-                width={48}
-                height={48}
+                width={65}
+                height={65}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -137,7 +137,7 @@ export default function BottomMiniPlayer({ song, onClick, accessToken, isPlaying
           </div>
         </div>
 
-        {/* CENTER: Control Buttons + Time Display */}
+        {/* CENTER: Control Buttons */}
         <div className="flex flex-col items-center gap-2">
           <div className="flex items-center justify-center gap-2">
             <button
@@ -169,7 +169,7 @@ export default function BottomMiniPlayer({ song, onClick, accessToken, isPlaying
             </button>
           </div>
 
-          {/* Time display (desktop only) */}
+          {/* Time display below controls */}
           <div className="hidden lg:flex items-center gap-2 text-xs text-gray-400">
             <span>{formatTime(localProgressMs)}</span>
             <span>/</span>
