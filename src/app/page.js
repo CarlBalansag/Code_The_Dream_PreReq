@@ -1,6 +1,5 @@
 "use client";
 import CurrentlyPlaying from "./main";
-import SpotifyDeviceStatus from "./component/pages/components/navbar/connected_device";
 import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
 import SpotifyTour from "./component/pages/components/SpotifyTour";
 import { useState, useEffect } from "react";
