@@ -26,10 +26,12 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
         setTimeRange(newRange);
     };
 
-    // Animation variants for content
+    // Animation variants for content with reduced motion support
+    const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     const contentVariants = {
         enter: (direction) => ({
-            x: direction > 0 ? 300 : -300,
+            x: prefersReducedMotion ? 0 : (direction > 0 ? 300 : -300),
             opacity: 0,
         }),
         center: {
@@ -37,7 +39,7 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
             opacity: 1,
         },
         exit: (direction) => ({
-            x: direction > 0 ? -300 : 300,
+            x: prefersReducedMotion ? 0 : (direction > 0 ? -300 : 300),
             opacity: 0,
         }),
     };

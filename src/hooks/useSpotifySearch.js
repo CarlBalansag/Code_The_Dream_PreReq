@@ -52,8 +52,13 @@ export function useSpotifySearch(accessToken, debounceDelay = 300) {
         console.log(`🔍 Searching for: "${query}"`);
 
         const response = await fetch(
-          `/api/search/spotify?query=${encodeURIComponent(query)}&limit=5&accessToken=${encodeURIComponent(accessToken)}`,
-          { signal: abortController.signal }
+          `/api/search/spotify?query=${encodeURIComponent(query)}&limit=5`,
+          {
+            signal: abortController.signal,
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          }
         );
 
         // Check if request was aborted

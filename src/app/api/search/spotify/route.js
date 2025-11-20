@@ -5,7 +5,10 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('query');
     const limit = parseInt(searchParams.get('limit') || '5');
-    const accessToken = searchParams.get('accessToken');
+
+    // Get access token from Authorization header instead of query params
+    const authHeader = req.headers.get('authorization');
+    const accessToken = authHeader?.replace('Bearer ', '');
 
     if (!query || query.length < 1) {
       return NextResponse.json(

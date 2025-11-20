@@ -25,7 +25,11 @@
       "Bash(npx prisma generate:*)",
       "Bash(del:*)",
       "Bash(git apply:*)",
-      "Bash(netstat:*)"
+      "Bash(netstat:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

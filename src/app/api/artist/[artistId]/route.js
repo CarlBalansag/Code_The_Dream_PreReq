@@ -7,8 +7,10 @@ import { NextResponse } from 'next/server';
 export async function GET(req, { params }) {
   try {
     const { artistId } = params;
-    const { searchParams } = new URL(req.url);
-    const accessToken = searchParams.get('accessToken');
+
+    // Get access token from Authorization header instead of query params
+    const authHeader = req.headers.get('authorization');
+    const accessToken = authHeader?.replace('Bearer ', '');
 
     if (!artistId) {
       return NextResponse.json(
