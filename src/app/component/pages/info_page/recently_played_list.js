@@ -1,11 +1,12 @@
 ﻿"use client";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTokenRefresh } from "@/hooks/useTokenRefresh";
 
 const BASE_INTERVAL = 30000; // 30s baseline
 const QUIET_MAX_INTERVAL = 60000; // back off to 60s when nothing changes
 const RATE_LIMIT_INTERVAL = 120000; // hard back off when Spotify rate limits
 
-export default function RecentlyPlayedList({ accessToken, name, onLoadingChange }) {
+export default function RecentlyPlayedList({ accessToken, name, userId, onLoadingChange, onTokenRefresh }) {
   const [recentTracks, setRecentTracks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [pollInterval, setPollInterval] = useState(BASE_INTERVAL);
@@ -17,6 +18,9 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
   const visibilityRef = useRef(
     typeof document !== "undefined" ? document.visibilityState === "visible" : true
   );
+
+  // Use token refresh hook
+  const { fetchWithTokenRefresh } = useTokenRefresh(accessToken, userId, onTokenRefresh);
 
   // Keep the latest callback reference for loading state changes
   useEffect(() => {
@@ -42,9 +46,8 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
       }
 
       try {
-        const res = await fetch(
-          `https://api.spotify.com/v1/me/player/recently-played?limit=50`,
-          { headers: { Authorization: `Bearer ${accessToken}` } }
+        const res = await fetchWithTokenRefresh(
+          `https://api.spotify.com/v1/me/player/recently-played?limit=50`
         );
 
         if (res.status === 429) {
@@ -83,7 +86,7 @@ export default function RecentlyPlayedList({ accessToken, name, onLoadingChange 
         isFetchingRef.current = false;
       }
     },
-    [accessToken]
+    [fetchWithTokenRefresh]
   );
 
   // Adjust polling interval based on recent changes and rate limiting

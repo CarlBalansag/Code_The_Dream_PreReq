@@ -14,7 +14,7 @@ import SongModal from "./component/pages/info_page/SongModal";
 import BasicArtistModal from "./component/pages/info_page/BasicArtistModal";
 import ArtistModal from "./component/pages/info_page/ArtistModal";
 
-export default function CurrentlyPlaying({ accessToken, premium, name, userId, deviceConnected, tourButton, profileDropdown }) {
+export default function CurrentlyPlaying({ accessToken, premium, name, userId, deviceConnected, tourButton, profileDropdown, onTokenRefresh }) {
   const [song, setSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [songID, setSongID] = useState(null);
@@ -216,7 +216,9 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
         <RecentlyPlayedList
           accessToken={accessToken}
           name={name}
+          userId={userId}
           onLoadingChange={handleRecentlyPlayedLoadingChange}
+          onTokenRefresh={onTokenRefresh}
         />
       </div>
     </div>
@@ -261,7 +263,13 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
 
                 {/* Recently Played - Full width, horizontal scroll */}
                 <div className="h-auto min-h-[280px] " data-tour="recently-played">
-                  <RecentlyPlayedList accessToken={accessToken} name={name} onLoadingChange={handleRecentlyPlayedLoadingChange} />
+                  <RecentlyPlayedList
+                    accessToken={accessToken}
+                    name={name}
+                    userId={userId}
+                    onLoadingChange={handleRecentlyPlayedLoadingChange}
+                    onTokenRefresh={onTokenRefresh}
+                  />
                 </div>
               </div>
             </div>

@@ -30,7 +30,8 @@
       "Bash(rm:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Skill(frontend-design)"
     ],
     "deny": [],
     "ask": []
