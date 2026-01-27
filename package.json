@@ -11,10 +11,9 @@
     "check:db": "node check-db.mjs"
   },
   "dependencies": {
-    "@ark-ui/react": "^5.26.0",
+    "@prisma/client": "^6.19.0",
+    "framer-motion": "^12.23.24",
     "lucide-react": "^0.514.0",
-    "mongodb": "^6.9.0",
-    "mongoose": "^8.7.1",
     "next": "15.3.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -30,6 +29,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
     "postcss": "^8.5.6",
+    "prisma": "^6.19.0",
     "tailwindcss": "^4.1.11"
   }
 }

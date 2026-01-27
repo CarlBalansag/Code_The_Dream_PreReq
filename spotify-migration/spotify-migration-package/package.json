@@ -1,0 +1,29 @@
+{
+  "name": "spotify-tracker-migration",
+  "version": "1.0.0",
+  "description": "Migration script from MongoDB to PostgreSQL for Spotify Listening History Tracker",
+  "main": "migrate.js",
+  "scripts": {
+    "migrate": "node migrate.js",
+    "migrate:dry-run": "node migrate.js --dry-run",
+    "migrate:users-only": "node migrate.js --skip-plays --skip-import-jobs",
+    "migrate:plays-only": "node migrate.js --skip-users --skip-import-jobs",
+    "setup:postgres": "psql $DATABASE_URL -f schema.sql",
+    "verify": "node verify.js"
+  },
+  "keywords": [
+    "spotify",
+    "migration",
+    "mongodb",
+    "postgresql"
+  ],
+  "dependencies": {
+    "mongoose": "^8.0.0",
+    "pg": "^8.11.0",
+    "cli-progress": "^3.12.0",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

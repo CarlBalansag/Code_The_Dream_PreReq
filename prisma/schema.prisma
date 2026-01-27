@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model albums {
+  id         String    @id @db.VarChar(100)
+  name       String    @db.VarChar(500)
+  artist_id  String?   @db.VarChar(100)
+  image_url  String?
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  artists    artists?  @relation(fields: [artist_id], references: [id], onUpdate: NoAction)
+  tracks     tracks[]
+
+  @@index([artist_id], map: "idx_albums_artist")
+  @@index([name], map: "idx_albums_name")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model artists {
+  id         String    @id @db.VarChar(100)
+  name       String    @db.VarChar(500)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  albums     albums[]
+  tracks     tracks[]
+
+  @@index([name], map: "idx_artists_name")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model import_jobs {
+  id               Int       @id @default(autoincrement())
+  user_id          String    @db.VarChar(100)
+  status           String    @default("pending") @db.VarChar(20)
+  file_name        String    @db.VarChar(500)
+  total_tracks     Int?      @default(0)
+  processed_tracks Int?      @default(0)
+  started_at       DateTime? @db.Timestamptz(6)
+  completed_at     DateTime? @db.Timestamptz(6)
+  error_message    String?
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+  metrics          Json?
+  users            users     @relation(fields: [user_id], references: [spotify_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([created_at(sort: Desc)], map: "idx_import_jobs_created")
+  @@index([user_id, status], map: "idx_import_jobs_user_status")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model plays {
+  id        BigInt   @id @default(autoincrement())
+  user_id   String   @db.VarChar(100)
+  track_id  String?  @db.VarChar(100)
+  played_at DateTime @db.Timestamptz(6)
+  source    Int?     @default(0) @db.SmallInt
+  tracks    tracks?  @relation(fields: [track_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users     users    @relation(fields: [user_id], references: [spotify_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, track_id, played_at])
+  @@index([source], map: "idx_plays_source")
+  @@index([track_id], map: "idx_plays_track")
+  @@index([user_id, played_at(sort: Desc)], map: "idx_plays_user_time")
+  @@index([user_id, track_id], map: "idx_plays_user_track")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tracks {
+  id          String    @id @db.VarChar(100)
+  name        String    @db.VarChar(500)
+  artist_id   String?   @db.VarChar(100)
+  album_id    String?   @db.VarChar(100)
+  duration_ms Int
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  plays       plays[]
+  albums      albums?   @relation(fields: [album_id], references: [id], onUpdate: NoAction)
+  artists     artists?  @relation(fields: [artist_id], references: [id], onUpdate: NoAction)
+
+  @@index([album_id], map: "idx_tracks_album")
+  @@index([artist_id], map: "idx_tracks_artist")
+  @@index([name], map: "idx_tracks_name")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model users {
+  spotify_id         String        @id @db.VarChar(100)
+  display_name       String        @db.VarChar(255)
+  email              String?       @db.VarChar(255)
+  country            String?       @db.VarChar(10)
+  profile_image      String?
+  access_token       String?
+  refresh_token      String?
+  token_expires_at   DateTime?     @db.Timestamptz(6)
+  import_flags       Int?          @default(0) @db.SmallInt
+  background_tracking Boolean      @default(true)
+  last_check_at      DateTime?     @db.Timestamptz(6)
+  joined_at          DateTime?     @default(now()) @db.Timestamptz(6)
+  created_at         DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?     @default(now()) @db.Timestamptz(6)
+  import_jobs        import_jobs[]
+  plays              plays[]
+
+  @@index([import_flags], map: "idx_users_import_flags")
+  @@index([background_tracking], map: "idx_users_background_tracking")
+}

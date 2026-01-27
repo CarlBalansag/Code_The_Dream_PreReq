@@ -1,0 +1,181 @@
+// Prisma Schema for Spotify Listening History Tracker
+// After migration, use Prisma for type-safe database access
+//
+// Setup:
+// 1. npm install prisma @prisma/client
+// 2. Copy this file to your project as prisma/schema.prisma
+// 3. npx prisma generate
+// 4. Use in your code: import { PrismaClient } from '@prisma/client'
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  spotifyId       String    @id @map("spotify_id") @db.VarChar(100)
+  displayName     String    @map("display_name") @db.VarChar(255)
+  email           String?   @db.VarChar(255)
+  country         String?   @db.VarChar(10)
+  profileImage    String?   @map("profile_image") @db.Text
+  
+  accessToken     String?   @map("access_token") @db.Text
+  refreshToken    String?   @map("refresh_token") @db.Text
+  tokenExpiresAt  DateTime? @map("token_expires_at") @db.Timestamptz(6)
+  
+  importFlags     Int       @default(0) @map("import_flags") @db.SmallInt
+  lastCheckAt     DateTime? @map("last_check_at") @db.Timestamptz(6)
+  
+  joinedAt        DateTime  @default(now()) @map("joined_at") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  // Relations
+  plays           Play[]
+  importJobs      ImportJob[]
+  
+  @@index([email])
+  @@index([importFlags])
+  @@map("users")
+}
+
+model Artist {
+  id        String   @id @db.VarChar(100)
+  name      String   @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  
+  // Relations
+  tracks    Track[]
+  albums    Album[]
+  
+  @@index([name])
+  @@map("artists")
+}
+
+model Album {
+  id        String   @id @db.VarChar(100)
+  name      String   @db.VarChar(500)
+  artistId  String?  @map("artist_id") @db.VarChar(100)
+  imageUrl  String?  @map("image_url") @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  
+  // Relations
+  artist    Artist?  @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  tracks    Track[]
+  
+  @@index([artistId])
+  @@index([name])
+  @@map("albums")
+}
+
+model Track {
+  id         String   @id @db.VarChar(100)
+  name       String   @db.VarChar(500)
+  artistId   String?  @map("artist_id") @db.VarChar(100)
+  albumId    String?  @map("album_id") @db.VarChar(100)
+  durationMs Int      @map("duration_ms")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  
+  // Relations
+  artist     Artist?  @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  album      Album?   @relation(fields: [albumId], references: [id], onDelete: SetNull)
+  plays      Play[]
+  
+  @@index([artistId])
+  @@index([albumId])
+  @@index([name])
+  @@map("tracks")
+}
+
+model Play {
+  id        BigInt   @id @default(autoincrement())
+  userId    String   @map("user_id") @db.VarChar(100)
+  trackId   String?  @map("track_id") @db.VarChar(100)
+  playedAt  DateTime @map("played_at") @db.Timestamptz(6)
+  source    Int      @default(0) @db.SmallInt
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [spotifyId], onDelete: Cascade)
+  track     Track?   @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, trackId, playedAt])
+  @@index([userId, playedAt(sort: Desc)])
+  @@index([trackId])
+  @@index([userId, trackId])
+  @@index([source])
+  @@map("plays")
+}
+
+model ImportJob {
+  id              Int       @id @default(autoincrement())
+  userId          String    @map("user_id") @db.VarChar(100)
+  status          String    @default("pending") @db.VarChar(20)
+  fileName        String    @map("file_name") @db.VarChar(500)
+  totalTracks     Int       @default(0) @map("total_tracks")
+  processedTracks Int       @default(0) @map("processed_tracks")
+  startedAt       DateTime? @map("started_at") @db.Timestamptz(6)
+  completedAt     DateTime? @map("completed_at") @db.Timestamptz(6)
+  errorMessage    String?   @map("error_message") @db.Text
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [spotifyId], onDelete: Cascade)
+  
+  @@index([userId, status])
+  @@index([createdAt(sort: Desc)])
+  @@map("import_jobs")
+}
+
+// Example Usage:
+//
+// import { PrismaClient } from '@prisma/client'
+// const prisma = new PrismaClient()
+//
+// // Get user with plays
+// const user = await prisma.user.findUnique({
+//   where: { spotifyId: 'user123' },
+//   include: {
+//     plays: {
+//       take: 10,
+//       orderBy: { playedAt: 'desc' },
+//       include: {
+//         track: {
+//           include: {
+//             artist: true,
+//             album: true
+//           }
+//         }
+//       }
+//     }
+//   }
+// })
+//
+// // Track a new play
+// await prisma.play.create({
+//   data: {
+//     userId: 'user123',
+//     trackId: 'track456',
+//     playedAt: new Date(),
+//     source: 0
+//   }
+// })
+//
+// // Get top artists
+// const topArtists = await prisma.$queryRaw`
+//   SELECT 
+//     a.id,
+//     a.name,
+//     COUNT(p.id) as play_count
+//   FROM artists a
+//   JOIN tracks t ON t.artist_id = a.id
+//   JOIN plays p ON p.track_id = t.id
+//   WHERE p.user_id = 'user123'
+//   GROUP BY a.id, a.name
+//   ORDER BY play_count DESC
+//   LIMIT 10
+// `

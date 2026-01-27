@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+<<<<<<< HEAD
       "Bash(findstr:*)",
       "Bash(rm \"c:\\Users\\Carl\\Desktop\\Code The Dream\\Pre-Req\\spotify-app\\src\\lib\\services\\tempCodeRunnerFile.js\")",
       "Bash(git add src/app/page.js)",
@@ -10,6 +11,49 @@
       "Bash(git commit -m \"Fix token exchange to fetch user data and format response correctly\")",
       "Bash(rd /s /q .next)",
       "Bash(rm -rf \"c:\\Users\\Carl\\Desktop\\Code The Dream\\Pre-Req\\spotify-app\\.next\")"
+=======
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(git checkout:*)",
+      "Bash(npm install:*)",
+      "Bash(cat:*)",
+      "Bash(npm run lint)",
+      "Bash(timeout:*)",
+      "Bash(node test-db-connection.js)",
+      "Bash(node:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(dir:*)",
+      "Bash(ping:*)",
+      "Bash(npm run migrate:dry-run:*)",
+      "Bash(npm run migrate:*)",
+      "Bash(npm run verify:*)",
+      "Bash(npm run check:db:*)",
+      "Bash(git show:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(del:*)",
+      "Bash(git apply:*)",
+      "Bash(netstat:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npx eslint:*)",
+      "Skill(frontend-design)",
+      "Bash(curl:*)",
+      "WebFetch(domain:codepen.io)",
+      "WebFetch(domain:charts.spotify.com)",
+      "WebFetch(domain:kworb.net)",
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri ''http://localhost:3000/api/landing/top-artist'' -UseBasicParsing | Select-Object -ExpandProperty Content\")",
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri ''http://localhost:3000/api/landing/top-artist?refresh=true'' -UseBasicParsing | Select-Object -ExpandProperty Content\")",
+      "WebFetch(domain:open.spotify.com)",
+      "WebFetch(domain:reactbits.dev)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)"
+>>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
     ],
     "deny": [],
     "ask": []

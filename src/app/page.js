@@ -1,4 +1,5 @@
 "use client";
+<<<<<<< HEAD
 // import CurrentlyPlaying from "./main";
 // import SpotifyDeviceStatus from "./component/pages/components/navbar/connected_device";
 // import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
@@ -20,6 +21,21 @@ const REDIRECT_URI = "https://spotify.carltechs.com"; //link that tells spotify 
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; //link for spotify login page
 const SCOPES ="user-read-recently-played user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read user-read-recently-played user-top-read";
 const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID; //Spotify unique I
+=======
+import CurrentlyPlaying from "./main";
+import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
+import SpotifyTour from "./component/pages/components/SpotifyTour";
+import Hero from "./component/pages/landing/Hero";
+import { useState, useEffect, useCallback } from "react";
+import { HelpCircle } from "lucide-react";
+import { usePlayTracking } from "@/hooks/usePlayTracking";
+
+const CLIENT_ID = "2751136537024052b892a475c49906e1";
+const REDIRECT_URI = "http://127.0.0.1:3000";
+const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
+const SCOPES =
+  "user-read-recently-played user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read user-read-recently-played user-top-read";
+>>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
 
 export default function Home() {
   const [accessToken, setAccessToken] = useState(null);
@@ -31,7 +47,18 @@ export default function Home() {
   const [deviceConnected, setDeviceConnected] = useState(false);
   const [showTour, setShowTour] = useState(false);
   const [mounted, setMounted] = useState(false);
+<<<<<<< HEAD
 
+=======
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+  // Handle token refresh callback
+  const handleTokenRefresh = useCallback((newToken) => {
+    console.log('🔄 Updating access token in app state');
+    setAccessToken(newToken);
+  }, []);
+
+>>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
   // ✅ Enable play tracking when user is logged in
   const { lastPollResult, isPolling } = usePlayTracking(
     user,
@@ -52,6 +79,10 @@ export default function Home() {
     console.log("🧠 URL Code:", authCode);
     if (authCode) {
       setCode(authCode);
+<<<<<<< HEAD
+=======
+      setIsAuthenticating(true);
+>>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
     }
   }, []);
 
@@ -143,12 +174,14 @@ export default function Home() {
   };
 
   const loginToSpotify = () => {
+    setIsAuthenticating(true);
     const url = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}`;
     window.location.href = url;
   };
 
   return (
     <div className="bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950">
+<<<<<<< HEAD
       {isLoggedIn && user ? (
         <div className="min-h-screen flex flex-col">
           {/* Navbar */}
@@ -214,8 +247,67 @@ export default function Home() {
             >
               Continue to Spotify
             </button>
+=======
+      {isAuthenticating && !isLoggedIn ? (
+        // Loading screen during authentication
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="flex flex-col items-center gap-6">
+            <div className="relative">
+              {/* Spinning ring */}
+              <div className="w-20 h-20 border-4 border-[#1DB954]/20 border-t-[#1DB954] rounded-full animate-spin"></div>
+            </div>
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-bold text-white">Connecting to Spotify</h2>
+              <p className="text-gray-400">Please wait while we authenticate your account...</p>
+            </div>
+>>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
           </div>
         </div>
+      ) : isLoggedIn && user ? (
+        <div className="min-h-screen flex flex-col">
+          {/* REMOVED OLD NAVBAR - Now using new Navbar component in main.js */}
+
+          {/* Main Content */}
+          <div className="flex-1 z-1 w-full h-full relative">
+            <CurrentlyPlaying
+              accessToken={accessToken}
+              premium={premium}
+              name={user.displayName || user.display_name}
+              userId={userID}
+              deviceConnected={deviceConnected}
+              tourActive={showTour}
+              onTokenRefresh={handleTokenRefresh}
+              tourButton={
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("spotify-tour-completed");
+                    setShowTour(true);
+                  }}
+                  className="p-2 rounded-full hover:bg-gray-800/50 transition-colors"
+                  title="Take a tour"
+                >
+                  <HelpCircle size={24} className="text-[#1DB954]" />
+                </button>
+              }
+              profileDropdown={
+                <DropdownMenu
+                  ProfilePicture={user?.profileImage || user?.images?.[0]?.url}
+                  UserName={user.displayName || user.display_name}
+                  UserProduct={premium ? "premium" : "free"}
+                  accessToken={accessToken}
+                  userId={userID}
+                />
+              }
+            />
+          </div>
+
+          {/* Tour */}
+          {showTour && mounted && (
+            <SpotifyTour onComplete={handleTourComplete} premium={premium} />
+          )}
+        </div>
+      ) : (
+        <Hero onConnectClick={loginToSpotify} />
       )}
     </div>
   );

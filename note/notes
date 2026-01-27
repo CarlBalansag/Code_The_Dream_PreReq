@@ -1,0 +1,100 @@
+
+premium mode: Song Playing: view album
+side arrow.
+
+better warning for no device connected toast.
+
+work on hero section get ideas, top tracks united states 
+
+fix pagination on mobile
+
+add more animation
+
+Tour
+https://ark-ui.com/docs/components/tour
+First: ("These are your top listened to artists. Use the buttons below to switch between the last 4 weeks, 6 months, or all-time rankings.”)
+Second: ("This is your top tracks listened. Use the buttons above to switch between the last 4 weeks, 6 months, or all-time favorites.")
+Third: ("These are your recently played songs, showing your most recent listening activity.")
+Fourth: Connect device to spotify (“These are your connected Spotify devices. If you don’t see your device, open Spotify on the device and make sure you’re logged in.”)
+Sixth: View current song (“View the song you’re currently listening to in real time.”)
+
+
+
+October 14 2025 Errors 
+    on Artist Modal a button that updates the api call to get recent listened to music,  like on the top right
+        the chart is updated once every couple minutes that button lets them call the api to update the chart
+
+    BottomMiniPlayer Playback controls currently when a song is played on topTracks there is no queue for what is the next song is played because it plays a    specific song, make it when the next button is played and there is no next song play liked songs or recommend songs
+
+    Fix tour component, missing connected device, and showing what is currently playing in the bottom. also make new tour pages for liveSong section - different type of tour
+
+    On LiveSongs, DropDown to go back to UseStats backround is gone add background
+
+    on profile dropdown its hardcoded free member we need fix
+
+    on charts change the color based on artist pfp color 
+
+October 18, 2025
+    Add clicking artist into tour shows them more information about the artist
+        also fix live song tour button 
+    
+    On the bottom of chart on user artist modal, make some sort of indication like, not seeing all your music? import your data button that opens up import modal
+
+    add connected device to the bottom nav bar
+November 5th, 2025
+    - top artist some are showing N/A
+    - hover on graph more maybe zoom in idk fix hover jumping month to month maybe day  instead
+    - make webpage a bit bigger recentlyplayed is hidden because of bottom navbar
+    fix navbar 
+    - tour component needs to be fixed 
+
+November 7th, 2025 3:35 AM
+    
+    Nick: site loads really slow maybe because pulling data for the recently played a lot i was doing testings and it loads the recently played pretty quick idk
+
+    i think 30 songs it too much for top tracks maybe leave it at 10 or 20
+    same for top artists tho no? 25 is a lot usually ppl just care about top 10 maybe top 15
+
+    i wanted to start working on the "everybody is listening" to tab but i idk i didnt wanna just show top 50 songs global and thats it, that lw seemed boring
+
+    Fixed :
+        bottom nav bar intercepting with recentlyplayed, had horizontal scroll bar like top artists but i dont think its necessary
+
+        fixed the vertical scroll it was white now its the spotify green color
+        NOTE: for the vertical bar idk maybe im just tweaking but looks odd/off take a look at it maybe looks better without a bar?
+
+        changed top tracks to only show 8 at a time instead of 12 because of tour
+
+        fixed the tour sort of, took mad long cos lw the code for it is retarded but i managed to get it centered that took so long because of the scroll view bullshit but its fine now it just needs fixing on when actually clicking next the highlighted box just moves too fast i guess?
+
+November 7th, 2025 6:57 AM // TODO
+    - top artist some are showing N/A
+    - hover on graph more maybe zoom in idk fix hover jumping month to month maybe day instead
+    - fix tour adjusting highlighted box movement
+
+November 11th, 2025
+    Import Data visualization broken no blur
+        and no exit button
+
+    when searching for an artist, if the artist has been listened too, open up there ArtistModal
+        if not listened to we gotta figure out what to replace the other section so it just doesn't say 0 and empty graph
+
+    when searching for song, figure out ideas for what can be on the modal
+
+    on UserTopArtist the Top#1 etc change that to something else not Top#1
+
+    When on mobile view fix tour, maybe need a whole new tour just for mobile view
+
+    Remove 25 tracks on Recently Played
+
+    Remove ArtistModal Insight, find new things to put in there
+
+
+https://dribbble.com/shots/26078461-Spotify-Wrapped-Power-BI-Dashboard
+
+
+Frank Ocean
+Taylor Swift
+Bruno Mars
+Sza
+Drake

@@ -1,0 +1,84 @@
+╔════════════════════════════════════════════════════════╗
+║  How to Use This Migration with Claude Code           ║
+╚════════════════════════════════════════════════════════╝
+
+STEP 1: Download the Files
+---------------------------
+Download the spotify-migration.tar.gz file to your local machine.
+
+STEP 2: Extract the Archive
+---------------------------
+# On macOS/Linux:
+tar -xzf spotify-migration.tar.gz
+cd spotify-migration-package
+
+# On Windows (using Git Bash or WSL):
+tar -xzf spotify-migration.tar.gz
+cd spotify-migration-package
+
+# Or use a GUI tool like 7-Zip on Windows
+
+STEP 3: Open in Claude Code
+---------------------------
+# Navigate to the directory in your terminal
+cd /path/to/spotify-migration-package
+
+# Start Claude Code
+claude-code
+
+# Or if you prefer VS Code with Claude
+code .
+
+STEP 4: Tell Claude Code What to Do
+---------------------------
+Once in Claude Code, simply paste this prompt:
+
+"""
+I have a MongoDB database for a Spotify listening history tracker that's 
+running out of storage. I need to migrate to PostgreSQL to save ~80% space.
+
+I have migration files in this directory:
+- schema.sql (optimized PostgreSQL schema)
+- migrate.js (migration script)
+- verify.js (verification script)
+- README.md (full documentation)
+
+Please help me:
+1. Review the migration files and explain what they do
+2. Set up my PostgreSQL database (I want to use [Supabase/Neon/etc.])
+3. Configure my .env file with the right connection strings
+4. Run the migration safely with a dry run first
+5. Verify the migration was successful
+
+My MongoDB connection string is: [YOUR_MONGODB_URI]
+"""
+
+STEP 5: What Claude Code Will Do
+---------------------------
+Claude Code will:
+✅ Review your migration files
+✅ Help you choose a PostgreSQL provider
+✅ Guide you through setup
+✅ Configure your environment variables
+✅ Run dry-run migration first
+✅ Execute full migration
+✅ Verify data integrity
+✅ Help you update your application code
+
+ALTERNATIVE: Use These Files in Your Project
+---------------------------
+If you just want to copy these files into your existing project:
+
+# Copy migration directory to your project
+cp -r spotify-migration-package/* /path/to/your/project/migration/
+
+# Then follow the README.md instructions
+
+NEED HELP?
+---------------------------
+- Read README.md for detailed step-by-step instructions
+- Check QUERY_GUIDE.md for code examples
+- All scripts include --help flags
+- Scripts have dry-run modes for safety
+
+Good luck with your migration! 🚀
