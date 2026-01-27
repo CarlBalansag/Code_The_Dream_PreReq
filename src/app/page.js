@@ -23,6 +23,7 @@ export default function Home() {
   const [deviceConnected, setDeviceConnected] = useState(false);
   const [showTour, setShowTour] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   // Handle token refresh callback
   const handleTokenRefresh = useCallback((newToken) => {
@@ -50,6 +51,7 @@ export default function Home() {
     console.log("🧠 URL Code:", authCode);
     if (authCode) {
       setCode(authCode);
+      setIsAuthenticating(true);
     }
   }, []);
 
@@ -141,13 +143,28 @@ export default function Home() {
   };
 
   const loginToSpotify = () => {
+    setIsAuthenticating(true);
     const url = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}`;
     window.location.href = url;
   };
 
   return (
     <div className="bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950">
-      {isLoggedIn && user ? (
+      {isAuthenticating && !isLoggedIn ? (
+        // Loading screen during authentication
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="flex flex-col items-center gap-6">
+            <div className="relative">
+              {/* Spinning ring */}
+              <div className="w-20 h-20 border-4 border-[#1DB954]/20 border-t-[#1DB954] rounded-full animate-spin"></div>
+            </div>
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-bold text-white">Connecting to Spotify</h2>
+              <p className="text-gray-400">Please wait while we authenticate your account...</p>
+            </div>
+          </div>
+        </div>
+      ) : isLoggedIn && user ? (
         <div className="min-h-screen flex flex-col">
           {/* REMOVED OLD NAVBAR - Now using new Navbar component in main.js */}
 

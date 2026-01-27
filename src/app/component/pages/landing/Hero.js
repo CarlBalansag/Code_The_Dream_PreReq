@@ -1,81 +1,70 @@
 "use client";
-import { ArrowRight, Zap, TrendingUp, Radio } from 'lucide-react';
+import { ArrowRight, Music } from 'lucide-react';
 import LivePulse from './LivePulse';
 import GlobalTrends from './GlobalTrends';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-// Music notes configuration - Generate programmatically!
-const generateMusicNotes = (count = 50) => {
-  const symbols = ['♪', '♫', '♬', '♩'];
-  const colors = ['#BFFF0B', '#FF006E', '#00F5FF'];
-  const sizes = ['4xl', '5xl', '6xl', '7xl', '8xl', '9xl'];
-  const animations = ['float', 'float-delayed', 'float-slow'];
-
-  return Array.from({ length: count }, (_, i) => {
-    const useTop = Math.random() > 0.5;
-    const useLeft = Math.random() > 0.5;
-
-    return {
-      id: i + 1,
-      symbol: symbols[i % symbols.length],
-      [useTop ? 'top' : 'bottom']: `${Math.floor(Math.random() * 96) + 2}%`,
-      [useLeft ? 'left' : 'right']: `${Math.floor(Math.random() * 96) + 2}%`,
-      color: colors[i % colors.length],
-      opacity: 1, // Fixed opacity - change this number to adjust (3 = 0.03 transparency)
-      size: sizes[Math.floor(Math.random() * sizes.length)],
-      animation: animations[i % animations.length],
-    };
-  });
-};
+// Static fallback data in case API fails
+const FALLBACK_ARTISTS = [
+  {
+    rank: 1,
+    artist: "Drake",
+    title: "Rich Baby Daddy",
+    days: 365,
+    streams: 1500000000,
+    streamsFormatted: "1.50B",
+    imageUrl: "https://i.scdn.co/image/ab6761610000e5eb4293385d324db8558179afd9",
+  },
+  {
+    rank: 2,
+    artist: "Taylor Swift",
+    title: "Anti-Hero",
+    days: 800,
+    streams: 2100000000,
+    streamsFormatted: "2.10B",
+    imageUrl: "https://i.scdn.co/image/ab6761610000e5eb5a00969a4698c3132a15fbb0",
+  },
+  {
+    rank: 3,
+    artist: "The Weeknd",
+    title: "Blinding Lights",
+    days: 1500,
+    streams: 4200000000,
+    streamsFormatted: "4.20B",
+    imageUrl: "https://i.scdn.co/image/ab6761610000e5eb214f3cf1cbe7139c1e26ffbb",
+  },
+];
 
 export default function Hero({ onConnectClick }) {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const heroRef = useRef(null);
   // Generate music notes only on client side to avoid hydration mismatch
-  const [musicNotes] = useState(() => generateMusicNotes(50)); // Change the number here to add/remove notes!
+  const [musicNotes, setMusicNotes] = useState([]);
+  const [topArtists, setTopArtists] = useState(FALLBACK_ARTISTS);
+  const [isLoading, setIsLoading] = useState(true);
 
+
+  // Fetch top artists from KWORB API
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (heroRef.current) {
-        const rect = heroRef.current.getBoundingClientRect();
-        setMousePos({
-          x: (e.clientX - rect.left) / rect.width,
-          y: (e.clientY - rect.top) / rect.height,
-        });
-      }
-    };
+    async function fetchTopArtists() {
+      try {
+        const response = await fetch('/api/landing/top-artist');
+        const result = await response.json();
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+        if (result.success && result.data?.length >= 3) {
+          setTopArtists(result.data.slice(0, 3));
+        }
+      } catch (error) {
+        console.error('Failed to fetch top artists:', error);
+        // Keep fallback data
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchTopArtists();
   }, []);
 
   return (
-    <div ref={heroRef} className="relative min-h-screen w-full overflow-hidden bg-[#0D0D0D] pt-20">
-      {/* Animated Vinyl Records Background */}
-      <div className="absolute top-20 right-[5%] w-[500px] h-[500px] opacity-4 pointer-events-none">
-        <div className="vinyl-record animate-spin-vinyl" />
-      </div>
-      <div className="absolute bottom-32 left-[10%] w-[350px] h-[350px] opacity-5 pointer-events-none">
-        <div className="vinyl-record animate-spin-vinyl-reverse" />
-      </div>
-
-      {/* Audio Waveform Lines */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
-        <svg className="absolute w-full h-full" style={{
-          transform: `translateY(${mousePos.y * 30}px)`,
-          transition: 'transform 0.5s ease-out',
-        }}>
-          <path d="M0,250 Q250,200 500,250 T1000,250 T1500,250 T2000,250" stroke="#BFFF0B" strokeWidth="2" fill="none" className="animate-wave-flow" />
-          <path d="M0,350 Q250,300 500,350 T1000,350 T1500,350 T2000,350" stroke="#FF006E" strokeWidth="2" fill="none" className="animate-wave-flow-delayed" />
-          <path d="M0,450 Q250,400 500,450 T1000,450 T1500,450 T2000,450" stroke="#00F5FF" strokeWidth="2" fill="none" className="animate-wave-flow-slow" />
-        </svg>
-      </div>
-
-      {/* Sound Wave Orbs */}
-      <div className="absolute top-20 left-[10%] w-[600px] h-[600px] bg-[#BFFF0B] opacity-10 blur-[150px] rounded-full animate-wave-pulse" />
-      <div className="absolute top-40 right-[15%] w-[500px] h-[500px] bg-[#FF006E] opacity-10 blur-[140px] rounded-full animate-wave-pulse-delayed" />
-      <div className="absolute bottom-20 left-[30%] w-[400px] h-[400px] bg-[#00F5FF] opacity-10 blur-[130px] rounded-full animate-wave-pulse-slow" />
-
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#0D0D0D] pt-20">
       {/* Music Note Accents - Mapped from array */}
       {musicNotes.map((note) => (
         <div
@@ -96,79 +85,73 @@ export default function Hero({ onConnectClick }) {
         {/* Hero Header - Asymmetric Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-20 items-center">
           <div className="lg:col-span-7 space-y-8">
-            {/* Eyebrow */}
-            <div className="flex items-center gap-3 animate-slide-in-left">
-              <div className="h-[2px] w-12 bg-gradient-to-r from-[#BFFF0B] to-transparent" />
-              <span className="text-[#BFFF0B] text-sm font-bold tracking-[0.3em] uppercase">
-                Real-Time Analytics
-              </span>
-            </div>
-
             {/* Main Headline */}
-            <h1 className="text-6xl md:text-8xl font-black leading-[0.9] text-white tracking-tight animate-slide-in-left-delayed">
-              <span className="block">YOUR</span>
-              <span className="block text-[#BFFF0B] glitch-text" data-text="SONIC">MUSIC</span>
-              <span className="block">IDENTITY</span>
+            <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black leading-[0.9] text-white tracking-tighter animate-slide-in-left-delayed">
+              <span className="block">Discover Your</span>
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#1DB954] to-[#1ed760]">MUSIC STATS</span>
             </h1>
 
             {/* Description */}
             <p className="text-xl text-gray-400 max-w-xl leading-relaxed font-light animate-fade-in-delayed">
-              Break through the noise. Visualize your music DNA with
-              <span className="text-[#00F5FF] font-semibold"> hyper-granular analytics</span> that reveal
-              patterns you never knew existed.
+              Uncover hidden patterns in your listening habits with
+              <span className="text-[#1DB954] font-semibold"> real-time analytics</span> that reveal your unique musical identity.
             </p>
 
             {/* CTA Button */}
             <div className="flex flex-wrap gap-4 animate-fade-in-delayed-2">
               <button
                 onClick={onConnectClick}
-                className="group relative px-8 py-5 bg-[#BFFF0B] text-black font-bold text-lg overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(191,255,11,0.4)]"
+                className="group relative px-10 py-5 bg-[#1DB954] text-black font-bold text-lg rounded-full overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(29,185,84,0.6)]"
               >
                 <span className="relative z-10 flex items-center gap-3">
                   Connect Spotify
                   <ArrowRight className="group-hover:translate-x-1 transition-transform" size={22} />
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-[#FF006E] to-[#00F5FF] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-[#1ed760] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </button>
-            </div>
-
-            {/* Stats Bar */}
-            <div className="flex flex-wrap gap-8 pt-8 border-t border-white/10 animate-fade-in-delayed-3">
-              <div className="space-y-1">
-                <div className="text-3xl font-black text-[#BFFF0B]">47K+</div>
-                <div className="text-xs text-gray-500 uppercase tracking-wider">Active Users</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-3xl font-black text-[#FF006E]">2.3M+</div>
-                <div className="text-xs text-gray-500 uppercase tracking-wider">Tracks Analyzed</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-3xl font-black text-[#00F5FF]">99.9%</div>
-                <div className="text-xs text-gray-500 uppercase tracking-wider">Accuracy</div>
-              </div>
             </div>
           </div>
 
-          {/* Feature Cards - Right Side */}
-          <div className="lg:col-span-5 space-y-4 animate-slide-in-right">
-            <FeatureCard
-              icon={<Zap className="text-[#BFFF0B]" size={24} />}
-              title="Real-Time Tracking"
-              description="Every play, every artist, captured instantly"
-              delay="0s"
-            />
-            <FeatureCard
-              icon={<TrendingUp className="text-[#FF006E]" size={24} />}
-              title="Deep Analytics"
-              description="Uncover hidden patterns in your listening"
-              delay="0.1s"
-            />
-            <FeatureCard
-              icon={<Radio className="text-[#00F5FF]" size={24} />}
-              title="Global Trends"
-              description="See what the world is streaming now"
-              delay="0.2s"
-            />
+          {/* Top Artists Cards - Right Side - Card Fan Effect */}
+          <div className="lg:col-span-5 animate-slide-in-right flex items-center justify-center">
+            <div className="card-stack" style={{ position: 'relative', width: '380px', height: '580px' }}>
+              {/* Right card - Rank 3 (rotates right) */}
+              <div className="stack-card stack-card-1" style={{ position: 'absolute', top: 0, left: 0 }}>
+                <ArtistRankCard
+                  rank={topArtists[2]?.rank || 3}
+                  artist={topArtists[2]?.artist || "Loading..."}
+                  title={topArtists[2]?.title || ""}
+                  days={topArtists[2]?.days || 0}
+                  streams={topArtists[2]?.streamsFormatted || "0"}
+                  imageUrl={topArtists[2]?.imageUrl}
+                  isLoading={isLoading}
+                />
+              </div>
+              {/* Left card - Rank 2 (rotates left) */}
+              <div className="stack-card stack-card-2" style={{ position: 'absolute', top: 0, left: 0 }}>
+                <ArtistRankCard
+                  rank={topArtists[1]?.rank || 2}
+                  artist={topArtists[1]?.artist || "Loading..."}
+                  title={topArtists[1]?.title || ""}
+                  days={topArtists[1]?.days || 0}
+                  streams={topArtists[1]?.streamsFormatted || "0"}
+                  imageUrl={topArtists[1]?.imageUrl}
+                  isLoading={isLoading}
+                />
+              </div>
+              {/* Front/Middle card - Rank 1 */}
+              <div className="stack-card stack-card-3" style={{ position: 'absolute', top: 0, left: 0 }}>
+                <ArtistRankCard
+                  rank={topArtists[0]?.rank || 1}
+                  artist={topArtists[0]?.artist || "Loading..."}
+                  title={topArtists[0]?.title || ""}
+                  days={topArtists[0]?.days || 0}
+                  streams={topArtists[0]?.streamsFormatted || "0"}
+                  imageUrl={topArtists[0]?.imageUrl}
+                  isLoading={isLoading}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -178,11 +161,8 @@ export default function Hero({ onConnectClick }) {
             <div className="flex-1 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             <div className="space-y-2 text-center">
               <h3 className="text-4xl md:text-5xl font-black text-white tracking-tight">
-                YOUR COMMAND CENTER
-              </h3>
-              <p className="text-sm text-gray-500 uppercase tracking-[0.3em]">
                 Preview Dashboard
-              </p>
+              </h3>
             </div>
             <div className="flex-1 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           </div>
@@ -194,31 +174,17 @@ export default function Hero({ onConnectClick }) {
           <GlobalTrends />
         </div>
 
-        {/* Final CTA - Brutalist Box */}
-        <div className="relative w-full bg-gradient-to-br from-[#1a1a1a] to-[#0D0D0D] border-4 border-[#BFFF0B] p-12 md:p-16">
-          <div className="absolute top-4 left-4 w-16 h-16 border-t-4 border-l-4 border-[#FF006E]" />
-          <div className="absolute bottom-4 right-4 w-16 h-16 border-b-4 border-r-4 border-[#00F5FF]" />
-
-          <div className="relative z-10 text-center space-y-6 max-w-3xl mx-auto">
-            <h2 className="text-4xl md:text-6xl font-black text-white leading-tight">
-              READY TO <span className="text-[#BFFF0B]">DECODE</span><br />
-              YOUR MUSIC DNA?
-            </h2>
-            <p className="text-lg text-gray-400 font-light">
-              Join the movement of music lovers who track every beat, every moment
-            </p>
-            <button
-              onClick={onConnectClick}
-              className="group relative px-12 py-6 bg-white text-black font-black text-xl overflow-hidden hover:scale-105 transition-all hover:shadow-[0_0_60px_rgba(255,255,255,0.3)]"
-            >
-              <span className="relative z-10 flex items-center gap-3 justify-center">
-                Launch Dashboard
-                <ArrowRight className="group-hover:translate-x-2 transition-transform" size={24} />
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-[#BFFF0B] via-[#FF006E] to-[#00F5FF] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            </button>
+        {/* Footer */}
+        <footer className="w-full border-t border-white/10 py-8 mt-12">
+          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
+            <p>© 2024 SonicPulse. All rights reserved.</p>
+            <div className="flex gap-6">
+              <a href="#" className="hover:text-white transition-colors">Privacy</a>
+              <a href="#" className="hover:text-white transition-colors">Terms</a>
+              <a href="#" className="hover:text-white transition-colors">Contact</a>
+            </div>
           </div>
-        </div>
+        </footer>
       </div>
 
       <style jsx>{`
@@ -397,6 +363,11 @@ export default function Hero({ onConnectClick }) {
           opacity: 0;
         }
 
+        .animate-fade-in-bar {
+          animation: fadeInUp 0.5s ease-out forwards;
+          opacity: 0;
+        }
+
         .glitch-text {
           position: relative;
           display: inline-block;
@@ -433,28 +404,191 @@ export default function Hero({ onConnectClick }) {
           33% { transform: translate(2px, -2px); }
           66% { transform: translate(-2px, 2px); }
         }
+
+        @keyframes scan {
+          0% { background-position: 0 0; }
+          100% { background-position: 0 100%; }
+        }
+
+        .animate-scan {
+          animation: scan 8s linear infinite;
+        }
+
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+
+        /* Stacked Card Pile */
+        .card-stack {
+          position: relative;
+          width: 280px;
+          height: 480px;
+        }
+
+        .stack-card {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 340px;
+          transform-origin: center 700px;
+          will-change: transform, opacity;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+        }
+
+        /* Card 1 - Bottom (rotated right) */
+        .stack-card-1 {
+          z-index: 1;
+          transform: rotate(6deg) translateZ(0);
+          opacity: 0.6;
+          transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+        }
+
+        /* Card 2 - Middle (rotated left) */
+        .stack-card-2 {
+          z-index: 2;
+          transform: rotate(-4deg) translateZ(0);
+          opacity: 0.8;
+          transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+        }
+
+        /* Card 3 - Top (front, no rotation) */
+        .stack-card-3 {
+          z-index: 3;
+          transform: rotate(0deg) translateZ(0);
+          opacity: 1;
+          transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+        }
+
+        /* Fan out on container hover */
+        .card-stack:hover .stack-card-1 {
+          transform: rotate(20deg) translateZ(0);
+          opacity: 0.5;
+        }
+
+        .card-stack:hover .stack-card-2 {
+          transform: rotate(-20deg) translateZ(0);
+          opacity: 0.7;
+        }
+
+        .card-stack:hover .stack-card-3 {
+          transform: rotate(0deg) scale(1.02) translateZ(0);
+          opacity: 1;
+        }
+
+        /* Individual card hover - stay in fanned position but scale up */
+        .card-stack:hover .stack-card-1:hover {
+          z-index: 10;
+          transform: rotate(20deg) scale(1.1) translateZ(0);
+          opacity: 1;
+        }
+
+        .card-stack:hover .stack-card-2:hover {
+          z-index: 10;
+          transform: rotate(-20deg) scale(1.1) translateZ(0);
+          opacity: 1;
+        }
+
+        .card-stack:hover .stack-card-3:hover {
+          z-index: 10;
+          transform: rotate(0deg) scale(1.1) translateZ(0);
+          opacity: 1;
+        }
+
+        .stack-card:hover .card-shine {
+          opacity: 1;
+        }
+
+        .stack-card:hover img {
+          transform: scale(1.1);
+        }
       `}</style>
     </div>
   );
 }
 
-// Feature Card Component
-function FeatureCard({ icon, title, description, delay }) {
+// NFT Artist Card Component - CloneX Style with Card Fan Effect
+function ArtistRankCard({ rank, artist, title, days, streams, imageUrl, isLoading }) {
   return (
-    <div
-      className="group relative bg-[#1a1a1a] border-2 border-white/10 p-6 hover:border-[#BFFF0B] transition-all duration-300 hover:translate-x-2"
-      style={{ animationDelay: delay }}
-    >
-      <div className="absolute top-0 left-0 w-1 h-0 bg-[#BFFF0B] group-hover:h-full transition-all duration-300" />
-      <div className="flex items-start gap-4">
-        <div className="p-3 bg-white/5 group-hover:bg-white/10 transition-colors">
-          {icon}
-        </div>
-        <div className="flex-1">
-          <h4 className="text-lg font-bold text-white mb-1">{title}</h4>
-          <p className="text-sm text-gray-500">{description}</p>
+    <div className="w-[340px]">
+      {/* Glass Frame Container */}
+      <div className="relative bg-gradient-to-br from-white/5 to-transparent backdrop-blur-md rounded-2xl p-[3px] shadow-2xl">
+
+        {/* Chrome Corner Accents */}
+        <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white/40 rounded-tl-2xl" />
+        <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white/40 rounded-tr-2xl" />
+        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white/40 rounded-bl-2xl" />
+        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white/40 rounded-br-2xl" />
+
+        {/* Inner Card */}
+        <div className="relative bg-black rounded-2xl overflow-hidden">
+          {/* Artist Image */}
+          <div className="relative w-full h-[340px] overflow-hidden">
+            {isLoading ? (
+              <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 animate-pulse flex items-center justify-center">
+                <Music size={48} className="text-gray-600" />
+              </div>
+            ) : imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={artist}
+                className="w-full h-full object-cover transition-transform duration-700"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            {/* Fallback when no image */}
+            <div
+              className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center absolute inset-0"
+              style={{ display: imageUrl && !isLoading ? 'none' : 'flex' }}
+            >
+              <Music size={48} className="text-[#1DB954]" />
+            </div>
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+            {/* Rank Badge */}
+            <div className="absolute top-3 left-3 w-10 h-10 bg-[#1DB954] rounded-full flex items-center justify-center">
+              <span className="text-black font-black text-lg">#{rank}</span>
+            </div>
+          </div>
+
+          {/* Bottom Metadata Bar */}
+          <div className="relative bg-black p-4">
+            {/* Artist Name */}
+            <div className="flex items-center justify-between mb-2 text-[10px] text-gray-400 font-mono uppercase tracking-wider">
+              <span>{artist}</span>
+            </div>
+
+            {/* Song Title */}
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-white font-bold text-xl tracking-tight mb-1 truncate max-w-[280px]">{title}</div>
+              </div>
+            </div>
+
+            {/* Days and Streams */}
+            <div className="flex items-center justify-between text-[10px] text-gray-500 uppercase tracking-wider">
+              <span>{days} Days on Chart</span>
+              <div className="flex items-center gap-2">
+                <Music size={12} className="text-[#1DB954]" />
+                <span className="text-[#1DB954] font-bold">{streams} STREAMS</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Holographic Shine Effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/10 to-white/0 opacity-0 transition-opacity duration-700 pointer-events-none mix-blend-overlay card-shine" />
+
+          {/* Scan Lines */}
+          <div className="absolute inset-0 opacity-5 pointer-events-none">
+            <div className="w-full h-full bg-gradient-to-b from-transparent via-white to-transparent bg-[length:100%_4px] animate-scan" />
+          </div>
         </div>
       </div>
+
     </div>
   );
 }
+

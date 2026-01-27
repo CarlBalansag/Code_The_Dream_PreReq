@@ -356,7 +356,7 @@ export default function UserTopArtists({ accessToken, userId }) {
       <button
         key={`${artist.id}-${index}`}
         type="button"
-        className="flex-shrink-0 w-40 lg:w-44 bg-[rgba(255,255,255,0.05)] backdrop-blur-md border border-[rgba(255,255,255,0.1)] rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_8px_24px_rgba(29,185,84,0.3)] active:scale-95 lg:active:scale-100 text-left"
+        className="flex-shrink-0 w-40 lg:w-44 bg-[rgba(0,0,0,0.4)] backdrop-blur-md border border-[rgba(255,255,255,0.1)] rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[0_8px_24px_rgba(29,185,84,0.3)] active:scale-95 lg:active:scale-100 text-left"
         onClick={() => setSelectedArtist(artist)}
         aria-label={`View details for ${artist.name}`}
       >

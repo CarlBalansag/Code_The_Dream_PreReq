@@ -6,7 +6,6 @@ import RecentlyPlayedList from "./component/pages/info_page/recently_played_list
 import UserTopArtists from "./component/pages/info_page/user_top_artists";
 import UserTopTracks from "./component/pages/info_page/user_top_tracks";
 import { fetchCurrentlyPlaying } from "./component/pages/current_song/live_song";
-import LoadingDots from "./component/pages/components/loading";
 import BottomMiniPlayer from "./component/pages/components/bottom_player/BottomMiniPlayer";
 import ExpandedPlayer from "./component/pages/components/bottom_player/ExpandedPlayer";
 import Navbar from "./component/pages/components/navbar/Navbar";
@@ -175,17 +174,23 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
   const LoadingOverlay = () => (
     <>
       <div
-        className="fixed inset-0 backdrop-blur-sm"
+        className="fixed inset-0 bg-[#0D0D0D]/95 backdrop-blur-md"
         style={{ zIndex: 999999 }}
       />
-      
+
       <div
         className="fixed inset-0 flex items-center justify-center p-4 pointer-events-none"
         style={{ zIndex: 1000000 }}
       >
-        <div className="flex flex-col items-center justify-center gap-4">
-          <LoadingDots size={25} color="#1DB954" activeColor="#1ed760" />
-          <p className="text-gray-400 text-sm">Loading...</p>
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative">
+            {/* Spinning ring */}
+            <div className="w-20 h-20 border-4 border-[#1DB954]/20 border-t-[#1DB954] rounded-full animate-spin"></div>
+          </div>
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-bold text-white">Loading Your Stats</h2>
+            <p className="text-gray-400">Please wait while we fetch your music data...</p>
+          </div>
         </div>
       </div>
     </>
@@ -193,40 +198,44 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
 
   // NEW Mobile View - Vertical scroll with stacked sections (NO Swiper)
   const MobileView = () => (
-    <div className="block lg:hidden w-full pt-16 pb-20 px-4 overflow-y-auto custom-scrollbar h-full">
-      {/* Top Artists - Horizontal scroll */}
-      <div data-tour="top-artists-mobile">
-        <UserTopArtists
-          accessToken={accessToken}
-          userId={userId}
-        />
-      </div>
+    <div className="block lg:hidden w-full pt-16 pb-20 px-4 overflow-y-auto custom-scrollbar h-full relative">
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Top Artists - Horizontal scroll */}
+        <div data-tour="top-artists-mobile">
+          <UserTopArtists
+            accessToken={accessToken}
+            userId={userId}
+          />
+        </div>
 
-      {/* Top Tracks - Vertical scroll, single column */}
-      <div data-tour="top-tracks-mobile">
-        <UserTopTracks
-          accessToken={accessToken}
-          onLoadingChange={handleUserTopTracksLoadingChange}
-          onPlayClick={handlePlayButtonClick}
-        />
-      </div>
+        {/* Top Tracks - Vertical scroll, single column */}
+        <div data-tour="top-tracks-mobile">
+          <UserTopTracks
+            accessToken={accessToken}
+            onLoadingChange={handleUserTopTracksLoadingChange}
+            onPlayClick={handlePlayButtonClick}
+          />
+        </div>
 
-      {/* Recently Played - Horizontal scroll */}
-      <div data-tour="recently-played-mobile">
-        <RecentlyPlayedList
-          accessToken={accessToken}
-          name={name}
-          userId={userId}
-          onLoadingChange={handleRecentlyPlayedLoadingChange}
-          onTokenRefresh={onTokenRefresh}
-        />
+        {/* Recently Played - Horizontal scroll */}
+        <div data-tour="recently-played-mobile">
+          <RecentlyPlayedList
+            accessToken={accessToken}
+            name={name}
+            userId={userId}
+            onLoadingChange={handleRecentlyPlayedLoadingChange}
+            onTokenRefresh={onTokenRefresh}
+          />
+        </div>
       </div>
     </div>
   );
 
   //Desktop View
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div className="absolute inset-0 overflow-hidden bg-[#0D0D0D]">
+
       {/* Navbar - Fixed at top */}
       <Navbar
         tourButton={tourButton}
@@ -237,7 +246,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
         onTrackClick={handleTrackClick}
       />
 
-      <main id="main-content" className="h-full w-full flex flex-col">
+      <main id="main-content" className="relative h-full w-full flex flex-col z-10">
         <div className="flex-1 min-h-0">
           {/* Stats View - Always shown */}
           <div className="w-full h-full">
@@ -348,6 +357,16 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
           />
         )}
       </AnimatePresence>
+
+      {/* Custom Animations & Styling */}
+      <style jsx>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;700;900&display=swap');
+
+        * {
+          font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+      `}</style>
     </div>
   );
 }

@@ -222,7 +222,7 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
                             {currentTracks.map((item, index) => (
                             <div
                                 key={item.id}
-                                className="bg-[rgba(255,255,255,0.03)] border border-transparent rounded-lg p-3 lg:p-4 flex items-center gap-3 lg:gap-4 transition-all hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] active:scale-[0.98] lg:active:scale-100 group"
+                                className="bg-[rgba(0,0,0,0.35)] border border-transparent rounded-lg p-3 lg:p-4 flex items-center gap-3 lg:gap-4 transition-all hover:bg-[rgba(0,0,0,0.5)] hover:border-[rgba(255,255,255,0.1)] active:scale-[0.98] lg:active:scale-100 group"
                                 onMouseEnter={() => setHoveredTrackId(item.id)}
                                 onMouseLeave={() => setHoveredTrackId(null)}
                                 data-tour={index === 0 ? "play-button" : undefined}

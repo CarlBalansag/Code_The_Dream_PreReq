@@ -70,18 +70,29 @@ export async function POST(req) {
   // Save user to database
   const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
 
-  const savedUser = await saveUser({
-    spotifyId: userProfile.id,
-    displayName: userProfile.display_name,
-    email: userProfile.email,
-    country: userProfile.country,
-    profileImage: userProfile.images?.[0]?.url || '',
-    spotifyAccessToken: tokenData.access_token,
-    spotifyRefreshToken: tokenData.refresh_token,
-    tokenExpiresAt: expiresAt,
-  });
-
-  console.log("✅ Saved user to DB:", savedUser.displayName);
+  let savedUser;
+  try {
+    savedUser = await saveUser({
+      spotifyId: userProfile.id,
+      displayName: userProfile.display_name,
+      email: userProfile.email,
+      country: userProfile.country,
+      profileImage: userProfile.images?.[0]?.url || '',
+      spotifyAccessToken: tokenData.access_token,
+      spotifyRefreshToken: tokenData.refresh_token,
+      tokenExpiresAt: expiresAt,
+    });
+    console.log("✅ Saved user to DB:", savedUser.displayName);
+  } catch (dbError) {
+    console.error("❌ Database error saving user:", dbError);
+    return new Response(
+      JSON.stringify({
+        error: "database_error",
+        error_description: dbError.message
+      }),
+      { status: 500 }
+    );
+  }
 
   // Check if user needs initial import
   let initialImportResult = null;

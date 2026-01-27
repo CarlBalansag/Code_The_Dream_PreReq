@@ -1,146 +1,232 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { Globe, Activity, Users, ArrowUpRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Globe, Activity, Users, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { GLOBAL_ARTISTS, GLOBAL_TRACKS } from './constants';
 
-// Versioned cache keys to force refresh when data shape changes
-const CACHE_KEY = 'globalChartsData_v4';
-const CACHE_TIMESTAMP_KEY = 'globalChartsTimestamp_v4';
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const FALLBACK_IMG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%231DB954"/><text x="50" y="54" font-size="36" text-anchor="middle" fill="black" font-family="Arial, sans-serif">&#9835;</text></svg>';
+const ARTISTS_CACHE_KEY = 'global_artists_cache';
+const TRACKS_CACHE_KEY = 'global_tracks_cache';
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
+/**
+ * Format relative time (e.g., "2 hours ago")
+ */
+function getRelativeTime(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+}
+
+/**
+ * Format absolute time (e.g., "Jan 26, 3:45 PM")
+ */
+function getAbsoluteTime(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+}
 
 export default function GlobalTrends() {
   const [artists, setArtists] = useState(GLOBAL_ARTISTS);
   const [tracks, setTracks] = useState(GLOBAL_TRACKS);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [isLoadingArtists, setIsLoadingArtists] = useState(true);
+  const [isLoadingTracks, setIsLoadingTracks] = useState(true);
 
   useEffect(() => {
-    const sortByDailyStreams = (list = []) =>
-      [...list].sort((a, b) => (b.dailyStreamsRaw || 0) - (a.dailyStreamsRaw || 0));
-
-    const fetchGlobalCharts = async (useCache = true) => {
+    async function fetchGlobalArtists() {
       try {
-        // Check if we have cached data that's still valid
-        if (useCache && typeof window !== 'undefined') {
-          const cachedData = localStorage.getItem(CACHE_KEY);
-          const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+        // Check localStorage cache first
+        const cached = localStorage.getItem(ARTISTS_CACHE_KEY);
+        if (cached) {
+          const { data, lastUpdated: cachedTime, timestamp } = JSON.parse(cached);
+          const age = Date.now() - timestamp;
 
-          if (cachedData && cachedTimestamp) {
-            const cacheAge = Date.now() - parseInt(cachedTimestamp);
-
-            // If cache is less than 24 hours old, use it
-            if (cacheAge < CACHE_DURATION) {
-              const parsedData = JSON.parse(cachedData);
-              setArtists(sortByDailyStreams(parsedData.artists || []));
-              setTracks(sortByDailyStreams(parsedData.tracks || []));
-              setLastUpdated(new Date(parseInt(cachedTimestamp)));
-              setLoading(false);
-              console.log('�o. Using cached chart data (age:', Math.floor(cacheAge / 1000 / 60 / 60), 'hours)');
-              return;
-            } else {
-              console.log('�?� Cache expired, fetching fresh data...');
-            }
+          // If cache is less than 24 hours old, use it
+          if (age < CACHE_DURATION) {
+            setArtists(data);
+            setLastUpdated(cachedTime);
+            setIsLoadingArtists(false);
+            return;
           }
         }
 
-        // Fetch fresh data
-        const response = await fetch('/api/charts/global');
+        // Fetch fresh data from API
+        const response = await fetch('/api/landing/global-artists');
+        const result = await response.json();
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-          console.error('API Error Response:', errorData);
-          throw new Error(`Failed to fetch: ${errorData.error || response.statusText}`);
+        if (result.success && result.data?.length > 0) {
+          setArtists(result.data);
+          setLastUpdated(result.lastUpdated);
+
+          // Save to localStorage
+          localStorage.setItem(ARTISTS_CACHE_KEY, JSON.stringify({
+            data: result.data,
+            lastUpdated: result.lastUpdated,
+            timestamp: Date.now()
+          }));
         }
-
-        const data = await response.json();
-
-        if (data.artists && data.tracks) {
-          const sortedArtists = sortByDailyStreams(data.artists);
-          const sortedTracks = sortByDailyStreams(data.tracks);
-
-          setArtists(sortedArtists);
-          setTracks(sortedTracks);
-
-          console.log('GlobalTrends: KWORB scrape success', {
-            artists: sortedArtists.length,
-            tracks: sortedTracks.length,
-            lastUpdated: data.lastUpdated,
-          });
-
-          // Cache the data
-          if (typeof window !== 'undefined') {
-            const timestamp = Date.now();
-            localStorage.setItem(CACHE_KEY, JSON.stringify({ artists: sortedArtists, tracks: sortedTracks }));
-            localStorage.setItem(CACHE_TIMESTAMP_KEY, timestamp.toString());
-            setLastUpdated(new Date(timestamp));
-            console.log('�o. Fetched and cached fresh chart data');
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching global charts:', err);
-        setError(err.message);
-        // Keep using mock data on error
+      } catch (error) {
+        console.error('Failed to fetch global artists:', error);
+        // Keep fallback data
       } finally {
-        setLoading(false);
+        setIsLoadingArtists(false);
       }
-    };
+    }
 
-    fetchGlobalCharts();
+    async function fetchGlobalTracks() {
+      try {
+        // Check localStorage cache first
+        const cached = localStorage.getItem(TRACKS_CACHE_KEY);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          const age = Date.now() - timestamp;
+
+          // If cache is less than 24 hours old, use it
+          if (age < CACHE_DURATION) {
+            setTracks(data);
+            setIsLoadingTracks(false);
+            return;
+          }
+        }
+
+        // Fetch fresh data from API
+        const response = await fetch('/api/landing/global-tracks');
+        const result = await response.json();
+
+        if (result.success && result.data?.length > 0) {
+          setTracks(result.data);
+
+          // Save to localStorage
+          localStorage.setItem(TRACKS_CACHE_KEY, JSON.stringify({
+            data: result.data,
+            lastUpdated: result.lastUpdated,
+            timestamp: Date.now()
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch global tracks:', error);
+        // Keep fallback data
+      } finally {
+        setIsLoadingTracks(false);
+      }
+    }
+
+    fetchGlobalArtists();
+    fetchGlobalTracks();
   }, []);
 
   return (
     <div className="w-full max-w-6xl mx-auto mt-12 px-4">
-        <div className="flex items-center gap-2 mb-6 justify-center md:justify-start flex-wrap">
+        <div className="flex items-center gap-2 mb-2 justify-center md:justify-start flex-wrap">
             <Globe className="text-spotify animate-pulse" size={20} />
-            <h2 className="text-lg font-bold tracking-wider text-white uppercase">Global Live Pulse</h2>
-            {loading && <span className="text-xs text-gray-500">(Loading...)</span>}
-            {lastUpdated && !loading && (
-              <span className="text-xs text-gray-500">
-                (Updated {lastUpdated.toLocaleDateString()} at {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
-              </span>
-            )}
+            <h2 className="text-lg font-bold tracking-wider text-white uppercase">Global Charts</h2>
         </div>
+        {lastUpdated && (
+          <span className="text-xs text-gray-500 block mb-6 text-center md:text-left">
+            Last updated: {getRelativeTime(lastUpdated)} ({getAbsoluteTime(lastUpdated)})
+          </span>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Artists */}
             <div className="bg-dark-900/40 backdrop-blur-sm rounded-xl border border-white/5 p-6">
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <Users size={18} className="text-blue-400" /> Top Artists
                 </h3>
-                {artists.map((artist, i) => (
+                {isLoadingArtists ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="flex items-center gap-4 p-3 animate-pulse">
+                        <span className="w-4 h-4 bg-gray-700 rounded"></span>
+                        <div className="w-10 h-10 bg-gray-700 rounded-full"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-700 rounded w-24"></div>
+                          <div className="h-3 bg-gray-700 rounded w-16"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  artists.map((artist, i) => (
                     <div key={artist.id} className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-lg transition-colors">
-                        <span className="text-gray-500 font-mono w-4">{i + 1}</span>
-                        <img src={artist.img} alt={artist.name} className="w-10 h-10 rounded-full object-cover" />
+                        <span className="text-gray-500 font-mono w-4">{artist.rank || i + 1}</span>
+                        <img
+                          src={artist.imageUrl || artist.img || FALLBACK_IMG}
+                          alt={artist.name}
+                          className="w-10 h-10 rounded-full object-cover"
+                          onError={(e) => { e.target.src = FALLBACK_IMG; }}
+                        />
                         <div className="flex-1">
                           <h4 className="text-white text-sm font-semibold">{artist.name}</h4>
+                          <span className={`text-xs flex items-center gap-1 ${artist.isPositive !== undefined ? (artist.isPositive ? 'text-green-400' : 'text-red-400') : 'text-gray-400'}`}>
+                            {artist.dailyChangeFormatted ? (
+                              <>
+                                {artist.isPositive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                                Daily: {artist.dailyChangeFormatted}
+                              </>
+                            ) : (
+                              artist.trend || ''
+                            )}
+                          </span>
                         </div>
-                        <span className="text-xs text-green-400 font-semibold">
-                          {artist.dailyStreams ? `${artist.dailyStreams} daily` : artist.listeners}
+                        <span className="text-xs text-spotify font-semibold">
+                          {artist.listenersFormatted || artist.listeners} Listeners
                         </span>
                     </div>
-                ))}
+                  ))
+                )}
             </div>
              {/* Tracks */}
              <div className="bg-dark-900/40 backdrop-blur-sm rounded-xl border border-white/5 p-6">
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <Activity size={18} className="text-purple-400" /> Viral Right Now
                 </h3>
-                {tracks.map((track, i) => (
+                {isLoadingTracks ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="flex items-center gap-4 p-3 animate-pulse">
+                        <span className="w-4 h-4 bg-gray-700 rounded"></span>
+                        <div className="w-10 h-10 bg-gray-700 rounded"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-700 rounded w-28"></div>
+                          <div className="h-3 bg-gray-700 rounded w-20"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  tracks.map((track, i) => (
                     <div key={track.id} className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-lg transition-colors">
-                        <span className="text-gray-500 font-mono w-4">{i + 1}</span>
-                        <img src={track.img} alt={track.title} className="w-10 h-10 rounded object-cover" />
+                        <span className="text-gray-500 font-mono w-4">{track.rank || i + 1}</span>
+                        <img
+                          src={track.imageUrl || track.img || FALLBACK_IMG}
+                          alt={track.title}
+                          className="w-10 h-10 rounded object-cover"
+                          onError={(e) => { e.target.src = FALLBACK_IMG; }}
+                        />
                         <div className="flex-1">
                           <h4 className="text-white text-sm font-semibold">{track.title}</h4>
                           <p className="text-gray-500 text-xs">{track.artist}</p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs text-white font-semibold">
-                            {track.plays || (track.dailyStreamsRaw ? `${track.dailyStreamsRaw.toLocaleString('en-US')} daily streams` : '')}
-                          </p>
-                          <ArrowUpRight size={14} className="text-green-400 inline" />
-                        </div>
+                        <span className="text-xs text-spotify font-semibold">
+                          {track.streamsFormatted || track.plays} Listeners
+                        </span>
                     </div>
-                ))}
+                  ))
+                )}
             </div>
         </div>
     </div>

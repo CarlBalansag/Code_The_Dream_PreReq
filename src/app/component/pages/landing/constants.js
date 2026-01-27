@@ -1,23 +1,26 @@
+// Demo data for LivePulse (Personal Dashboard Preview)
+// Artist images are fetched from Spotify API via /api/landing/artist-images
+// This is fallback data shown before API responds
 export const MOCK_TOP_ARTISTS = [
-  { id: '1', name: 'Drake', plays: 2500, imageUrl: 'https://i.scdn.co/image/ab6761610000e5eb4293385d324db8558179afd9' },
-  { id: '2', name: 'The Weeknd', plays: 926, imageUrl: 'https://i.scdn.co/image/ab6761610000e5eb214f3cf1cbe7139c1e26ffbb' },
-  { id: '3', name: 'Travis Scott', plays: 1800, imageUrl: 'https://i.scdn.co/image/ab6761610000e5eb19c2790744c792d05570bb71' },
-  { id: '4', name: 'SZA', plays: 771, imageUrl: 'https://i.scdn.co/image/ab6761610000e5eb70abc9f6b8a4d7a979c21d9d' },
-  { id: '5', name: 'Metro Boomin', plays: 579, imageUrl: 'https://i.scdn.co/image/ab6761610000e5ebf7db69d48408e3943314b663' }
+  { id: '1', name: 'Frank Ocean', plays: 342, imageUrl: null },
+  { id: '2', name: 'Taylor Swift', plays: 287, imageUrl: null },
+  { id: '3', name: 'Bruno Mars', plays: 219, imageUrl: null },
+  { id: '4', name: 'SZA', plays: 186, imageUrl: null },
+  { id: '5', name: 'Drake', plays: 164, imageUrl: null }
 ];
 
 export const MOCK_RECENT_TRACKS = [
-  { id: 'r1', title: 'No Pole', artist: 'Don Toliver', imageUrl: 'https://i.scdn.co/image/ab67616d0000b273054a2ce45343a1b5829561d5' },
-  { id: 'r2', title: 'TSU', artist: 'Drake', imageUrl: 'https://i.scdn.co/image/ab67616d0000b273cd945b4bab0896a960517617' },
-  { id: 'r3', title: 'Me and My Guitar', artist: 'A Boogie Wit da Hoodie', imageUrl: 'https://i.scdn.co/image/ab67616d0000b27350a3147b4db13d84e447f45b' },
-  { id: 'r4', title: 'Crew Love', artist: 'Drake, The Weeknd', imageUrl: 'https://i.scdn.co/image/ab67616d0000b2731367f6c64032689d8d985909' }
+  { id: 'r1', title: 'I Just Might', artist: 'Bruno Mars', imageUrl: 'https://i.scdn.co/image/ab67616d0000b273e2887a1b6b98fc6c73bab12b' },
+  { id: 'r2', title: 'Back to friends', artist: 'Sombr', imageUrl: 'https://i.scdn.co/image/ab67616d0000b2739d24f74c1e2d8a12b1e591ec' },
+  { id: 'r3', title: 'Lose My Mind', artist: 'Don Toliver', imageUrl: 'https://i.scdn.co/image/ab67616d0000b273c63a12b4d7de1d527566e61c' },
+  { id: 'r4', title: 'NOKIA', artist: 'Drake', imageUrl: 'https://i.scdn.co/image/ab67616d0000b273b5a28a256eae6dc0424fef59' }
 ];
 
 export const MOCK_TOP_TRACKS_LIST = [
-  { rank: 1, title: 'Lady Killers III', artist: 'G-Eazy', imageUrl: 'https://i.scdn.co/image/ab67616d000048511507b565bc062220234d5562', plays: '12.5M' },
-  { rank: 2, title: 'Open Arms', artist: 'SZA, Travis Scott', imageUrl: 'https://i.scdn.co/image/ab67616d000048510c471c36970b940e0de945e3', plays: '8.2M' },
-  { rank: 3, title: 'Heartbeat', artist: 'Childish Gambino', imageUrl: 'https://i.scdn.co/image/ab67616d00004851b579bb12235499668ba5562a', plays: '7.9M' },
-  { rank: 4, title: 'Headlines', artist: 'Drake', imageUrl: 'https://i.scdn.co/image/ab67616d000048511367f6c64032689d8d985909', plays: '15.1M' }
+  { rank: 1, title: 'Blinding Lights', artist: 'The Weeknd', imageUrl: 'https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36', plays: '3286 plays' },
+  { rank: 2, title: 'Pink + White', artist: 'Frank Ocean', imageUrl: 'https://i.scdn.co/image/ab67616d0000b273c5649add07ed3720be9d5526', plays: '2956 plays' },
+  { rank: 3, title: 'Love Galore', artist: 'SZA', imageUrl: 'https://i.scdn.co/image/ab67616d0000b2734c79d5ec52a6d0302f3add25', plays: '1153 plays' },
+  { rank: 4, title: 'From Time', artist: 'Drake', imageUrl: 'https://i.scdn.co/image/ab67616d0000b273a90d170c61fb7d063d47161d', plays: '670 plays' }
 ];
 
 export const GLOBAL_ARTISTS = [
