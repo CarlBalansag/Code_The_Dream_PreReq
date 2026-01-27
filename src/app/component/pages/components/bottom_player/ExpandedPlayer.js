@@ -115,7 +115,7 @@ export default function ExpandedPlayer({
                 "--swiper-pagination-color": "#1ed760",
                 "--swiper-pagination-bullet-inactive-color": "rgba(29, 185, 84, 0.3)",
                 "--swiper-pagination-bullet-inactive-opacity": "1",
-                "--swiper-pagination-bottom": "30px",
+                "--swiper-pagination-bottom": "44px",
               }}
             >
               <SwiperSlide>

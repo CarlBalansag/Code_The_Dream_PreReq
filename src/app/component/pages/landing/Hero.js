@@ -71,7 +71,7 @@ export default function Hero({ onConnectClick }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mb-12 sm:mb-16 md:mb-20 items-center" id="TOP">
           <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[10rem] font-black leading-[0.9] text-white tracking-tighter animate-slide-in-left-delayed">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[10rem] font-black leading-[0.9] text-white tracking-tighter animate-slide-in-left-delayed">
               <span className="block">Discover Your</span>
               <span className="block">
                 <ShinyText

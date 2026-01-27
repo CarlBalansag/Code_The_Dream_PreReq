@@ -36,7 +36,8 @@ export default function RecentlyPlayedList({ accessToken, name, userId, onLoadin
 
   const fetchRecentlyPlayed = useCallback(
     async (isInitialLoad = false) => {
-      if (!accessToken || isFetchingRef.current || !visibilityRef.current) return;
+      if (!accessToken || isFetchingRef.current) return;
+      if (!visibilityRef.current && !isInitialLoad) return;
 
       isFetchingRef.current = true;
 
