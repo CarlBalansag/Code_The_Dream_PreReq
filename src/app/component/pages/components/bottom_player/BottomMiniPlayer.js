@@ -4,25 +4,25 @@ import Image from "next/image";
 import { ChevronUp, Music, SkipBack, SkipForward, Pause, Play } from "lucide-react";
 
 export default function BottomMiniPlayer({ song, onClick, accessToken, isPlaying, getSong }) {
-  if (!song || !song.item) return null;
-
-  const track = song.item;
-  const albumArt = track.album.images[0]?.url;
-  const durationMs = track.duration_ms || 0;
+  const track = song?.item;
+  const albumArt = track?.album?.images[0]?.url;
+  const durationMs = track?.duration_ms || 0;
+  const progressMs = song?.progress_ms || 0;
+  const trackId = track?.id;
 
   // Local state for smooth progress updates
-  const [localProgressMs, setLocalProgressMs] = useState(song.progress_ms || 0);
+  const [localProgressMs, setLocalProgressMs] = useState(progressMs);
   const lastUpdateTimeRef = useRef(Date.now());
 
   // Sync local progress with API data when it updates
   useEffect(() => {
-    setLocalProgressMs(song.progress_ms || 0);
+    setLocalProgressMs(progressMs);
     lastUpdateTimeRef.current = Date.now();
-  }, [song.progress_ms, track.id]); // Reset when song changes or API updates
+  }, [progressMs, trackId]); // Reset when song changes or API updates
 
   // Update progress every second when playing
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || !track) return;
 
     const interval = setInterval(() => {
       setLocalProgressMs((prevProgress) => {
@@ -33,7 +33,10 @@ export default function BottomMiniPlayer({ song, onClick, accessToken, isPlaying
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isPlaying, durationMs]);
+  }, [isPlaying, durationMs, track]);
+
+  // Early return AFTER all hooks
+  if (!song || !track) return null;
 
   // Calculate progress percentage
   const progressPercent = durationMs > 0 ? (localProgressMs / durationMs) * 100 : 0;

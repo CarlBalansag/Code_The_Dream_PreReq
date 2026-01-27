@@ -17,13 +17,12 @@ export default function SongModal({ song, userId, onClose, onArtistClick }) {
   const [playCount, setPlayCount] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Don't render if no song
-  if (!song) return null;
+  const songId = song?.id;
 
   // Fetch user's play count for this song
   useEffect(() => {
     async function fetchPlayCount() {
-      if (!song.id || !userId) {
+      if (!songId || !userId) {
         setLoading(false);
         return;
       }
@@ -31,7 +30,7 @@ export default function SongModal({ song, userId, onClose, onArtistClick }) {
       try {
         setLoading(true);
         const response = await fetch(
-          `/api/stats/track-play-count?userId=${userId}&trackId=${song.id}`
+          `/api/stats/track-play-count?userId=${userId}&trackId=${songId}`
         );
 
         if (response.ok) {
@@ -41,7 +40,6 @@ export default function SongModal({ song, userId, onClose, onArtistClick }) {
           setPlayCount(0);
         }
       } catch (error) {
-        console.error('Error fetching play count:', error);
         setPlayCount(0);
       } finally {
         setLoading(false);
@@ -49,7 +47,10 @@ export default function SongModal({ song, userId, onClose, onArtistClick }) {
     }
 
     fetchPlayCount();
-  }, [song.id, userId]);
+  }, [songId, userId]);
+
+  // Don't render if no song - AFTER hooks
+  if (!song) return null;
 
   // Format duration
   const formatDuration = (ms) => {
@@ -193,7 +194,7 @@ export default function SongModal({ song, userId, onClose, onArtistClick }) {
           {!loading && playCount === 0 && (
             <div className="mt-4 p-3 bg-[#282828] rounded-lg text-center">
               <p className="text-gray-400 text-sm">
-                You haven't listened to this song yet
+                You haven&apos;t listened to this song yet
               </p>
             </div>
           )}

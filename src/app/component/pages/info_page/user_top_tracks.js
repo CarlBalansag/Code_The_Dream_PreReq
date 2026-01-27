@@ -138,7 +138,6 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
 
                 if (pauseRes.status === 204) {
                     setPlayingTrackId(null);
-                    console.log("⏸️ Track paused");
                 }
                 return;
             }
@@ -161,7 +160,6 @@ export default function UserTopTracks({ accessToken, setShowInfoPage, onLoadingC
 
             if (playRes.status === 204) {
                 setPlayingTrackId(trackId);
-                console.log("✅ Track started playing");
             } else {
                 const errorText = await playRes.text();
                 console.error("❌ Failed to play track. Response:", errorText);

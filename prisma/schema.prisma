@@ -88,21 +88,23 @@ model tracks {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model users {
-  spotify_id       String        @id @db.VarChar(100)
-  display_name     String        @db.VarChar(255)
-  email            String?       @db.VarChar(255)
-  country          String?       @db.VarChar(10)
-  profile_image    String?
-  access_token     String?
-  refresh_token    String?
-  token_expires_at DateTime?     @db.Timestamptz(6)
-  import_flags     Int?          @default(0) @db.SmallInt
-  last_check_at    DateTime?     @db.Timestamptz(6)
-  joined_at        DateTime?     @default(now()) @db.Timestamptz(6)
-  created_at       DateTime?     @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime?     @default(now()) @db.Timestamptz(6)
-  import_jobs      import_jobs[]
-  plays            plays[]
+  spotify_id         String        @id @db.VarChar(100)
+  display_name       String        @db.VarChar(255)
+  email              String?       @db.VarChar(255)
+  country            String?       @db.VarChar(10)
+  profile_image      String?
+  access_token       String?
+  refresh_token      String?
+  token_expires_at   DateTime?     @db.Timestamptz(6)
+  import_flags       Int?          @default(0) @db.SmallInt
+  background_tracking Boolean      @default(true)
+  last_check_at      DateTime?     @db.Timestamptz(6)
+  joined_at          DateTime?     @default(now()) @db.Timestamptz(6)
+  created_at         DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?     @default(now()) @db.Timestamptz(6)
+  import_jobs        import_jobs[]
+  plays              plays[]
 
   @@index([import_flags], map: "idx_users_import_flags")
+  @@index([background_tracking], map: "idx_users_background_tracking")
 }

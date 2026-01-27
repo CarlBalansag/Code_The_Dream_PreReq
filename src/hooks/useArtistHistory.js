@@ -48,8 +48,6 @@ export function useArtistHistory(artistId, userId, timeRange = '30D', artistName
       setLoading(true);
       setError(null);
 
-      console.log(`🔄 Fetching artist history: ${artistId}, range: ${timeRange}`);
-
       // Add artist name to URL for fallback matching
       const params = new URLSearchParams({
         userId,
@@ -66,15 +64,12 @@ export function useArtistHistory(artistId, userId, timeRange = '30D', artistName
 
       // Check if request was aborted
       if (abortController.signal.aborted) {
-        console.log('⏭️  Request aborted (new request started)');
         return;
       }
 
       if (!response.ok) {
         // Handle 404 (no data) as empty data state, not an error
         if (response.status === 404) {
-          console.log('ℹ️ No data available for this artist in the selected time range');
-
           // Set empty data state instead of error
           if (isMountedRef.current && !abortController.signal.aborted) {
             setData({ chartData: [], totalPlays: 0, totalDays: 0 });
@@ -92,20 +87,14 @@ export function useArtistHistory(artistId, userId, timeRange = '30D', artistName
 
       // Only update state if component is still mounted and request wasn't aborted
       if (isMountedRef.current && !abortController.signal.aborted) {
-        console.log('📦 Full API response:', result);
-        console.log('🎵 Favorite track data:', result.favoriteTrack);
         setData(result);
-        console.log(`✅ Fetched ${result.chartData.length} days of data for ${result.artistName}`);
       }
 
     } catch (err) {
       // Ignore abort errors
       if (err.name === 'AbortError') {
-        console.log('⏭️  Fetch aborted');
         return;
       }
-
-      console.error('❌ Error fetching artist history:', err);
 
       // Only update error state if component is still mounted
       if (isMountedRef.current) {
@@ -117,7 +106,7 @@ export function useArtistHistory(artistId, userId, timeRange = '30D', artistName
         setLoading(false);
       }
     }
-  }, [artistId, userId, timeRange, enabled]);
+  }, [artistId, userId, timeRange, artistName, enabled]);
 
   // Fetch data when dependencies change
   useEffect(() => {

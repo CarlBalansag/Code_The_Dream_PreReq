@@ -8,7 +8,54 @@ import ImportDataModal from './ImportDataModal';
 export default function DropdownMenu({ ProfilePicture, UserName, UserProduct, accessToken, onDisconnect, userId }) {
   const [open, setOpen] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [backgroundTracking, setBackgroundTracking] = useState(true);
+  const [isLoadingTracking, setIsLoadingTracking] = useState(true);
   const dropdownRef = useRef();
+
+  // Fetch initial background tracking status
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchTrackingStatus = async () => {
+      try {
+        const res = await fetch(`/api/user/background-tracking?userId=${userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setBackgroundTracking(data.enabled);
+        }
+      } catch (error) {
+        console.error('Failed to fetch background tracking status:', error);
+      } finally {
+        setIsLoadingTracking(false);
+      }
+    };
+
+    fetchTrackingStatus();
+  }, [userId]);
+
+  // Toggle background tracking
+  const toggleBackgroundTracking = async () => {
+    const newValue = !backgroundTracking;
+    setBackgroundTracking(newValue);
+
+    try {
+      const res = await fetch('/api/user/background-tracking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, enabled: newValue }),
+      });
+
+      if (!res.ok) {
+        // Revert on error
+        setBackgroundTracking(!newValue);
+        console.error('Failed to update background tracking');
+      }
+    } catch (error) {
+      // Revert on error
+      setBackgroundTracking(!newValue);
+      console.error('Failed to update background tracking:', error);
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -50,6 +97,29 @@ export default function DropdownMenu({ ProfilePicture, UserName, UserProduct, ac
           </div>
 
           <div className="p-1 space-y-0.5">
+            {/* Background Tracking Toggle */}
+            <button
+              onClick={toggleBackgroundTracking}
+              disabled={isLoadingTracking}
+              className="w-full flex items-center justify-between gap-3 px-4 py-2 text-sm text-gray-800 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${backgroundTracking ? 'bg-[#1DB954] animate-pulse' : 'bg-gray-400'}`} />
+                Background Tracking
+              </span>
+              <span
+                className={`relative inline-flex h-5 w-10 flex-shrink-0 items-center rounded-full transition-colors duration-200 ${
+                  backgroundTracking ? 'bg-[#1DB954]' : 'bg-gray-500'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                    backgroundTracking ? 'translate-x-5' : 'translate-x-1'
+                  }`}
+                />
+              </span>
+            </button>
+
             <button
               onClick={() => {
                 setShowImportModal(true);

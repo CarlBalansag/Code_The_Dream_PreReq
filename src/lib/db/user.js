@@ -32,6 +32,7 @@ function mapUser(record, { includeTokens = true } = {}) {
     spotifyAccessToken: includeTokens ? record.access_token : undefined,
     spotifyRefreshToken: includeTokens ? record.refresh_token : undefined,
     tokenExpiresAt: record.token_expires_at,
+    backgroundTracking: record.background_tracking ?? true,
     lastCheckTimestamp: record.last_check_at,
     joinedAt: record.joined_at,
     createdAt: record.created_at,
@@ -202,4 +203,36 @@ export async function getUserStats() {
 export function needsInitialImport(user) {
   if (!user) return false;
   return !user.hasInitialImport;
+}
+
+export async function updateBackgroundTracking(spotifyId, enabled) {
+  const user = await prisma.users.update({
+    where: { spotify_id: spotifyId },
+    data: {
+      background_tracking: enabled,
+      updated_at: new Date()
+    },
+  });
+  return mapUser(user);
+}
+
+export async function getBackgroundTrackingStatus(spotifyId) {
+  const user = await prisma.users.findUnique({
+    where: { spotify_id: spotifyId },
+    select: { background_tracking: true },
+  });
+  return user?.background_tracking ?? true;
+}
+
+export async function getUsersWithBackgroundTracking(limit = 100) {
+  const users = await prisma.users.findMany({
+    where: {
+      background_tracking: true,
+      refresh_token: { not: null },
+    },
+    orderBy: { last_check_at: "asc" },
+    take: limit,
+  });
+
+  return users.map((user) => mapUser(user));
 }

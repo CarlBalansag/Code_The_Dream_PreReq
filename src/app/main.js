@@ -62,7 +62,6 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
         setSong(currentSong);
 
         if (waitingForSongRef.current && currentSong.item.id === waitingForSongRef.current) {
-          console.log("New song detected!");
           waitingForSongRef.current = null;
         }
       } else {
@@ -77,7 +76,6 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
   }, [accessToken, quit]);
 
   const handlePlayButtonClick = useCallback((trackId) => {
-    console.log("🎵 Play button clicked, waiting for track:", trackId);
     waitingForSongRef.current = trackId;
   }, []);
 
@@ -97,8 +95,6 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
 
   // Handle artist click from search
   const handleArtistClick = useCallback(async (artist) => {
-    console.log('🎨 Artist clicked from search:', artist);
-
     try {
       // Check if user has listening history for this artist via API
       const response = await fetch(
@@ -117,12 +113,9 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
 
       if (hasHistory) {
         // User has history - open full ArtistModal with stats
-        console.log('User has history for this artist - opening ArtistModal');
-        console.log('Artist object:', artist);
         setSelectedArtist(artist);
       } else {
         // No history - show basic info modal
-        console.log('No history for this artist - opening BasicArtistModal');
         setSelectedArtistForBasicModal(artist);
       }
     } catch (error) {
@@ -134,7 +127,6 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
 
   // Handle track click from search
   const handleTrackClick = useCallback((track) => {
-    console.log('🎵 Track clicked from search:', track);
     setSelectedSong(track);
   }, []);
 
@@ -298,10 +290,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
       {song && song.item && (
         <BottomMiniPlayer
           song={song}
-          onClick={() => {
-            console.log("BottomMiniPlayer clicked!");
-            setIsExpanded(true);
-          }}
+          onClick={() => setIsExpanded(true)}
           accessToken={accessToken}
           isPlaying={isPlaying}
           getSong={getSong}
@@ -311,10 +300,7 @@ export default function CurrentlyPlaying({ accessToken, premium, name, userId, d
       {/* Expanded Player Overlay */}
       <ExpandedPlayer
         isExpanded={isExpanded}
-        onClose={() => {
-          console.log("ExpandedPlayer closing!");
-          setIsExpanded(false);
-        }}
+        onClose={() => setIsExpanded(false)}
         song={song}
         isPlaying={isPlaying}
         accessToken={accessToken}

@@ -12,6 +12,9 @@ export {
   deleteUser,
   getUserStats,
   needsInitialImport,
+  updateBackgroundTracking,
+  getBackgroundTrackingStatus,
+  getUsersWithBackgroundTracking,
 } from "./user.js";
 
 export {

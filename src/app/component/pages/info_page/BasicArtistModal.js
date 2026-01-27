@@ -98,7 +98,7 @@ export default function BasicArtistModal({ artist, onClose }) {
             </div>
             <p className="text-white font-semibold mb-2">No Listening History</p>
             <p className="text-gray-400 text-sm">
-              You haven't listened to {artist.name} yet. Start playing their music to see your listening stats!
+              You haven&apos;t listened to {artist.name} yet. Start playing their music to see your listening stats!
             </p>
           </div>
 

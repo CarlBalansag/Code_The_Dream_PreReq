@@ -130,21 +130,21 @@ export default function GlobalTrends() {
   }, []);
 
   return (
-    <div className="w-full max-w-6xl mx-auto mt-12 px-4">
+    <div className="w-full max-w-6xl mx-auto mt-8 sm:mt-12 px-2 sm:px-4">
         <div className="flex items-center gap-2 mb-2 justify-center md:justify-start flex-wrap">
-            <Globe className="text-spotify animate-pulse" size={20} />
-            <h2 className="text-lg font-bold tracking-wider text-white uppercase">Global Charts</h2>
+            <Globe className="text-spotify animate-pulse w-4 h-4 sm:w-5 sm:h-5" />
+            <h2 className="text-base sm:text-lg font-bold tracking-wider text-white uppercase">Global Charts</h2>
         </div>
         {lastUpdated && (
-          <span className="text-xs text-gray-500 block mb-6 text-center md:text-left">
+          <span className="text-[10px] sm:text-xs text-gray-500 block mb-4 sm:mb-6 text-center md:text-left">
             Last updated: {getRelativeTime(lastUpdated)} ({getAbsoluteTime(lastUpdated)})
           </span>
         )}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
             {/* Artists */}
-            <div className="bg-dark-900/40 backdrop-blur-sm rounded-xl border border-white/5 p-6">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <Users size={18} className="text-blue-400" /> Top Artists
+            <div className="bg-dark-900/40 backdrop-blur-sm rounded-lg sm:rounded-xl border border-white/5 p-3 sm:p-4 md:p-6">
+                <h3 className="text-base sm:text-lg md:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
+                  <Users className="text-blue-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" /> Top Artists
                 </h3>
                 {isLoadingArtists ? (
                   <div className="space-y-3">
@@ -161,38 +161,38 @@ export default function GlobalTrends() {
                   </div>
                 ) : (
                   artists.map((artist, i) => (
-                    <div key={artist.id} className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-lg transition-colors">
-                        <span className="text-gray-500 font-mono w-4">{artist.rank || i + 1}</span>
+                    <div key={artist.id} className="flex items-center gap-2 sm:gap-3 md:gap-4 p-2 sm:p-3 hover:bg-white/5 rounded-lg transition-colors">
+                        <span className="text-gray-500 font-mono w-4 text-xs sm:text-sm">{artist.rank || i + 1}</span>
                         <img
                           src={artist.imageUrl || artist.img || FALLBACK_IMG}
                           alt={artist.name}
-                          className="w-10 h-10 rounded-full object-cover"
+                          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover flex-shrink-0"
                           onError={(e) => { e.target.src = FALLBACK_IMG; }}
                         />
-                        <div className="flex-1">
-                          <h4 className="text-white text-sm font-semibold">{artist.name}</h4>
-                          <span className={`text-xs flex items-center gap-1 ${artist.isPositive !== undefined ? (artist.isPositive ? 'text-green-400' : 'text-red-400') : 'text-gray-400'}`}>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-white text-xs sm:text-sm font-semibold truncate">{artist.name}</h4>
+                          <span className={`text-[10px] sm:text-xs flex items-center gap-1 ${artist.isPositive !== undefined ? (artist.isPositive ? 'text-green-400' : 'text-red-400') : 'text-gray-400'}`}>
                             {artist.dailyChangeFormatted ? (
                               <>
-                                {artist.isPositive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                                Daily: {artist.dailyChangeFormatted}
+                                {artist.isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                                <span className="hidden xs:inline">Daily:</span> {artist.dailyChangeFormatted}
                               </>
                             ) : (
                               artist.trend || ''
                             )}
                           </span>
                         </div>
-                        <span className="text-xs text-spotify font-semibold">
-                          {artist.listenersFormatted || artist.listeners} Listeners
+                        <span className="text-[10px] sm:text-xs text-spotify font-semibold whitespace-nowrap">
+                          {artist.listenersFormatted || artist.listeners}
                         </span>
                     </div>
                   ))
                 )}
             </div>
              {/* Tracks */}
-             <div className="bg-dark-900/40 backdrop-blur-sm rounded-xl border border-white/5 p-6">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <Activity size={18} className="text-purple-400" /> Viral Right Now
+             <div className="bg-dark-900/40 backdrop-blur-sm rounded-lg sm:rounded-xl border border-white/5 p-3 sm:p-4 md:p-6">
+                <h3 className="text-base sm:text-lg md:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
+                  <Activity className="text-purple-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" /> Viral Right Now
                 </h3>
                 {isLoadingTracks ? (
                   <div className="space-y-3">
@@ -209,20 +209,20 @@ export default function GlobalTrends() {
                   </div>
                 ) : (
                   tracks.map((track, i) => (
-                    <div key={track.id} className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-lg transition-colors">
-                        <span className="text-gray-500 font-mono w-4">{track.rank || i + 1}</span>
+                    <div key={track.id} className="flex items-center gap-2 sm:gap-3 md:gap-4 p-2 sm:p-3 hover:bg-white/5 rounded-lg transition-colors">
+                        <span className="text-gray-500 font-mono w-4 text-xs sm:text-sm">{track.rank || i + 1}</span>
                         <img
                           src={track.imageUrl || track.img || FALLBACK_IMG}
                           alt={track.title}
-                          className="w-10 h-10 rounded object-cover"
+                          className="w-8 h-8 sm:w-10 sm:h-10 rounded object-cover flex-shrink-0"
                           onError={(e) => { e.target.src = FALLBACK_IMG; }}
                         />
-                        <div className="flex-1">
-                          <h4 className="text-white text-sm font-semibold">{track.title}</h4>
-                          <p className="text-gray-500 text-xs">{track.artist}</p>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-white text-xs sm:text-sm font-semibold truncate">{track.title}</h4>
+                          <p className="text-gray-500 text-[10px] sm:text-xs truncate">{track.artist}</p>
                         </div>
-                        <span className="text-xs text-spotify font-semibold">
-                          {track.streamsFormatted || track.plays} Listeners
+                        <span className="text-[10px] sm:text-xs text-spotify font-semibold whitespace-nowrap">
+                          {track.streamsFormatted || track.plays}
                         </span>
                     </div>
                   ))
