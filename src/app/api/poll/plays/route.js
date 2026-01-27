@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-import { connectToDB } from '@/lib/mongodb.js';
-=======
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
 import { pollRecentlyPlayed } from '@/lib/services/continuousPolling.js';
 import { NextResponse } from 'next/server';
 
@@ -13,12 +9,6 @@ import { NextResponse } from 'next/server';
  */
 export async function POST(req) {
   try {
-<<<<<<< HEAD
-    // Connect to database
-    await connectToDB();
-
-=======
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
     // Parse request body
     const { spotifyId } = await req.json();
 
@@ -66,11 +56,6 @@ export async function POST(req) {
  */
 export async function GET(req) {
   try {
-<<<<<<< HEAD
-    await connectToDB();
-
-=======
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
     const { searchParams } = new URL(req.url);
     const spotifyId = searchParams.get('spotifyId');
 

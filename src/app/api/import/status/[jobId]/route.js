@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-import { connectToDB } from '@/lib/mongodb.js';
-import { ImportJob } from '@/lib/models/ImportJob.js';
-=======
 import { getJobById } from '@/lib/db/importJob.js';
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
 import { NextResponse } from 'next/server';
 
 /**
@@ -14,11 +9,6 @@ import { NextResponse } from 'next/server';
  */
 export async function GET(req, { params }) {
   try {
-<<<<<<< HEAD
-    await connectToDB();
-
-=======
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
     const { jobId } = params;
 
     if (!jobId) {
@@ -28,12 +18,7 @@ export async function GET(req, { params }) {
       );
     }
 
-<<<<<<< HEAD
-    // Get job
-    const job = await ImportJob.getJobById(jobId);
-=======
     const job = await getJobById(jobId);
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
 
     if (!job) {
       return NextResponse.json(
@@ -42,14 +27,9 @@ export async function GET(req, { params }) {
       );
     }
 
-<<<<<<< HEAD
-    // Calculate progress
-    const percentComplete = job.getProgress();
-=======
     const percentComplete = job.totalTracks
       ? Math.round((job.processedTracks / job.totalTracks) * 100)
       : 0;
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
 
     // Estimate time remaining (very rough estimate)
     let estimatedTimeRemaining = null;
@@ -76,11 +56,7 @@ export async function GET(req, { params }) {
 
     // Return status
     return NextResponse.json({
-<<<<<<< HEAD
-      jobId: job._id.toString(),
-=======
       jobId: job.id.toString(),
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
       userId: job.userId,
       status: job.status,
       fileName: job.fileName,

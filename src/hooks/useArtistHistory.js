@@ -48,11 +48,6 @@ export function useArtistHistory(artistId, userId, timeRange = '30D', artistName
       setLoading(true);
       setError(null);
 
-<<<<<<< HEAD
-      console.log(`🔄 Fetching artist history: ${artistId}, range: ${timeRange}`);
-
-=======
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
       // Add artist name to URL for fallback matching
       const params = new URLSearchParams({
         userId,
@@ -69,21 +64,12 @@ export function useArtistHistory(artistId, userId, timeRange = '30D', artistName
 
       // Check if request was aborted
       if (abortController.signal.aborted) {
-<<<<<<< HEAD
-        console.log('⏭️  Request aborted (new request started)');
-=======
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
         return;
       }
 
       if (!response.ok) {
         // Handle 404 (no data) as empty data state, not an error
         if (response.status === 404) {
-<<<<<<< HEAD
-          console.log('ℹ️ No data available for this artist in the selected time range');
-
-=======
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
           // Set empty data state instead of error
           if (isMountedRef.current && !abortController.signal.aborted) {
             setData({ chartData: [], totalPlays: 0, totalDays: 0 });
@@ -102,27 +88,14 @@ export function useArtistHistory(artistId, userId, timeRange = '30D', artistName
       // Only update state if component is still mounted and request wasn't aborted
       if (isMountedRef.current && !abortController.signal.aborted) {
         setData(result);
-<<<<<<< HEAD
-        console.log(`✅ Fetched ${result.chartData.length} days of data for ${result.artistName}`);
-=======
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
       }
 
     } catch (err) {
       // Ignore abort errors
       if (err.name === 'AbortError') {
-<<<<<<< HEAD
-        console.log('⏭️  Fetch aborted');
         return;
       }
 
-      console.error('❌ Error fetching artist history:', err);
-
-=======
-        return;
-      }
-
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
       // Only update error state if component is still mounted
       if (isMountedRef.current) {
         setError(err.message);
@@ -133,11 +106,7 @@ export function useArtistHistory(artistId, userId, timeRange = '30D', artistName
         setLoading(false);
       }
     }
-<<<<<<< HEAD
-  }, [artistId, userId, timeRange, enabled]);
-=======
   }, [artistId, userId, timeRange, artistName, enabled]);
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
 
   // Fetch data when dependencies change
   useEffect(() => {

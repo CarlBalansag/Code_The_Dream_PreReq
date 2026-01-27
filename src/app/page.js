@@ -1,27 +1,4 @@
 "use client";
-<<<<<<< HEAD
-// import CurrentlyPlaying from "./main";
-// import SpotifyDeviceStatus from "./component/pages/components/navbar/connected_device";
-// import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
-// import SpotifyTour from "./component/pages/components/SpotifyTour";
-// import { useState, useEffect } from "react";
-// import { HelpCircle } from "lucide-react";
-// import { usePlayTracking } from "@/hooks/usePlayTracking";
-
-import CurrentlyPlaying from "./main";
-import SpotifyDeviceStatus from "./component/components/navbar/connected_device";
-import DropdownMenu from "./component/components/navbar/DropdownMenu";
-import SpotifyTour from "./component/components/SpotifyTour";
-import { usePlayTracking } from "@/hooks/usePlayTracking";
-import { useState, useEffect } from "react";
-import { HelpCircle } from "lucide-react";
-
-
-const REDIRECT_URI = "https://spotify.carltechs.com"; //link that tells spotify where to send user back after log in 
-const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"; //link for spotify login page
-const SCOPES ="user-read-recently-played user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read user-read-recently-played user-top-read";
-const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID; //Spotify unique I
-=======
 import CurrentlyPlaying from "./main";
 import DropdownMenu from "./component/pages/components/navbar/DropdownMenu";
 import SpotifyTour from "./component/pages/components/SpotifyTour";
@@ -30,12 +7,11 @@ import { useState, useEffect, useCallback } from "react";
 import { HelpCircle } from "lucide-react";
 import { usePlayTracking } from "@/hooks/usePlayTracking";
 
-const CLIENT_ID = "2751136537024052b892a475c49906e1";
-const REDIRECT_URI = "http://127.0.0.1:3000";
+const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
+const REDIRECT_URI = process.env.NEXT_PUBLIC_REDIRECT_URI || "https://spotify.carltechs.com";
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
 const SCOPES =
   "user-read-recently-played user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read user-read-recently-played user-top-read";
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
 
 export default function Home() {
   const [accessToken, setAccessToken] = useState(null);
@@ -47,9 +23,6 @@ export default function Home() {
   const [deviceConnected, setDeviceConnected] = useState(false);
   const [showTour, setShowTour] = useState(false);
   const [mounted, setMounted] = useState(false);
-<<<<<<< HEAD
-
-=======
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   // Handle token refresh callback
@@ -58,7 +31,6 @@ export default function Home() {
     setAccessToken(newToken);
   }, []);
 
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
   // ✅ Enable play tracking when user is logged in
   const { lastPollResult, isPolling } = usePlayTracking(
     user,
@@ -79,10 +51,7 @@ export default function Home() {
     console.log("🧠 URL Code:", authCode);
     if (authCode) {
       setCode(authCode);
-<<<<<<< HEAD
-=======
       setIsAuthenticating(true);
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
     }
   }, []);
 
@@ -134,7 +103,7 @@ export default function Home() {
           setUserID(userData.spotifyId);
           setAccessToken(tokenData.tokens.access_token);
           setIsLoggedIn(true);
-          
+
           // 🔧 FIXED: Better premium detection with debug logging
           const isPremium = userData.product === "premium";
           console.log("🎵 Premium Status Check:", {
@@ -181,73 +150,6 @@ export default function Home() {
 
   return (
     <div className="bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950">
-<<<<<<< HEAD
-      {isLoggedIn && user ? (
-        <div className="min-h-screen flex flex-col">
-          {/* Navbar */}
-          <div
-            id="navbar"
-            className="w-full h-16 px-6 flex items-center justify-between shadow-md z-2 mb-10"
-          >
-            <div className="mb-6">
-              <SpotifyDeviceStatus
-                accessToken={accessToken}
-                onDeviceConnect={() => setDeviceConnected(true)}
-                data-tour="connect-device"
-              />
-            </div>
-            <div className="flex items-center gap-4 mb-6 mt-5">
-              <div id="fab-navbar-slot"></div>
-
-              <button
-                onClick={() => {
-                  localStorage.removeItem("spotify-tour-completed");
-                  setShowTour(true);
-                }}
-                className="p-2 rounded-full hover:bg-gray-800/50 transition-colors"
-                title="Take a tour"
-              >
-                <HelpCircle size={24} className="text-[#1DB954]" />
-              </button>
-
-              <DropdownMenu
-                ProfilePicture={user?.profileImage || user?.images?.[0]?.url}
-                UserName={user.displayName || user.display_name}
-                UserProduct={premium ? "premium" : "free"}
-                accessToken={accessToken}
-                userId={userID}
-              />
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1 p-6 z-1 w-full h-full relative">
-            <CurrentlyPlaying
-              accessToken={accessToken}
-              premium={premium}
-              name={user.displayName || user.display_name}
-              userId={userID}
-              deviceConnected={deviceConnected}
-              tourActive={showTour}
-            />
-          </div>
-
-          {/* Tour */}
-          {showTour && mounted && (
-            <SpotifyTour onComplete={handleTourComplete} premium={premium} />
-          )}
-        </div>
-      ) : (
-        <div className="flex items-center justify-center h-screen pb-10">
-          <div className="text-center">
-            <h1 className="text-4xl pb-5">Log in to Spotify</h1>
-            <button
-              onClick={loginToSpotify}
-              className="w-5/6 bg-[#1db954] text-black text-lg h-12 rounded-3xl"
-            >
-              Continue to Spotify
-            </button>
-=======
       {isAuthenticating && !isLoggedIn ? (
         // Loading screen during authentication
         <div className="min-h-screen flex items-center justify-center">
@@ -260,7 +162,6 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-white">Connecting to Spotify</h2>
               <p className="text-gray-400">Please wait while we authenticate your account...</p>
             </div>
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
           </div>
         </div>
       ) : isLoggedIn && user ? (
