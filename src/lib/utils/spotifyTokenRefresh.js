@@ -155,11 +155,7 @@ export async function batchRefreshTokens(users) {
 
   for (const user of users) {
     try {
-<<<<<<< HEAD
       if (user.needsTokenRefresh()) {
-=======
-      if (needsTokenRefresh(user)) {
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
         await refreshSpotifyToken(user.spotifyRefreshToken, user.spotifyId);
         results.success.push(user.spotifyId);
       }
