@@ -1,13 +1,5 @@
-<<<<<<< HEAD
 import { trackMultiplePlays } from '../db/playOperations.js';
 import { updateLastCheckTimestamp, getUserBySpotifyId } from '../db/userOperations.js';
-=======
-import {
-  getUserBySpotifyId,
-  trackMultiplePlays,
-  updateLastCheckTimestamp,
-} from '../db/index.js';
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
 import { spotifyApiRequest } from '../utils/spotifyTokenRefresh.js';
 
 /**

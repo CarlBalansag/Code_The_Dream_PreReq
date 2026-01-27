@@ -1,13 +1,8 @@
-<<<<<<< HEAD
-import { trackMultiplePlays } from '../db/playOperations.js';
-import { markInitialImportComplete, getUserBySpotifyId } from '../db/userOperations.js';
-=======
 import {
   getUserBySpotifyId,
   markInitialImportComplete,
   trackMultiplePlays,
 } from '../db/index.js';
->>>>>>> 87ca31fd224237bbda80dffc127f5438735a0600
 import { spotifyApiRequest } from '../utils/spotifyTokenRefresh.js';
 
 /**
