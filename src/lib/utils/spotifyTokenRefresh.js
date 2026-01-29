@@ -6,6 +6,24 @@ import { updateUserTokens } from "../db/userOperations.js";
  */
 
 /**
+ * Check if user's token needs refresh (expires in < 5 minutes)
+ * Works with both Mongoose documents and plain Prisma objects
+ * @param {object} user - User object with tokenExpiresAt field
+ * @returns {boolean} True if token needs refresh
+ */
+function needsTokenRefresh(user) {
+  // Handle both Mongoose method and plain object
+  if (typeof user.needsTokenRefresh === 'function') {
+    return user.needsTokenRefresh();
+  }
+  // Plain object (Prisma) - check manually
+  const expiresAt = user.tokenExpiresAt || user.token_expires_at;
+  if (!expiresAt) return true;
+  const fiveMinutesFromNow = new Date(Date.now() + 5 * 60 * 1000);
+  return new Date(expiresAt) <= fiveMinutesFromNow;
+}
+
+/**
  * Refresh Spotify access token using refresh token
  * @param {string} refreshToken - User's Spotify refresh token
  * @param {string} spotifyId - User's Spotify ID (for updating database)
@@ -79,7 +97,7 @@ export async function refreshSpotifyToken(refreshToken, spotifyId = null) {
  */
 export async function getValidAccessToken(user) {
   // Check if token needs refresh
-  if (user.needsTokenRefresh()) {
+  if (needsTokenRefresh(user)) {
     console.log(`🔄 Token expired, refreshing for user: ${user.displayName}`);
 
     const { accessToken } = await refreshSpotifyToken(
@@ -155,7 +173,7 @@ export async function batchRefreshTokens(users) {
 
   for (const user of users) {
     try {
-      if (user.needsTokenRefresh()) {
+      if (needsTokenRefresh(user)) {
         await refreshSpotifyToken(user.spotifyRefreshToken, user.spotifyId);
         results.success.push(user.spotifyId);
       }

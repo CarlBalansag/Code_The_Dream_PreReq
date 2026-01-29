@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 /**
  * Custom hook to track user's plays by polling Spotify API
@@ -13,18 +13,20 @@ export function usePlayTracking(user, intervalMs = 3 * 60 * 1000, enabled = true
   const [isPolling, setIsPolling] = useState(false);
   const [error, setError] = useState(null);
   const intervalRef = useRef(null);
+  const isPollingRef = useRef(false);
 
   // Function to poll for new plays
-  const pollForNewPlays = async () => {
-    if (!user?.spotifyId || isPolling) {
+  const pollForNewPlays = useCallback(async () => {
+    if (!user?.spotifyId || isPollingRef.current) {
       return;
     }
 
     try {
+      isPollingRef.current = true;
       setIsPolling(true);
       setError(null);
 
-      console.log('🔄 Polling Prisma-backed history service for new plays...');
+      console.log('🔄 Polling for new plays...');
 
       const response = await fetch('/api/poll/plays', {
         method: 'POST',
@@ -61,9 +63,10 @@ export function usePlayTracking(user, intervalMs = 3 * 60 * 1000, enabled = true
       console.error('❌ Polling error:', err.message);
       setError(err.message);
     } finally {
+      isPollingRef.current = false;
       setIsPolling(false);
     }
-  };
+  }, [user?.spotifyId]);
 
   // Set up polling interval
   useEffect(() => {
@@ -75,9 +78,7 @@ export function usePlayTracking(user, intervalMs = 3 * 60 * 1000, enabled = true
     pollForNewPlays();
 
     // Set up interval for continuous polling
-    intervalRef.current = setInterval(() => {
-      pollForNewPlays();
-    }, intervalMs);
+    intervalRef.current = setInterval(pollForNewPlays, intervalMs);
 
     // Cleanup on unmount
     return () => {
@@ -85,7 +86,27 @@ export function usePlayTracking(user, intervalMs = 3 * 60 * 1000, enabled = true
         clearInterval(intervalRef.current);
       }
     };
-  }, [user?.spotifyId, intervalMs, enabled]);
+  }, [user?.spotifyId, intervalMs, enabled, pollForNewPlays]);
+
+  // Poll when tab becomes visible (user returns to the app)
+  useEffect(() => {
+    if (!enabled || !user?.spotifyId) {
+      return;
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👁️ Tab visible - checking for new plays...');
+        pollForNewPlays();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [enabled, user?.spotifyId, pollForNewPlays]);
 
   return {
     pollForNewPlays,
