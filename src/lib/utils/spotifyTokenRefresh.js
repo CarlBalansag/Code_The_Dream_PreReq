@@ -1,4 +1,4 @@
-import { updateUserTokens } from "../db/userOperations.js";
+import { updateUserTokens } from "../db/index.js";
 
 /**
  * Spotify Token Refresh Utility
