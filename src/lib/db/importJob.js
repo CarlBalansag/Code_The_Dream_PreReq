@@ -19,7 +19,7 @@ function mapJob(record) {
   };
 }
 
-export async function createJob(userId, fileName, totalTracks) {
+export async function createJob(userId, fileName, totalTracks, metrics = null) {
   const job = await prisma.import_jobs.create({
     data: {
       user_id: userId,
@@ -27,6 +27,7 @@ export async function createJob(userId, fileName, totalTracks) {
       total_tracks: totalTracks,
       processed_tracks: 0,
       status: "pending",
+      metrics,
     },
   });
 
@@ -118,6 +119,17 @@ export async function failJob(jobId, errorMessage) {
       status: "failed",
       completed_at: new Date(),
       error_message: errorMessage,
+      updated_at: new Date(),
+    },
+  });
+  return mapJob(job);
+}
+
+export async function updateJobMetrics(jobId, metrics) {
+  const job = await prisma.import_jobs.update({
+    where: { id: Number(jobId) },
+    data: {
+      metrics,
       updated_at: new Date(),
     },
   });

@@ -14,6 +14,9 @@ import { X, Upload, FileJson, CheckCircle, XCircle, Loader2 } from 'lucide-react
  * @param {string} userId - User's Spotify ID
  */
 export default function ImportDataModal({ isOpen, onClose, userId }) {
+  const MAX_UPLOAD_MB = 3.5;
+  const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
+
   const [files, setFiles] = useState([]);
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -38,6 +41,8 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
     const fileArray = Array.from(selectedFiles);
     const validFiles = [];
     const errors = [];
+    const existingTotalBytes = files.reduce((total, file) => total + file.size, 0);
+    let newFilesBytes = 0;
 
     fileArray.forEach((file) => {
       // Validate file type
@@ -46,21 +51,25 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
         return;
       }
 
-      // Validate file size (4MB max per file due to Vercel serverless limit)
-      const maxSize = 4 * 1024 * 1024; // 4MB
-      if (file.size > maxSize) {
-        errors.push(`${file.name}: Too large (max 4MB). Please split large files.`);
+      // Validate file size (multipart overhead + Vercel limit => keep well under 4.5MB total)
+      if (file.size > MAX_UPLOAD_BYTES) {
+        errors.push(`${file.name}: Too large (max ~${MAX_UPLOAD_MB}MB). Please split large files.`);
         return;
       }
 
+      newFilesBytes += file.size;
       validFiles.push(file);
     });
+
+    if (existingTotalBytes + newFilesBytes > MAX_UPLOAD_BYTES) {
+      errors.push(`Total upload too large (max ~${MAX_UPLOAD_MB}MB per request). Please upload smaller files one at a time.`);
+    }
 
     if (errors.length > 0) {
       setError(errors.join(', '));
     }
 
-    if (validFiles.length > 0) {
+    if (validFiles.length > 0 && errors.length === 0) {
       setFiles((prev) => [...prev, ...validFiles]);
     }
   };
@@ -140,7 +149,7 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
 
       // Handle 413 error (file too large)
       if (response.status === 413) {
-        throw new Error('File too large. Please split your Spotify history files into smaller chunks (under 4MB each) and upload them one at a time.');
+        throw new Error(`Upload too large. Keep the total request under ~${MAX_UPLOAD_MB}MB (multipart overhead included) or upload files one at a time.`);
       }
 
       // Check if response is JSON
@@ -253,7 +262,7 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
               <li>Upload all JSON files here (you can select multiple at once)</li>
             </ol>
             <p className="text-xs text-gray-400 mt-3">
-              Note: Files must be under 4MB each. If your files are larger, you can split them using a JSON splitter tool online, or upload them one at a time.
+              Note: Total upload must be under ~{MAX_UPLOAD_MB}MB per request (Vercel serverless limit). If your files are larger, split them or upload one at a time.
             </p>
           </div>
 
@@ -351,7 +360,7 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
                       Browse Files
                     </span>
                   </label>
-                  <p className="text-xs text-gray-500">Maximum file size: 4MB per file (split large files if needed)</p>
+                  <p className="text-xs text-gray-500">Maximum upload size: ~{MAX_UPLOAD_MB}MB per request (split large files if needed)</p>
                 </div>
               )}
             </div>
