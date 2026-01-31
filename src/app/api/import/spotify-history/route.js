@@ -10,6 +10,13 @@ import {
 import { trackMultiplePlays } from '@/lib/db/play.js';
 import { NextResponse } from 'next/server';
 
+// Route segment config for App Router
+// Increase max duration for processing large files (Vercel Pro: up to 300s, Hobby: 60s)
+export const maxDuration = 60;
+
+// Note: For body size limits in App Router, Vercel has a hard limit of 4.5MB for serverless functions
+// For larger files, users need to split their Spotify export files or use chunked uploads
+
 /**
  * POST /api/import/spotify-history
  * Upload and start importing Spotify listening history from JSON file

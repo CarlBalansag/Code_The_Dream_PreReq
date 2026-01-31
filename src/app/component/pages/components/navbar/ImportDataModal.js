@@ -46,10 +46,10 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
         return;
       }
 
-      // Validate file size (200MB max per file)
-      const maxSize = 200 * 1024 * 1024; // 200MB
+      // Validate file size (4MB max per file due to Vercel serverless limit)
+      const maxSize = 4 * 1024 * 1024; // 4MB
       if (file.size > maxSize) {
-        errors.push(`${file.name}: Too large (max 200MB)`);
+        errors.push(`${file.name}: Too large (max 4MB). Please split large files.`);
         return;
       }
 
@@ -137,6 +137,18 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
         method: 'POST',
         body: formData,
       });
+
+      // Handle 413 error (file too large)
+      if (response.status === 413) {
+        throw new Error('File too large. Please split your Spotify history files into smaller chunks (under 4MB each) and upload them one at a time.');
+      }
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        throw new Error(text || 'Server error. Please try again.');
+      }
 
       const data = await response.json();
 
@@ -241,7 +253,7 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
               <li>Upload all JSON files here (you can select multiple at once)</li>
             </ol>
             <p className="text-xs text-gray-400 mt-3">
-              Note: You can upload multiple files (StreamingHistory0.json, StreamingHistory1.json, etc.) all at once!
+              Note: Files must be under 4MB each. If your files are larger, you can split them using a JSON splitter tool online, or upload them one at a time.
             </p>
           </div>
 
@@ -339,7 +351,7 @@ export default function ImportDataModal({ isOpen, onClose, userId }) {
                       Browse Files
                     </span>
                   </label>
-                  <p className="text-xs text-gray-500">Maximum file size: 200MB per file</p>
+                  <p className="text-xs text-gray-500">Maximum file size: 4MB per file (split large files if needed)</p>
                 </div>
               )}
             </div>
