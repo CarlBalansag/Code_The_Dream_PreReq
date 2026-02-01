@@ -1,7 +1,5 @@
-import { Client } from '@upstash/qstash';
 import {
   createJob,
-  failJob,
   getActiveJob,
 } from '@/lib/db/importJob.js';
 import { processImport } from '@/lib/import/processImport.js';
@@ -139,34 +137,11 @@ export async function POST(req) {
 
     console.log(`📝 Created import job: ${job.id}`);
 
-    const baseUrl = getBaseUrl();
-    const qstashToken = process.env.QSTASH_TOKEN;
-
-    if (!qstashToken) {
-      if (process.env.VERCEL === '1' || process.env.NODE_ENV === 'production') {
-        await failJob(job.id, 'QSTASH_TOKEN is not configured');
-        return NextResponse.json(
-          { error: 'QStash is not configured on the server' },
-          { status: 500 }
-        );
-      }
-
-      // Local fallback: process immediately
-      processImport(job.id.toString(), userId, allSpotifyData).catch(err => {
-        console.error('❌ Background import error:', err);
-      });
-    } else {
-      const qstash = new Client({ token: qstashToken });
-      try {
-        await qstash.publishJSON({
-          url: `${baseUrl}/api/import/process`,
-          body: { jobId: job.id.toString() },
-        });
-      } catch (err) {
-        await failJob(job.id, 'Failed to enqueue import job');
-        throw err;
-      }
-    }
+    // Process import directly (bypassing QStash for reliability)
+    // This runs in the background - the response returns immediately
+    processImport(job.id.toString(), userId, allSpotifyData).catch(err => {
+      console.error('❌ Background import error:', err);
+    });
 
     return NextResponse.json({
       success: true,
@@ -186,18 +161,4 @@ export async function POST(req) {
       { status: 500 }
     );
   }
-}
-
-function getBaseUrl() {
-  const explicit = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL;
-  if (explicit) {
-    return explicit.replace(/\/$/, '');
-  }
-
-  const vercelUrl = process.env.VERCEL_URL;
-  if (vercelUrl) {
-    return `https://${vercelUrl}`;
-  }
-
-  return 'http://localhost:3000';
 }
