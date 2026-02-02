@@ -1,5 +1,7 @@
+import { Client } from '@upstash/qstash';
 import {
   createJob,
+  failJob,
   getActiveJob,
 } from '@/lib/db/importJob.js';
 import { processImport } from '@/lib/import/processImport.js';
@@ -137,11 +139,34 @@ export async function POST(req) {
 
     console.log(`📝 Created import job: ${job.id}`);
 
-    // Process import directly (bypassing QStash for reliability)
-    // This runs in the background - the response returns immediately
-    processImport(job.id.toString(), userId, allSpotifyData).catch(err => {
-      console.error('❌ Background import error:', err);
-    });
+    // Use QStash to process import in background
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || `https://${process.env.VERCEL_URL}`;
+    const qstashToken = process.env.QSTASH_TOKEN;
+
+    if (qstashToken) {
+      const qstash = new Client({ token: qstashToken });
+      try {
+        console.log(`📤 Sending job ${job.id} to QStash -> ${baseUrl}/api/import/process`);
+        await qstash.publishJSON({
+          url: `${baseUrl}/api/import/process`,
+          body: { jobId: job.id.toString() },
+        });
+        console.log(`✅ QStash message sent for job ${job.id}`);
+      } catch (err) {
+        console.error('❌ QStash publish error:', err);
+        await failJob(job.id, 'Failed to enqueue import job');
+        return NextResponse.json(
+          { error: 'Failed to start import processing' },
+          { status: 500 }
+        );
+      }
+    } else {
+      // Local fallback: process directly
+      console.log(`⚠️ No QSTASH_TOKEN, processing directly`);
+      processImport(job.id.toString(), userId, allSpotifyData).catch(err => {
+        console.error('❌ Background import error:', err);
+      });
+    }
 
     return NextResponse.json({
       success: true,
