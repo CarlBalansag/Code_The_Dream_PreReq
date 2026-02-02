@@ -143,6 +143,8 @@ function normalizePlayBatch(plays) {
     normalizedPlays.push({
       user_id: normalized.userId,
       track_id: normalized.trackId,
+      artist_id: normalized.artistId,
+      artist_name: normalized.artistName,
       played_at: playedAt,
       source: toSourceCode(normalized.source),
     });
@@ -166,8 +168,8 @@ function mapPlayRecord(record) {
     userId: record.user_id,
     trackId: record.track_id,
     trackName: track?.name || null,
-    artistId: track?.artist_id || null,
-    artistName: artist?.name || null,
+    artistId: record.artist_id || track?.artist_id || null,
+    artistName: record.artist_name || artist?.name || null,
     albumId: track?.album_id || null,
     albumName: album?.name || null,
     albumImage: album?.image_url || null,
@@ -274,17 +276,17 @@ export async function getTopArtists(userId, { startDate = null, endDate = null, 
 
   const rows = await prisma.$queryRaw`
     SELECT
-      COALESCE(t.artist_id, 'unknown') AS artist_id,
-      COALESCE(ar.name, 'Unknown Artist') AS artist_name,
+      COALESCE(p.artist_id, t.artist_id, 'unknown') AS artist_id,
+      COALESCE(p.artist_name, ar.name, 'Unknown Artist') AS artist_name,
       COUNT(*)::bigint AS play_count,
       COALESCE(SUM(t.duration_ms), 0)::bigint AS total_duration_ms,
       MIN(p.played_at) AS first_played,
       MAX(p.played_at) AS last_played
     FROM plays p
     LEFT JOIN tracks t ON t.id = p.track_id
-    LEFT JOIN artists ar ON ar.id = t.artist_id
+    LEFT JOIN artists ar ON ar.id = COALESCE(p.artist_id, t.artist_id)
     WHERE ${whereClause}
-    GROUP BY artist_id, artist_name
+    GROUP BY COALESCE(p.artist_id, t.artist_id, 'unknown'), COALESCE(p.artist_name, ar.name, 'Unknown Artist')
     ORDER BY play_count DESC
     LIMIT ${limit};
   `;
@@ -323,17 +325,17 @@ export async function getArtistDailyHistory({
         COUNT(*)::int AS artist_songs
       FROM plays p
       LEFT JOIN tracks t ON t.id = p.track_id
-      LEFT JOIN artists ar ON ar.id = t.artist_id
+      LEFT JOIN artists ar ON ar.id = COALESCE(p.artist_id, t.artist_id)
       WHERE p.user_id = ${userId}
         AND p.played_at BETWEEN ${startDate} AND ${endDate}
         AND (
           ${
             artistId
-              ? Prisma.sql`t.artist_id = ${artistId}`
+              ? Prisma.sql`(p.artist_id = ${artistId} OR t.artist_id = ${artistId})`
               : Prisma.sql`FALSE`
           } OR ${
             artistName
-              ? Prisma.sql`(ar.name IS NOT NULL AND LOWER(ar.name) = LOWER(${artistName}))`
+              ? Prisma.sql`(LOWER(COALESCE(p.artist_name, ar.name, '')) = LOWER(${artistName}))`
               : Prisma.sql`FALSE`
           }
         )
@@ -360,16 +362,16 @@ export async function getArtistFirstPlayDate(userId, artistId, artistName) {
     SELECT MIN(p.played_at) AS first_play
     FROM plays p
     LEFT JOIN tracks t ON t.id = p.track_id
-    LEFT JOIN artists ar ON ar.id = t.artist_id
+    LEFT JOIN artists ar ON ar.id = COALESCE(p.artist_id, t.artist_id)
     WHERE p.user_id = ${userId}
       AND (
         ${
           artistId
-            ? Prisma.sql`t.artist_id = ${artistId}`
+            ? Prisma.sql`(p.artist_id = ${artistId} OR t.artist_id = ${artistId})`
             : Prisma.sql`FALSE`
         } OR ${
           artistName
-            ? Prisma.sql`(ar.name IS NOT NULL AND LOWER(ar.name) = LOWER(${artistName}))`
+            ? Prisma.sql`(LOWER(COALESCE(p.artist_name, ar.name, '')) = LOWER(${artistName}))`
             : Prisma.sql`FALSE`
         }
       );
@@ -390,7 +392,7 @@ export async function getArtistPlayCount(
     SELECT COUNT(*)::bigint AS play_count
     FROM plays p
     LEFT JOIN tracks t ON t.id = p.track_id
-    LEFT JOIN artists ar ON ar.id = t.artist_id
+    LEFT JOIN artists ar ON ar.id = COALESCE(p.artist_id, t.artist_id)
     WHERE
       p.user_id = ${userId}
       ${startDate ? Prisma.sql`AND p.played_at >= ${startDate}` : Prisma.empty}
@@ -398,11 +400,11 @@ export async function getArtistPlayCount(
       AND (
         ${
           artistId
-            ? Prisma.sql`t.artist_id = ${artistId}`
+            ? Prisma.sql`(p.artist_id = ${artistId} OR t.artist_id = ${artistId})`
             : Prisma.sql`FALSE`
         } OR ${
           artistName
-            ? Prisma.sql`LOWER(COALESCE(ar.name, '')) = LOWER(${artistName})`
+            ? Prisma.sql`(LOWER(COALESCE(p.artist_name, ar.name, '')) = LOWER(${artistName}))`
             : Prisma.sql`FALSE`
         }
       );
@@ -423,7 +425,7 @@ export async function getArtistListeningDuration(
     SELECT COALESCE(SUM(t.duration_ms), 0)::bigint AS total_duration_ms
     FROM plays p
     LEFT JOIN tracks t ON t.id = p.track_id
-    LEFT JOIN artists ar ON ar.id = t.artist_id
+    LEFT JOIN artists ar ON ar.id = COALESCE(p.artist_id, t.artist_id)
     WHERE
       p.user_id = ${userId}
       ${startDate ? Prisma.sql`AND p.played_at >= ${startDate}` : Prisma.empty}
@@ -431,11 +433,11 @@ export async function getArtistListeningDuration(
       AND (
         ${
           artistId
-            ? Prisma.sql`t.artist_id = ${artistId}`
+            ? Prisma.sql`(p.artist_id = ${artistId} OR t.artist_id = ${artistId})`
             : Prisma.sql`FALSE`
         } OR ${
           artistName
-            ? Prisma.sql`(ar.name IS NOT NULL AND LOWER(ar.name) = LOWER(${artistName}))`
+            ? Prisma.sql`(LOWER(COALESCE(p.artist_name, ar.name, '')) = LOWER(${artistName}))`
             : Prisma.sql`FALSE`
         }
       );
@@ -459,14 +461,16 @@ export async function hasArtistHistory(userId, artistId) {
     return false;
   }
 
+  // Check both denormalized artist_id on plays and through tracks relation
   const count = await prisma.plays.count({
     where: {
       user_id: userId,
-      tracks: {
-        artist_id: artistId,
-      },
+      OR: [
+        { artist_id: artistId },
+        { tracks: { artist_id: artistId } },
+      ],
     },
-    take: 1, // Only need to know if at least 1 exists
+    take: 1,
   });
 
   return count > 0;
