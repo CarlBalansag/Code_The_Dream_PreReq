@@ -1,0 +1,154 @@
+================================================================================
+                    GIT BRANCH WORKFLOW GUIDE
+                    Spotify App - Local & Main Branches
+================================================================================
+
+BRANCH OVERVIEW
+---------------
+- main   = Production (deployed to Vercel at spotify.carltechs.com)
+- local  = Local development (runs at http://127.0.0.1:3000)
+
+
+================================================================================
+SCENARIO 1: MERGE LOCAL CHANGES INTO MAIN (Deploy to Production)
+================================================================================
+
+Use this when you've tested changes locally and want to push them to production.
+
+Step 1: Make sure your local changes are committed
+--------------------------------------------------
+    git checkout local
+    git add .
+    git commit -m "Your commit message"
+
+Step 2: Switch to main branch
+-----------------------------
+    git checkout main
+
+Step 3: Pull latest changes from remote (in case others made changes)
+---------------------------------------------------------------------
+    git pull origin main
+
+Step 4: Merge local branch into main
+------------------------------------
+    git merge local
+
+    NOTE: If there are merge conflicts, Git will tell you which files.
+    Open those files, look for <<<<<<< and >>>>>>> markers, and resolve them.
+    Then: git add . && git commit -m "Resolve merge conflicts"
+
+Step 5: Push to remote (triggers Vercel deployment)
+---------------------------------------------------
+    git push origin main
+
+Step 6: Go back to local branch for continued development
+---------------------------------------------------------
+    git checkout local
+
+
+================================================================================
+SCENARIO 2: MERGE MAIN CHANGES INTO LOCAL (Get Production Updates)
+================================================================================
+
+Use this when main has changes you need in your local development branch.
+
+Step 1: Make sure your local changes are committed
+--------------------------------------------------
+    git checkout local
+    git add .
+    git commit -m "Your commit message"
+
+Step 2: Pull latest main from remote
+------------------------------------
+    git checkout main
+    git pull origin main
+
+Step 3: Switch back to local and merge main into it
+---------------------------------------------------
+    git checkout local
+    git merge main
+
+    NOTE: If there are merge conflicts, resolve them as described above.
+
+Step 4: Push updated local branch to remote
+-------------------------------------------
+    git push origin local
+
+
+================================================================================
+QUICK REFERENCE COMMANDS
+================================================================================
+
+Check which branch you're on:
+    git branch
+
+Switch branches:
+    git checkout main
+    git checkout local
+
+See all changes (staged and unstaged):
+    git status
+
+See commit history:
+    git log --oneline -10
+
+Discard all uncommitted changes (CAREFUL - this deletes your work!):
+    git checkout .
+
+Create a new branch from current branch:
+    git checkout -b new-branch-name
+
+
+================================================================================
+BEST PRACTICES
+================================================================================
+
+1. Always commit or stash your changes before switching branches
+
+2. Pull before you push to avoid conflicts
+
+3. Test your changes locally before merging to main
+
+4. Write descriptive commit messages
+
+5. If something goes wrong, DON'T PANIC:
+   - git reflog    (shows history of all actions)
+   - git reset --hard HEAD~1    (undo last commit, CAREFUL!)
+
+
+================================================================================
+ENVIRONMENT DIFFERENCES
+================================================================================
+
+MAIN (Production):
+- Uses Vercel environment variables
+- Redirect URI: https://spotify.carltechs.com
+- Uses QStash for background job processing
+
+LOCAL (Development):
+- Uses .env file in project root
+- Redirect URI: http://127.0.0.1:3000
+- Processes imports directly (no QStash needed)
+
+The .env file is gitignored, so each environment keeps its own config.
+Use .env.example as a template when setting up a new environment.
+
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+"Your branch is behind 'origin/main'"
+    Solution: git pull origin main
+
+"Merge conflict in [filename]"
+    Solution: Open the file, find <<<<<<< markers, edit to resolve, then:
+              git add [filename]
+              git commit -m "Resolve merge conflict"
+
+"Changes not staged for commit"
+    Solution: git add . (to stage all) or git add [filename] (to stage specific)
+
+"Cannot switch branch, you have uncommitted changes"
+    Solution: Either commit them (git add . && git commit -m "msg")
+              Or stash them (git stash) and retrieve later (git stash pop)
