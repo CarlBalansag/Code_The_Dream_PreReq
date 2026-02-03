@@ -12,7 +12,7 @@ export default function SpotifyTour({ onComplete, premium }) {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
+      setIsMobile(window.innerWidth < 1024);
     };
 
     checkMobile();
@@ -22,50 +22,28 @@ export default function SpotifyTour({ onComplete, premium }) {
 
   // Filter steps based on whether song is playing and screen size - memoized to prevent re-creation
   const steps = useMemo(() => {
-    // Mobile steps - simplified tour
+    // Mobile steps - simplified tour (same targets for premium and non-premium)
     if (isMobile) {
-      return premium ? [
+      return [
         {
           id: 'top-artists',
           title: 'Your Top Artists',
           description: 'Scroll down to see your top artists. Tap the time period buttons to see different rankings.',
-          target: '[data-tour="top-artists"]',
+          target: '[data-tour="top-artists-mobile"]',
           placement: 'bottom',
         },
         {
           id: 'top-tracks',
           title: 'Your Top Tracks',
           description: 'Keep scrolling to find your most played tracks. Switch time periods to explore your music history.',
-          target: '[data-tour="top-tracks"]',
+          target: '[data-tour="top-tracks-mobile"]',
           placement: 'bottom',
         },
         {
           id: 'recently-played',
           title: 'Recently Played',
           description: 'Your recently played songs appear here, showing your latest listening activity.',
-          target: '[data-tour="recently-played"]',
-          placement: 'bottom',
-        },
-      ] : [
-        {
-          id: 'top-artists',
-          title: 'Your Top Artists',
-          description: 'Scroll down to see your top artists. Tap the time period buttons to see different rankings.',
-          target: '[data-tour="top-artists"]',
-          placement: 'bottom',
-        },
-        {
-          id: 'top-tracks',
-          title: 'Your Top Tracks',
-          description: 'Keep scrolling to find your most played tracks. Switch time periods to explore your music history.',
-          target: '[data-tour="top-tracks"]',
-          placement: 'bottom',
-        },
-        {
-          id: 'recently-played',
-          title: 'Recently Played',
-          description: 'Your recently played songs appear here, showing your latest listening activity.',
-          target: '[data-tour="recently-played"]',
+          target: '[data-tour="recently-played-mobile"]',
           placement: 'bottom',
         },
       ];
@@ -135,7 +113,7 @@ export default function SpotifyTour({ onComplete, premium }) {
 
   const updateTooltipPosition = useCallback((element, placement) => {
     const rect = element.getBoundingClientRect();
-    const isMobile = window.innerWidth < 640; // Tailwind sm breakpoint
+    const isMobile = window.innerWidth < 1024; // Tailwind lg breakpoint
     const tooltipWidth = isMobile ? Math.min(window.innerWidth - 32, 320) : 320; // 16px padding on each side for mobile
     const tooltipHeight = 280; // Approximate height
     const viewportWidth = window.innerWidth;
@@ -144,17 +122,13 @@ export default function SpotifyTour({ onComplete, premium }) {
     let top = 0;
     let left = 0;
 
-    // On mobile, always position below or above the element (centered)
+    // On mobile, center the tooltip in the viewport (overlay style)
     if (isMobile) {
-      const spaceBelow = viewportHeight - rect.bottom;
-      const spaceAbove = rect.top;
+      // Center vertically in viewport
+      top = (viewportHeight - tooltipHeight) / 2;
 
-      // Position below if there's more space, otherwise above
-      if (spaceBelow > tooltipHeight + padding || spaceBelow > spaceAbove) {
-        top = rect.bottom + 12;
-      } else {
-        top = rect.top - tooltipHeight - 12;
-      }
+      // Ensure it stays within viewport bounds
+      top = Math.max(padding, Math.min(top, viewportHeight - tooltipHeight - padding));
 
       // Center horizontally with padding
       left = Math.max(padding, Math.min(
@@ -225,7 +199,7 @@ export default function SpotifyTour({ onComplete, premium }) {
 
         // Scroll behavior - use scrollIntoView for all sections
         const scrollBlock = steps[currentStep]?.id === 'top-tracks' ? 'center' :
-                           steps[currentStep]?.id === 'recently-played' ? 'start' : 'center';
+          steps[currentStep]?.id === 'recently-played' ? 'start' : 'center';
 
         element.scrollIntoView({ behavior: 'smooth', block: scrollBlock });
 
@@ -298,7 +272,7 @@ export default function SpotifyTour({ onComplete, premium }) {
   const getSpotlightStyle = () => {
     if (!targetElement) return {};
     const rect = targetElement.getBoundingClientRect();
-    const isMobile = window.innerWidth < 640;
+    const isMobile = window.innerWidth < 1024;
 
     // Check if this is the connect-device or floating-button step for tighter padding and circular shape
     const isConnectDevice = steps[currentStep]?.id === 'connect-device';
@@ -334,9 +308,8 @@ export default function SpotifyTour({ onComplete, premium }) {
       {/* Backdrop with rectangular cutout using box-shadow */}
       {targetElement && (
         <motion.div
-          className={`fixed pointer-events-none z-[9999] transition-all duration-300 ${
-            steps[currentStep]?.id === 'connect-device' || steps[currentStep]?.id === 'floating-button' ? 'rounded-full' : 'rounded-xl'
-          }`}
+          className={`fixed pointer-events-none z-[9999] transition-all duration-300 ${steps[currentStep]?.id === 'connect-device' || steps[currentStep]?.id === 'floating-button' ? 'rounded-full' : 'rounded-xl'
+            }`}
           style={{
             top: getSpotlightStyle().top,
             left: getSpotlightStyle().left,
@@ -365,9 +338,8 @@ export default function SpotifyTour({ onComplete, premium }) {
       {/* Spotlight Border */}
       {targetElement && (
         <motion.div
-          className={`fixed z-[10000] transition-all duration-300 pointer-events-none border-4 border-[#1ed760] shadow-[0_0_30px_rgba(30,215,96,0.6)] ${
-            steps[currentStep]?.id === 'connect-device' || steps[currentStep]?.id === 'floating-button' ? 'rounded-full' : 'rounded-xl'
-          }`}
+          className={`fixed z-[10000] transition-all duration-300 pointer-events-none border-4 border-[#1ed760] shadow-[0_0_30px_rgba(30,215,96,0.6)] ${steps[currentStep]?.id === 'connect-device' || steps[currentStep]?.id === 'floating-button' ? 'rounded-full' : 'rounded-xl'
+            }`}
           style={{
             ...getSpotlightStyle(),
           }}
@@ -378,9 +350,9 @@ export default function SpotifyTour({ onComplete, premium }) {
         />
       )}
 
-      {/* Tooltip */}
-      <motion.div
-        className="fixed z-[10001] max-h-[calc(100vh-40px)] overflow-y-auto custom-scrollbar bg-gradient-to-br from-[#1DB954] to-[#1ed760] text-white rounded-xl shadow-2xl p-4 sm:p-5 transition-all duration-300"
+      {/* Tooltip - only render when we have a valid target */}
+      {targetElement && <motion.div
+        className="fixed z-[10001] max-h-[calc(100vh-40px)] overflow-y-auto custom-scrollbar bg-gradient-to-br from-[#0d5c2a] to-[#158a42] text-white rounded-xl shadow-2xl p-4 sm:p-5 transition-all duration-300"
         style={{
           top: `${tooltipPosition.top}px`,
           left: `${tooltipPosition.left}px`,
@@ -417,11 +389,10 @@ export default function SpotifyTour({ onComplete, premium }) {
               {steps.map((_, index) => (
                 <div
                   key={index}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    index === currentStep
-                      ? 'w-8 bg-white'
-                      : 'w-2 bg-white/40'
-                  }`}
+                  className={`h-2 rounded-full transition-all duration-300 ${index === currentStep
+                    ? 'w-8 bg-white'
+                    : 'w-2 bg-white/40'
+                    }`}
                 />
               ))}
             </div>
@@ -448,17 +419,16 @@ export default function SpotifyTour({ onComplete, premium }) {
 
         {/* Arrow */}
         <div
-          className={`absolute w-4 h-4 bg-[#1DB954] transform rotate-45 ${
-            steps[currentStep]?.placement === 'right' ? '-left-2 top-1/2 -translate-y-1/2' :
+          className={`absolute w-4 h-4 bg-[#0d5c2a] transform rotate-45 ${steps[currentStep]?.placement === 'right' ? '-left-2 top-1/2 -translate-y-1/2' :
             steps[currentStep]?.placement === 'left' ? '-right-2 top-1/2 -translate-y-1/2' :
-            steps[currentStep]?.placement === 'bottom' ? 'left-1/2 -translate-x-1/2 -top-2' :
-            steps[currentStep]?.placement === 'bottom-right' ? 'right-8 -top-2' :
-            steps[currentStep]?.placement === 'bottom-left' ? 'left-8 -top-2' :
-            steps[currentStep]?.placement === 'top-left' ? '-right-2 bottom-6' :
-            'left-1/2 -translate-x-1/2 -bottom-2'
-          }`}
+              steps[currentStep]?.placement === 'bottom' ? 'left-1/2 -translate-x-1/2 -top-2' :
+                steps[currentStep]?.placement === 'bottom-right' ? 'right-8 -top-2' :
+                  steps[currentStep]?.placement === 'bottom-left' ? 'left-8 -top-2' :
+                    steps[currentStep]?.placement === 'top-left' ? '-right-2 bottom-6' :
+                      'left-1/2 -translate-x-1/2 -bottom-2'
+            }`}
         />
-      </motion.div>
+      </motion.div>}
     </>
   );
 }
